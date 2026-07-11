@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="nan-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新爾雅 · 生文</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1b1a17; --ink-2:#55524b; --ink-3:#8d887e;
+    --paper:#faf8f3; --card:#ffffff; --line:#e3ddd1;
+    --seal:#9c2b1f;      /* 印泥朱 */
+    --moss:#3f5d4a;      /* 苔綠 */
+    --wash:#f1ece1;
+    --r:10px;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --han:"Noto Sans TC","Iansui","Noto Sans CJK TC",system-ui,sans-serif;
+    --serif:"Noto Serif TC",serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--han);
+       font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  button,input,select{font-family:inherit;font-size:inherit}
+
+  /* ── 頂列 ── */
+  header{display:flex;align-items:center;gap:14px;padding:14px 20px;
+         border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:20}
+  .logo{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.06em}
+  .logo em{font-style:normal;color:var(--seal)}
+  .ver{font-family:var(--mono);font-size:11px;color:var(--ink-3);border:1px solid var(--line);
+       border-radius:99px;padding:1px 8px}
+  .spacer{flex:1}
+  .meter{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+  .meter b{color:var(--moss);font-weight:500}
+  .ghost{background:none;border:1px solid var(--line);border-radius:var(--r);padding:6px 12px;
+         color:var(--ink-2);cursor:pointer}
+  .ghost:hover{border-color:var(--ink-3);color:var(--ink)}
+
+  /* ── 分頁 ── */
+  nav{display:flex;gap:2px;padding:0 20px;background:var(--card);border-bottom:1px solid var(--line)}
+  .tab{border:0;background:none;padding:10px 14px;color:var(--ink-3);cursor:pointer;
+       border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--seal);font-weight:500}
+  .tab[disabled]{opacity:.45;cursor:not-allowed}
+  .tab .soon{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-left:5px}
+
+  /* ── 主體 ── */
+  main{display:grid;grid-template-columns:250px 1fr;gap:0;min-height:calc(100vh - 105px)}
+  aside{border-right:1px solid var(--line);padding:16px;background:var(--card)}
+  .aside-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .aside-h span{font-size:12px;letter-spacing:.1em;color:var(--ink-3)}
+  .aside-h button{border:0;background:none;color:var(--ink-3);font-size:12px;cursor:pointer}
+  .aside-h button:hover{color:var(--seal)}
+  .hist-empty{font-size:13px;color:var(--ink-3);text-align:center;padding:26px 0}
+  .hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+  .hist li button{width:100%;text-align:left;border:1px solid transparent;background:none;
+       padding:7px 9px;border-radius:8px;cursor:pointer;color:var(--ink-2)}
+  .hist li button:hover{background:var(--wash);border-color:var(--line);color:var(--ink)}
+  .hist .q{color:var(--ink);font-weight:500}
+  .hist .m{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+
+  section.work{padding:22px 26px;max-width:900px}
+
+  /* ── 生成台 ── */
+  .console{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:16px}
+  .console-lbl{font-size:12px;letter-spacing:.1em;color:var(--ink-3);margin-bottom:10px;
+       display:flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:99px;background:var(--moss);display:inline-block}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  #q{flex:1;min-width:220px;border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;
+     background:var(--paper);color:var(--ink)}
+  #q:focus{outline:2px solid var(--moss);outline-offset:-1px;background:#fff}
+  #n{border:1px solid var(--line);border-radius:var(--r);padding:11px;background:var(--paper)}
+  .go{background:var(--seal);color:#fff;border:0;border-radius:var(--r);padding:11px 22px;
+      font-weight:500;cursor:pointer;letter-spacing:.05em}
+  .go:hover{background:#87241a}
+  .go[disabled]{opacity:.55;cursor:progress}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+  .chip{border:1px solid var(--line);background:none;border-radius:99px;padding:3px 11px;
+        font-size:13px;color:var(--ink-2);cursor:pointer}
+  .chip:hover{border-color:var(--seal);color:var(--seal)}
+
+  .err{margin-top:14px;border-left:3px solid var(--seal);background:#fdf3f1;padding:10px 13px;
+       border-radius:0 8px 8px 0;color:#7d211a;font-size:14px}
+
+  /* ── 文章卡 ── */
+  .meta{display:flex;gap:16px;align-items:baseline;margin:22px 0 12px;
+        font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+  .meta strong{font-family:var(--han);font-size:15px;color:var(--ink);letter-spacing:.04em}
+  .piece{border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:14px;
+         overflow:hidden}
+  .piece-top{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--wash);
+             background:var(--wash)}
+  .idx{font-family:var(--mono);font-size:11px;color:#fff;background:var(--moss);
+       border-radius:4px;padding:1px 6px}
+  .piece-top .n{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+  .piece-top .acts{margin-left:auto;display:flex;gap:4px}
+  .mini{border:1px solid var(--line);background:#fff;border-radius:7px;padding:3px 9px;
+        font-size:12px;color:var(--ink-2);cursor:pointer}
+  .mini:hover{border-color:var(--ink-3);color:var(--ink)}
+  .mini[disabled]{opacity:.4;cursor:not-allowed}
+  .body{padding:16px 18px;font-size:16.5px;line-height:2.05;
+        font-feature-settings:"palt" 0;white-space:pre-wrap;word-break:break-word}
+  /* 對照面板：骨架已入，預設收 */
+  .contrast{border-top:1px dashed var(--line);padding:12px 18px;background:#fcfbf8;display:none}
+  .contrast.open{display:block}
+  .contrast .tabs{display:flex;gap:6px;margin-bottom:9px}
+  .contrast .tabs button{border:1px solid var(--line);background:#fff;border-radius:99px;
+       padding:2px 11px;font-size:12px;color:var(--ink-2);cursor:pointer}
+  .contrast .tabs button[aria-selected="true"]{border-color:var(--moss);color:var(--moss)}
+  .contrast .pane{font-size:14px;color:var(--ink-3);line-height:1.9}
+  .contrast .pane .hold{font-family:var(--mono);font-size:12px}
+
+  .empty{border:1px dashed var(--line);border-radius:var(--r);padding:52px 20px;text-align:center;
+         color:var(--ink-3);margin-top:22px}
+  .empty .big{font-family:var(--serif);font-size:20px;color:var(--ink-2);margin-bottom:6px}
+
+  /* ── 設定 ── */
+  dialog{border:1px solid var(--line);border-radius:14px;padding:0;width:min(420px,92vw);
+         box-shadow:0 20px 50px rgba(0,0,0,.14)}
+  dialog::backdrop{background:rgba(27,26,23,.32)}
+  .dlg{padding:20px}
+  .dlg h2{font-family:var(--serif);font-size:17px;margin:0 0 4px}
+  .dlg p{margin:0 0 16px;font-size:13px;color:var(--ink-3)}
+  .fld{margin-bottom:13px}
+  .fld label{display:block;font-size:12px;color:var(--ink-2);margin-bottom:5px}
+  .fld input{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+             font-family:var(--mono);font-size:13px;background:var(--paper)}
+  .dlg-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+
+  .spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.4);
+        border-top-color:#fff;border-radius:99px;animation:sp .7s linear infinite;margin-right:7px;
+        vertical-align:-1px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
+  @media(max-width:760px){main{grid-template-columns:1fr}aside{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">新<em>爾</em>雅 · 生文</div>
+  <span class="ver">Corpus v4.3</span>
+  <div class="spacer"></div>
+  <div class="meter" id="meter">今仔日 <b>—</b> 篇</div>
+  <button class="ghost" id="btn-set">設定</button>
+</header>
+
+<nav role="tablist">
+  <button class="tab" role="tab" aria-selected="true">文章生成</button>
+  <button class="tab" role="tab" aria-selected="false" disabled>句子生成<span class="soon">掛帳</span></button>
+  <button class="tab" role="tab" aria-selected="false" disabled>改文<span class="soon">掛帳</span></button>
+</nav>
+
+<main>
+  <aside>
+    <div class="aside-h"><span>生成記錄</span><button id="btn-clear">清</button></div>
+    <div class="hist-empty" id="hist-empty">猶未生過</div>
+    <ul class="hist" id="hist"></ul>
+  </aside>
+
+  <section class="work">
+    <div class="console">
+      <div class="console-lbl"><i class="dot"></i>職業 → 台語敘事</div>
+      <div class="row">
+        <input id="q" placeholder="石工、消防員、麵包師傅…" autocomplete="off">
+        <select id="n" aria-label="篇數">
+          <option>1</option><option selected>3</option><option>5</option><option>10</option>
+        </select>
+        <button class="go" id="go">生成</button>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div id="out"></div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <div class="dlg">
+    <h2>設定</h2>
+    <p>金鑰佮網址存佇這台機器（localStorage），袂送別位。</p>
+    <div class="fld">
+      <label for="base">API Base URL</label>
+      <input id="base" placeholder="http://localhost:3777">
+    </div>
+    <div class="fld">
+      <label for="key">API 金鑰</label>
+      <input id="key" type="password" placeholder="x-api-key">
+    </div>
+    <div class="dlg-foot">
+      <button class="ghost" id="dlg-x">取消</button>
+      <button class="go" id="dlg-ok">存起來</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const S = {
+  base: () => localStorage.getItem('xny_base') || 'http://localhost:3777',
+  key : () => localStorage.getItem('xny_key')  || ''
+};
+const SAMPLES = ['石工','消防員','麵包師傅','農夫','漁夫','老師','廟公','護理師'];
+let hist = JSON.parse(localStorage.getItem('xny_hist') || '[]');
+
+// 範例籤
+$('#chips').innerHTML = SAMPLES.map(s=>`<button class="chip">${s}</button>`).join('');
+$('#chips').onclick = e => { if(e.target.classList.contains('chip')){ $('#q').value = e.target.textContent; run(); } };
+
+// 設定
+$('#btn-set').onclick = () => { $('#base').value = S.base(); $('#key').value = S.key(); $('#dlg').showModal(); };
+$('#dlg-x').onclick = () => $('#dlg').close();
+$('#dlg-ok').onclick = () => {
+  localStorage.setItem('xny_base', $('#base').value.trim().replace(/\/$/,''));
+  localStorage.setItem('xny_key',  $('#key').value.trim());
+  $('#dlg').close(); quota();
+};
+
+// 額度
+async function quota(){
+  if(!S.key()) { $('#meter').innerHTML = '金鑰猶未設'; return; }
+  try{
+    const r = await fetch(`${S.base()}/quota?key=${encodeURIComponent(S.key())}`);
+    const d = await r.json();
+    if(!r.ok) throw 0;
+    $('#meter').innerHTML = `今仔日 <b>${d.used_pieces}</b> 篇 · <b>${d.used_tokens}</b> tok · 賰 ${d.remaining}`;
+  }catch{ $('#meter').textContent = '額度讀袂著'; }
+}
+
+// 生成
+$('#go').onclick = run;
+$('#q').addEventListener('keydown', e => { if(e.key==='Enter') run(); });
+
+async function run(){
+  const query = $('#q').value.trim();
+  const n = +$('#n').value;
+  const out = $('#out');
+  if(!query){ out.innerHTML = err('輸入一个職業才會使生成。'); return; }
+  if(!S.key()){ out.innerHTML = err('金鑰猶未設，先去頂懸「設定」填。'); return; }
+  if(location.protocol==='https:' && S.base().startsWith('http://')){
+    out.innerHTML = err('這頁是 https，API 網址是 http——瀏覽器會擋（混合內容）。去「設定」換做 https 的 tunnel 網址。');
+    return;
+  }
+
+  const go = $('#go');
+  go.disabled = true; go.innerHTML = '<i class="spin"></i>生成中';
+  out.innerHTML = '';
+  try{
+    const res = await fetch(S.base()+'/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':S.key()},
+      body: JSON.stringify({query, n})
+    });
+    const d = await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(msg(res.status, d.error));
+    render(d);
+    hist.unshift({q:d.query, p:d.pieces, t:Date.now(), texts:d.texts});
+    hist = hist.slice(0,30);
+    localStorage.setItem('xny_hist', JSON.stringify(hist));
+    drawHist(); quota();
+  }catch(e){
+    out.innerHTML = err(e.message || '連袂著 API——檢查 Base URL 佮伺服器（CORS 有開無？）。');
+  }finally{
+    go.disabled = false; go.textContent = '生成';
+  }
+}
+
+const msg = (code, e) => ({
+  400:'請輸入查詢。', 401:'金鑰毋著，請檢查設定。',
+  429: e || '今仔日的額度用了矣。', 500:'服務暫時無法度，請閣試。'
+}[code] || e || `生成失敗（${code}）`);
+
+const err = t => `<div class="err">${t}</div>`;
+const esc = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const cp  = t => [...t].length;
+
+function render(d){
+  $('#out').innerHTML = `
+    <div class="meta"><strong>${esc(d.query)}</strong>
+      <span>${d.pieces} 篇</span><span>${d.chars} 字</span><span>~${d.tokens_est} tok</span></div>
+    ${d.texts.map((t,i)=>piece(t,i)).join('')}`;
+}
+
+function piece(t,i){
+  return `<article class="piece">
+    <div class="piece-top">
+      <span class="idx">${String(i+1).padStart(2,'0')}</span>
+      <span class="n">${cp(t)} 字</span>
+      <span class="acts">
+        <button class="mini" data-copy="${i}">抄</button>
+        <button class="mini" data-ct="${i}">對照</button>
+      </span>
+    </div>
+    <div class="body" id="b${i}">${esc(t)}</div>
+    <div class="contrast" id="c${i}">
+      <div class="tabs">
+        <button aria-selected="true">台⇄華</button><button aria-selected="false">台⇄英</button>
+      </div>
+      <div class="pane"><span class="hold">對照管線猶未接（掛帳）。骨架已留，接落去只是換內容。</span></div>
+    </div>
+  </article>`;
+}
+
+$('#out').onclick = e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.copy !== undefined){
+    navigator.clipboard.writeText($('#b'+b.dataset.copy).textContent);
+    b.textContent = '抄好'; setTimeout(()=>b.textContent='抄', 1200);
+  }
+  if(b.dataset.ct !== undefined) $('#c'+b.dataset.ct).classList.toggle('open');
+  if(b.parentElement?.classList.contains('tabs')){
+    [...b.parentElement.children].forEach(x=>x.setAttribute('aria-selected', x===b));
+  }
+};
+
+// 記錄
+function drawHist(){
+  $('#hist-empty').style.display = hist.length ? 'none' : 'block';
+  $('#hist').innerHTML = hist.map((h,i)=>`<li><button data-h="${i}">
+    <div class="q">${esc(h.q)}</div>
+    <div class="m">${h.p} 篇 · ${new Date(h.t).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}</div>
+  </button></li>`).join('');
+}
+$('#hist').onclick = e => {
+  const b = e.target.closest('button[data-h]'); if(!b) return;
+  const h = hist[+b.dataset.h];
+  render({query:h.q, pieces:h.p, chars:h.texts.reduce((a,t)=>a+cp(t),0),
+          tokens_est:Math.round(h.texts.reduce((a,t)=>a+cp(t),0)*1.3), texts:h.texts});
+};
+$('#btn-clear').onclick = () => { hist=[]; localStorage.removeItem('xny_hist'); drawHist(); };
+
+$('#out').innerHTML = `<div class="empty"><div class="big">揀一个職業，看伊按怎講家己的工課</div>
+  <div>頂懸拍字抑是點下跤的籤。</div></div>`;
+drawHist(); quota();
+</script>
+</body>
+</html>
