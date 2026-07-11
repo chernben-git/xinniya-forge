@@ -72,6 +72,19 @@
       font-weight:500;cursor:pointer;letter-spacing:.05em}
   .go:hover{background:#87241a}
   .go[disabled]{opacity:.55;cursor:progress}
+  .mic{border:1px solid var(--line);background:var(--paper);border-radius:var(--r);
+       padding:0 14px;cursor:pointer;font-size:17px;line-height:1;color:var(--ink-2)}
+  .mic:hover{border-color:var(--moss)}
+  .mic.rec{background:var(--seal);border-color:var(--seal);animation:pulse 1.1s ease-in-out infinite}
+  .mic[disabled]{opacity:.45;cursor:not-allowed}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+  @media(prefers-reduced-motion:reduce){.mic.rec{animation:none}}
+  #mic-hint{font-size:12.5px;color:var(--ink-3);margin-top:8px;min-height:0}
+  #mic-hint:not(:empty){min-height:20px}
+  .again{border:1px solid var(--seal);background:none;color:var(--seal);border-radius:var(--r);
+         padding:7px 16px;font-size:13.5px;cursor:pointer;margin-left:auto}
+  .again:hover{background:var(--seal);color:#fff}
+  .again[disabled]{opacity:.5;cursor:progress}
   .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
   .chip{border:1px solid var(--line);background:none;border-radius:99px;padding:3px 11px;
         font-size:13px;color:var(--ink-2);cursor:pointer}
@@ -162,9 +175,11 @@
         <select id="n" aria-label="篇數">
           <option>1</option><option selected>3</option><option>5</option><option>10</option>
         </select>
+        <button class="mic" id="mic" title="講台語">🎤</button>
         <button class="go" id="go">生成</button>
       </div>
       <div class="chips" id="chips"></div>
+      <div id="mic-hint"></div>
     </div>
     <div id="out"></div>
   </section>
@@ -323,8 +338,11 @@ function render(d, isSample){
   $('#out').innerHTML = (isSample ? note('即時生成這馬袂通，下跤是預生樣本。') : '') + `
     <div class="meta"><strong>${esc(d.query)}</strong>
       <span>${d.pieces} 篇</span><span>${d.chars} 字</span><span>~${d.tokens_est} tok</span>
-      ${isSample?'<span>預生樣本</span>':''}</div>
+      ${isSample?'<span>預生樣本</span>':''}
+      ${live && !isSample ? `<button class="again" id="again">閣生一批</button>` : ''}</div>
     ${d.texts.map((t,i)=>piece(t,i)).join('')}`;
+  const ag = $('#again');
+  if(ag) ag.onclick = () => { $('#q').value = d.query; run(); };
 }
 
 function piece(t,i){
@@ -358,6 +376,61 @@ $('#out').onclick = e => {
     [...b.parentElement.children].forEach(x=>x.setAttribute('aria-selected', x===b));
   }
 };
+
+/* ═══ 語音輸入：講台語 → 中繼 ASR → 變查詢 ═══ */
+const RELAY = 'https://asr.bitfull.tw';
+let rec = null, chunks = [], recording = false;
+
+$('#mic').onclick = async () => {
+  if(recording){ rec.stop(); return; }
+  if(!navigator.mediaDevices?.getUserMedia){
+    hint('這台裝置袂當錄音（愛 https 佮麥克風權限）。'); return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    rec = new MediaRecorder(stream);
+    chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = async () => {
+      stream.getTracks().forEach(t=>t.stop());
+      recording = false;
+      $('#mic').classList.remove('rec');
+      $('#mic').disabled = true;
+      hint('聽拍中…');
+      const blob = new Blob(chunks, {type: rec.mimeType || 'audio/webm'});
+      if(blob.size < 2000){ hint('傷短，閣講一擺。'); $('#mic').disabled=false; return; }
+      try{
+        const b64 = await blobB64(blob);
+        const r = await fetch(RELAY+'/asr-web', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({audioBase64:b64, mimeType: blob.type.split(';')[0]}),
+          signal: AbortSignal.timeout(70000)
+        });
+        const d = await r.json();
+        const t = (d.transcript || '').trim();
+        if(!t){ hint('聽無，閣講一擺。'); return; }
+        $('#q').value = t;
+        hint(`聽著：「${esc(t)}」`);
+        run();
+      }catch(e){
+        hint('語音服務這馬袂通。');
+      }finally{ $('#mic').disabled=false; }
+    };
+    rec.start();
+    recording = true;
+    $('#mic').classList.add('rec');
+    hint('咧錄音…講一个職業，講煞閣撳一下。');
+  }catch{
+    hint('麥克風開袂起來——檢查瀏覽器的權限。');
+  }
+};
+const hint = t => $('#mic-hint').innerHTML = t;
+const blobB64 = b => new Promise((res,rej)=>{
+  const r = new FileReader();
+  r.onload = () => res(r.result.split(',')[1]);
+  r.onerror = rej;
+  r.readAsDataURL(b);
+});
 
 function drawHist(){
   $('#hist-empty').style.display = hist.length ? 'none' : 'block';
