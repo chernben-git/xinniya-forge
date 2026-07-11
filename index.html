@@ -3,15 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>新爾雅 · 生文</title>
+<title>新爾雅 · 生文 | 台語職業敘事生成</title>
+<meta name="description" content="新爾雅台語知識引擎 — 輸入職業，即時生成台語敘事文章。">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#1b1a17; --ink-2:#55524b; --ink-3:#8d887e;
-    --paper:#faf8f3; --card:#ffffff; --line:#e3ddd1;
-    --seal:#9c2b1f;      /* 印泥朱 */
-    --moss:#3f5d4a;      /* 苔綠 */
-    --wash:#f1ece1;
+    --paper:#faf8f3; --card:#fff; --line:#e3ddd1;
+    --seal:#9c2b1f; --moss:#3f5d4a; --wash:#f1ece1; --amber:#8a6a1f;
     --r:10px;
     --mono:"IBM Plex Mono",ui-monospace,monospace;
     --han:"Noto Sans TC","Iansui","Noto Sans CJK TC",system-ui,sans-serif;
@@ -22,7 +21,6 @@
        font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
   button,input,select{font-family:inherit;font-size:inherit}
 
-  /* ── 頂列 ── */
   header{display:flex;align-items:center;gap:14px;padding:14px 20px;
          border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:20}
   .logo{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.06em}
@@ -32,20 +30,19 @@
   .spacer{flex:1}
   .meter{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
   .meter b{color:var(--moss);font-weight:500}
+  .meter.off b{color:var(--amber)}
   .ghost{background:none;border:1px solid var(--line);border-radius:var(--r);padding:6px 12px;
-         color:var(--ink-2);cursor:pointer}
+         color:var(--ink-3);cursor:pointer;font-size:13px}
   .ghost:hover{border-color:var(--ink-3);color:var(--ink)}
 
-  /* ── 分頁 ── */
   nav{display:flex;gap:2px;padding:0 20px;background:var(--card);border-bottom:1px solid var(--line)}
   .tab{border:0;background:none;padding:10px 14px;color:var(--ink-3);cursor:pointer;
        border-bottom:2px solid transparent;margin-bottom:-1px}
   .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--seal);font-weight:500}
   .tab[disabled]{opacity:.45;cursor:not-allowed}
-  .tab .soon{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-left:5px}
+  .tab .soon{font-family:var(--mono);font-size:10px;margin-left:5px}
 
-  /* ── 主體 ── */
-  main{display:grid;grid-template-columns:250px 1fr;gap:0;min-height:calc(100vh - 105px)}
+  main{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 105px)}
   aside{border-right:1px solid var(--line);padding:16px;background:var(--card)}
   .aside-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
   .aside-h span{font-size:12px;letter-spacing:.1em;color:var(--ink-3)}
@@ -61,13 +58,13 @@
 
   section.work{padding:22px 26px;max-width:900px}
 
-  /* ── 生成台 ── */
   .console{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:16px}
   .console-lbl{font-size:12px;letter-spacing:.1em;color:var(--ink-3);margin-bottom:10px;
        display:flex;align-items:center;gap:7px}
-  .dot{width:7px;height:7px;border-radius:99px;background:var(--moss);display:inline-block}
+  .dot{width:7px;height:7px;border-radius:99px;background:var(--moss);display:inline-block;flex:none}
+  .dot.off{background:var(--amber)}
   .row{display:flex;gap:10px;flex-wrap:wrap}
-  #q{flex:1;min-width:220px;border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;
+  #q{flex:1;min-width:200px;border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;
      background:var(--paper);color:var(--ink)}
   #q:focus{outline:2px solid var(--moss);outline-offset:-1px;background:#fff}
   #n{border:1px solid var(--line);border-radius:var(--r);padding:11px;background:var(--paper)}
@@ -82,9 +79,10 @@
 
   .err{margin-top:14px;border-left:3px solid var(--seal);background:#fdf3f1;padding:10px 13px;
        border-radius:0 8px 8px 0;color:#7d211a;font-size:14px}
+  .note{border-left:3px solid var(--amber);background:#fdf9ee;padding:9px 13px;
+        border-radius:0 8px 8px 0;color:#6f5716;font-size:13.5px;margin:16px 0 0}
 
-  /* ── 文章卡 ── */
-  .meta{display:flex;gap:16px;align-items:baseline;margin:22px 0 12px;
+  .meta{display:flex;gap:16px;align-items:baseline;margin:22px 0 12px;flex-wrap:wrap;
         font-family:var(--mono);font-size:12px;color:var(--ink-3)}
   .meta strong{font-family:var(--han);font-size:15px;color:var(--ink);letter-spacing:.04em}
   .piece{border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:14px;
@@ -98,10 +96,7 @@
   .mini{border:1px solid var(--line);background:#fff;border-radius:7px;padding:3px 9px;
         font-size:12px;color:var(--ink-2);cursor:pointer}
   .mini:hover{border-color:var(--ink-3);color:var(--ink)}
-  .mini[disabled]{opacity:.4;cursor:not-allowed}
-  .body{padding:16px 18px;font-size:16.5px;line-height:2.05;
-        font-feature-settings:"palt" 0;white-space:pre-wrap;word-break:break-word}
-  /* 對照面板：骨架已入，預設收 */
+  .body{padding:16px 18px;font-size:16.5px;line-height:2.05;white-space:pre-wrap;word-break:break-word}
   .contrast{border-top:1px dashed var(--line);padding:12px 18px;background:#fcfbf8;display:none}
   .contrast.open{display:block}
   .contrast .tabs{display:flex;gap:6px;margin-bottom:9px}
@@ -115,8 +110,7 @@
          color:var(--ink-3);margin-top:22px}
   .empty .big{font-family:var(--serif);font-size:20px;color:var(--ink-2);margin-bottom:6px}
 
-  /* ── 設定 ── */
-  dialog{border:1px solid var(--line);border-radius:14px;padding:0;width:min(420px,92vw);
+  dialog{border:1px solid var(--line);border-radius:14px;padding:0;width:min(440px,92vw);
          box-shadow:0 20px 50px rgba(0,0,0,.14)}
   dialog::backdrop{background:rgba(27,26,23,.32)}
   .dlg{padding:20px}
@@ -126,14 +120,15 @@
   .fld label{display:block;font-size:12px;color:var(--ink-2);margin-bottom:5px}
   .fld input{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
              font-family:var(--mono);font-size:13px;background:var(--paper)}
-  .dlg-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+  .dlg-foot{display:flex;justify-content:space-between;gap:8px;margin-top:6px;align-items:center}
+  .dlg-foot .right{display:flex;gap:8px}
 
   .spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.4);
         border-top-color:#fff;border-radius:99px;animation:sp .7s linear infinite;margin-right:7px;
         vertical-align:-1px}
   @keyframes sp{to{transform:rotate(360deg)}}
   @media(prefers-reduced-motion:reduce){.spin{animation:none}}
-  @media(max-width:760px){main{grid-template-columns:1fr}aside{display:none}}
+  @media(max-width:760px){main{grid-template-columns:1fr}aside{display:none}section.work{padding:16px}}
 </style>
 </head>
 <body>
@@ -142,7 +137,7 @@
   <div class="logo">新<em>爾</em>雅 · 生文</div>
   <span class="ver">Corpus v4.3</span>
   <div class="spacer"></div>
-  <div class="meter" id="meter">今仔日 <b>—</b> 篇</div>
+  <div class="meter" id="meter">聯線中…</div>
   <button class="ghost" id="btn-set">設定</button>
 </header>
 
@@ -161,7 +156,7 @@
 
   <section class="work">
     <div class="console">
-      <div class="console-lbl"><i class="dot"></i>職業 → 台語敘事</div>
+      <div class="console-lbl"><i class="dot" id="dot"></i><span id="mode-lbl">職業 → 台語敘事</span></div>
       <div class="row">
         <input id="q" placeholder="石工、消防員、麵包師傅…" autocomplete="off">
         <select id="n" aria-label="篇數">
@@ -171,7 +166,6 @@
       </div>
       <div class="chips" id="chips"></div>
     </div>
-
     <div id="out"></div>
   </section>
 </main>
@@ -179,56 +173,88 @@
 <dialog id="dlg">
   <div class="dlg">
     <h2>設定</h2>
-    <p>金鑰佮網址存佇這台機器（localStorage），袂送別位。</p>
+    <p>一般使用免設定。這爿是予開發者換 API 網址／金鑰用的，存佇這台機器（localStorage）。</p>
     <div class="fld">
       <label for="base">API Base URL</label>
-      <input id="base" placeholder="http://localhost:3777">
+      <input id="base" placeholder="https://taigi.bitfull.tw">
     </div>
     <div class="fld">
       <label for="key">API 金鑰</label>
       <input id="key" type="password" placeholder="x-api-key">
     </div>
     <div class="dlg-foot">
-      <button class="ghost" id="dlg-x">取消</button>
-      <button class="go" id="dlg-ok">存起來</button>
+      <button class="ghost" id="dlg-reset">還原預設</button>
+      <span class="right">
+        <button class="ghost" id="dlg-x">取消</button>
+        <button class="go" id="dlg-ok">存起來</button>
+      </span>
     </div>
   </div>
 </dialog>
 
 <script>
 const $ = s => document.querySelector(s);
+
+/* ═══ 內建設定(用戶免填) ═══ */
+const API_DEFAULT = 'https://taigi.bitfull.tw';
+const KEY_DEFAULT = 'xny_pub_624uu0dq';
 const S = {
-  base: () => localStorage.getItem('xny_base') || 'http://localhost:3777',
-  key : () => localStorage.getItem('xny_key')  || ''
+  base: () => localStorage.getItem('xny_base') || API_DEFAULT,
+  key : () => localStorage.getItem('xny_key')  || KEY_DEFAULT
 };
-const SAMPLES = ['石工','消防員','麵包師傅','農夫','漁夫','老師','廟公','護理師'];
+
+/* ═══ 保底樣本(API拍袂通就用這) ═══ */
+const SAMPLES = {"石工":["透早天拄光，石工就揀石頭，了後切石水冷慢慢鋸、看紋路落鑿。鑿仔落石，鏗鏗鏗。紲落來鑿石、雕琢，紲落來閣磨光。廟方講伊修的石堵佮舊的仝款。文化局請伊修古蹟。學徒講伊一鎚就知深淺。紋路先看予明，落鑿才袂裂毋著爿。看石的目，是幾十冬的目。向望鎚聲會當響久久。","逐工透早，石工就揀石頭，紲落來剖石照線落刀、切石水冷慢慢鋸。石的紋理，一層一層現。紲落來鑿石、雕琢，紲落來磨光。石桌用幾十冬猶勇。規工佮石頭做伙，雙手生甲厚厚。粗胚先摃，幼工上尾才落手。刻佇石頂的，是欲留百年的。希望這行的價值予人捌。","透早天拄光，石工就揀石頭，了後剖石照線落刀、切石水冷慢慢鋸。石堵罩布掀開，紋路慢慢現。紲落來鑿石、雕琢，了後磨光。同行服伊看石的目力。石獅的神韻，予伊雕出來。做幾十冬，鎚聲就是伊的人生。廟方講伊修的石堵佮舊的仝款。慢是石工的節奏。希望雕出好石作。","透早天拄光，石工就揀石頭，了後剖石照線落刀、切石水冷慢慢鋸。鎚聲規工，一聲一聲。紲落來鑿石、雕琢，了後磨光。廟方講伊修的石堵佮舊的仝款。做幾十冬，鎚聲就是伊的人生。石獅的神韻，予伊雕出來。一塊石頭雕甲成形，就是石工的功夫。向望古蹟攏修會好。","天拄光，石工就揀石頭，紲落來切石水冷慢慢鋸、看紋路落鑿。廟埕的石獅，愈修愈有神。了後鑿石、雕琢，紲落來磨光。紋路先看予明，落鑿才袂裂毋著爿。老師傅的手路，予伊傳落來。做幾十冬，鎚聲就是伊的人生。同行服伊看石的目力。慢是石工的節奏。向望石的文化傳落去。","天拄光，石工就揀石頭，紲落來閣剖石照線落刀、切石水冷慢慢鋸。石的紋理，一層一層現。了後鑿石、雕琢，了後磨光。石頭雖然硬，經過伊的手就有形有款。廟方講伊修的石堵佮舊的仝款。墓碑的字，家屬看甲流目屎。廟的石堵，是先人的話。向望做的石獅攏有神。","透早天拄光，石工就揀石頭，了後剖石照線落刀、切石水冷慢慢鋸。日頭下的石，燒燙燙。紲落來閣鑿石、雕琢，了後磨光。粗胚先摃，幼工上尾才落手。石獅的神韻，予伊雕出來。老師傅的手路，予伊傳落來。墓碑的字，家屬看甲流目屎。看石的目，是幾十冬的目。希望刻的字攏予人數念。","透早天拄光，石工就揀石頭，了後切石水冷慢慢鋸、看紋路落鑿。石堵罩布掀開，紋路慢慢現。了後鑿石、雕琢，紲落來磨光。石頭雖然硬，經過伊的手就有形有款。廟方講伊修的石堵佮舊的仝款。做幾十冬，鎚聲就是伊的人生。石是硬的，功夫是軟磨出來的。向望逐件石作攏徛甲百年。"],"消防員":["逐工透早，消防員就隨通報全隊、接警報，了後穿裝備齊全。警鈴一響，規隊隨動。了後鬥民眾處理蜂巢佮蛇、救受困的動物，紲落來確認現場安全、收隊裝備歸位。小學生來隊上參觀，目睭金金看。阿嬤的貓困佇樹頂，伊救落來。一分鐘的準備，就是一條命。向望逐工攏平安收勤。","天拄光，消防員就確認地點佮狀況，了後穿裝備齊全、隨上車出勤。水帶的水壓，手扞予在。紲落來評估傷患先做緊急處置、鬥民眾處理蜂巢佮蛇，了後確認現場安全、收隊裝備歸位。囡仔講大漢欲做伊。宣導了後，社區攏裝住警器。救護毋分大細件，攏是人命。向望逐暝攏平靜。","逐工透早，消防員就確認地點佮狀況、隨通報全隊，了後穿裝備齊全、隨上車出勤。器材室的架，排甲整齊。紲落來鬥民眾處理蜂巢佮蛇、救受困的動物，紲落來確認現場安全、收隊裝備歸位。予救轉來的人，專工來說多謝。預防做予好，火警就較少。希望逐擺出勤攏平安，人攏救會著。","天拄光，消防員就隨通報全隊、接警報，了後穿裝備齊全、隨上車出勤。收勤的裝備，擦甲金金。了後鬥民眾處理蜂巢佮蛇、救受困的動物，了後確認現場安全、收隊裝備歸位。蜂巢處理好，厝主一直共伊道謝。傷患的家屬，拜託閣拜託。入隊的第一工就知，這是責任。向望逐暝攏平靜。","逐工透早，消防員就隨通報全隊，紲落來穿裝備齊全、隨上車出勤。訓練場的汗，一滴一滴。了後評估傷患先做緊急處置、鬥民眾處理蜂巢佮蛇，紲落來閣確認現場安全、收隊裝備歸位。小學生來隊上參觀，目睭金金看。救一條命，拚一秒都毋敢延遲。向望同仁攏平安。","透早天拄光，消防員就確認地點佮狀況、隨通報全隊，了後穿裝備齊全、隨上車出勤。火焰衝甲懸懸，伊扛水管衝入去，規身軀流甲攏是汗。紲落來救受困的動物、排除災害現場，紲落來確認現場安全、收隊裝備歸位。預防做予好，火警就較少。向望逐擺救護攏赴會著。","逐工透早，消防員就隨通報全隊、接警報，了後穿裝備齊全、隨上車出勤。收勤的裝備，擦甲金金。了後評估傷患先做緊急處置、鬥民眾處理蜂巢佮蛇，了後確認現場安全、收隊裝備歸位。宣導了後，社區攏裝住警器。救人的路，一秒都袂當延。希望火警愈少愈好。","逐工透早，消防員就確認地點佮狀況、隨通報全隊，了後穿裝備齊全、隨上車出勤。訓練場的汗，一滴一滴。了後評估傷患先做緊急處置、鬥民眾處理蜂巢佮蛇，了後確認現場安全、收隊裝備歸位。予救轉來的人，專工來說多謝。裝備顧予好，性命才有保障。希望裝備愈來愈齊。"],"麵包師傅":["透早天拄光，麵包師傅就開工，紲落來發麵、整形。收店前，賰的麵包算了了。了後入烘爐、顧火，紲落來排列。麵包好食，人客逐工攏會來買。囡仔鼻著芳味，拖阿母入來。生日蛋糕，予人客感動甲。半暝就起來做，人客毋知，毋過食會出來。一粒麵包，是一工的開始。向望囡仔攏食著健康的麵包。","天拄光，麵包師傅就開工，了後拌麵粉、發麵。奶油的芳味甜甜。了後入烘爐、顧火，紲落來出爐、排列。老人客講紅豆餡有古早味。逐工透早排隊等出爐。學生囝放學來買麵包做點心。出爐的時，人客拄好圍過來。發酵袂當催，親像人生。希望學徒緊學會曉手路。","天拄光，麵包師傅就開工，紲落來拌麵粉、發麵。麵團揉過，軟軟有彈。紲落來入烘爐、顧火，了後出爐、排列。天猶未光伊就開始無閒，規間店攏是麵包芳。囡仔上愛伊的菠蘿麵包。老主顧幾十冬攏買仝款。一粒好麵包，是透早三四點就起來做的。向望新口味逐家會甲意。","透早天拄光，麵包師傅就開工，紲落來拌麵粉、發麵。奶油的芳味甜甜。紲落來入烘爐、顧火，紲落來閣排列、賣。有人買規袋，講欲送人。學徒出師，開家己的店。老主顧幾十冬攏買仝款。囡仔鼻著芳味，拖阿母入來。人客逐工來，是上大的信任。希望新品攏受歡迎。","透早天拄光，麵包師傅就開工，了後拌麵粉、發麵。出爐的麵包，敲底叩叩。紲落來入烘爐、顧火，紲落來排列。熟客呵咾今仔日的吐司特別軟。出爐的時，人客拄好圍過來。天猶未光伊就開始無閒，規間店攏是麵包芳。做麵包，天未光就愛開始。希望天氣穩定，發酵才好掠。","逐工透早，麵包師傅就開工，紲落來拌麵粉、發麵。門市的架，出爐隨補滿。紲落來入烘爐、顧火，了後出爐、排列。囡仔鼻著芳味，拖阿母入來。人客講伊逐工攏來買仝一款。學徒做的頭一粒麵包出爐矣。新品一出，隨賣了了。麵包是活的，愛照起工。向望逐工的麵包攏發甲媠。","天拄光，麵包師傅就開工，紲落來發麵、整形。麵粉飛佇空中，白白一層。紲落來閣入烘爐、顧火，紲落來出爐。有人買規袋，講欲送人。生日蛋糕，予人客感動甲。逐工透早排隊等出爐。熟客呵咾今仔日的吐司特別軟。做這途，愛甘願早起。希望透早的頭一爐攏成功。","逐工透早，麵包師傅就開工，紲落來閣拌麵粉、發麵。奶油抹過，一輾一輾勻。紲落來入烘爐、顧火，紲落來出爐、排列。囡仔鼻著芳味，拖阿母入來。新品項一下晡就賣了了。半暝就起來做，人客毋知，毋過食會出來。材料誠實，滋味才誠實。向望逐工的麵包攏發甲媠。"],"農夫":["春天，農夫就犁田、插秧。到夏天，伊除草、施肥。透早的露水沾佇褲跤。到秋天，伊割稻、收成。到冬天，伊整理農具、休耕。天未光就落田，日頭落山才轉來。孫仔綴落田，掠水蛙掠甲歡喜。厝邊呵咾今年的稻仔媠。販仔來看貨，出價講會當。一粒米，百粒汗。向望做田人的辛苦有人知。","春天，農夫就播種、插秧。到夏天，伊沃水、除草。田水照著日頭，金爍爍。到秋天，伊曝穀、收成。到冬天，伊顧菜園、整理農具。收成好，某笑甲真歡喜。落一陣及時雨，逐家攏歡喜。一粒米百粒汗，攏是伊的辛苦。老農會的朋友來開講。天公疼戇人，戇人搰力做。向望這塊田會當一直種落去。","春天，農夫就播種、犁田。到夏天，伊除草、施肥。腳踏落田，泥土芳直直撲鼻。到秋天，伊曝穀、收成。到冬天，伊整理農具、顧菜園。隔壁田的老歲仔來借農具。傍晚坐佇田岸，看家己的田。落一陣及時雨，逐家攏歡喜。一粒米百粒汗，攏是伊的辛苦。做穡靠天，嘛靠家己的手。一心等待好收成。","春天，農夫就插秧、犁田。到夏天，伊除草、施肥。穀曝佇埕，日頭味芳芳。到秋天，伊曝穀、割稻。到冬天，伊整理農具、顧菜園。收成好，某笑甲真歡喜。孫仔綴落田，掠水蛙掠甲歡喜。傍晚坐佇田岸，看家己的田。隔壁田的老歲仔來借農具。田是祖公傳落來的，愛顧。向望這塊田會當一直種落去。","春天，農夫就犁田、插秧。到夏天，伊沃水、施肥。土的氣味，落雨了後特別厚。到秋天，伊曝穀、割稻。到冬天，伊整理農具、顧菜園。傍晚坐佇田岸，看家己的田。落一陣及時雨，逐家攏歡喜。厝邊呵咾今年的稻仔媠。販仔來看貨，出價講會當。春天種的是希望。向望田水充足，作穡順利。","春天，農夫就犁田、插秧。到夏天，伊施肥、沃水。水蛙佇田裡叫規暝。到秋天，伊收成、割稻。到冬天，伊顧菜園、整地。孫仔綴落田，掠水蛙掠甲歡喜。老農會的朋友來開講。囝兒轉來鬥割稻。販仔來看貨，出價講會當。天未光就落田，日頭落山才轉來。做田人，看天食飯。希望收成的價數好。","春天，農夫就插秧、犁田。到夏天，伊除草、施肥。透早的露水沾佇褲跤。到秋天，伊收成、曝穀。到冬天，伊整地、整理農具。天未光就落田，日頭落山才轉來。落一陣及時雨，逐家攏歡喜。一粒米百粒汗，攏是伊的辛苦。傍晚坐佇田岸，看家己的田。土會黏人，做田人離袂開。希望風颱莫來。","春天，農夫就插秧、犁田。到夏天，伊除草、施肥。土的氣味，落雨了後特別厚。到秋天，伊收成、割稻。到冬天，伊整理農具、休耕。囝兒轉來鬥割稻。天未光就落田，日頭落山才轉來。厝邊呵咾今年的稻仔媠。落一陣及時雨，逐家攏歡喜。土會黏人，做田人離袂開。希望明年閣是一个好年冬。"],"漁夫":["逐工透早，漁夫就準備漁具、出港，紲落來落網、收網。漁網拖起來，重甸甸。了後入港、卸魚，了後賣魚。這網起了滿滿，逐家攏歡喜。厝邊的船互相報魚訊。一網一網收起來，毋管收穫偌濟，攏是靠經驗佮體力。少年船員第一擺看著大尾魚。海上互相照應，是討海人的義氣。向望海湧平靜。","天拄光，漁夫就準備漁具、出港，紲落來閣落網、收網。燈火佇海面一點一點。了後入港、卸魚，紲落來賣魚。孫仔佇港邊看阿公的船轉來。起風進前拄好入港，好佳哉。漁會的人講今仔日行情好。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。海是漁夫的田。向望逐擺出海攏平安轉來。","透早天拄光，漁夫就準備漁具、出港，了後收網、掠魚。入港的時，燈塔的光一明一暗。紲落來入港、卸魚，紲落來賣魚。一網一網收起來，毋管收穫偌濟，攏是靠經驗佮體力。這網起了滿滿，逐家攏歡喜。老船長報伊一个好漁場。一網魚，是一家伙仔的向望。向望討海人攏受保庇。","逐工透早，漁夫就準備漁具、出港，紲落來閣落網、收網。燈火佇海面一點一點。紲落來入港，紲落來賣魚。賣了好價，請船員食一頓。某佇港邊等船入港。老船長報伊一个好漁場。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。海是漁夫的田。向望討海人攏受保庇。","透早天拄光，漁夫就準備漁具，紲落來落網、收網。漁網拖起來，重甸甸。紲落來入港、卸魚，紲落來賣魚。販仔佇岸邊搶欲交關。某佇港邊等船入港。賣了好價，請船員食一頓。孫仔佇港邊看阿公的船轉來。一網魚，是一家伙仔的向望。希望魚價好，一家伙仔快活。","天拄光，漁夫就準備漁具、出港，紲落來收網。魚佇甲板頂跳，魚鱗閃閃爍。紲落來閣入港、卸魚，了後賣魚。賣了好價，請船員食一頓。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。某佇港邊等船入港。起風進前拄好入港，好佳哉。海袂當貪，夠額就好。向望討海人攏受保庇。","透早天拄光，漁夫就準備漁具、出港，了後收網、掠魚。海風透早就拍佇面。紲落來入港、卸魚，了後賣魚。這網起了滿滿，逐家攏歡喜。老船長報伊一个好漁場。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。入港的燈火，是上溫暖的光。向望今仔日有好收穫。","天拄光，漁夫就準備漁具、出港，了後收網、掠魚。日頭對海面浮起來。紲落來入港、卸魚，紲落來賣魚。賣了好價，請船員食一頓。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。一網一網收起來，毋管收穫偌濟，攏是靠經驗佮體力。一網魚，是一家伙仔的向望。向望海湧平靜。"],"老師":["透早，教師就準備教材、整理教室。到頂晡，伊寫黑板、指導學生。暗時的教案，寫甲燈跤。到下晡，伊上課、指導學生。到暗時，伊改作業、準備隔工。坐尾排的囡仔，予伊拉起來矣。家長講囡仔開始愛讀冊矣。畢業的學生轉來看伊。學生的目睭，騙袂過。希望學生大漢攏做好人。","透早，教師就備課、準備教材。到頂晡，伊點名、上課。考卷發落去，一片恬靜。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。考無好的學生，予伊鼓勵甲閣有信心。九月底的卡片，一張一張，攏是學生的心意。一枝粉筆，寫的是別人的未來。向望班上攏和和氣氣。","透早，教師就準備教材、整理教室。到頂晡，伊點名、上課。作業簿疊佇桌頂，一落一落。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。教過的學生做老師矣，轉來揣伊。九月底的卡片，一張一張，攏是學生的心意。老師一句話，學生會記誠久。希望做老師做甲有尊嚴。","透早，教師就準備教材、整理教室。到頂晡，伊講課、寫黑板。下課的鐘聲，一響規走廊活起來。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。學生比賽得獎，第一个報伊。教過的學生做老師矣，轉來揣伊。每一个學生攏有家己的光。向望教的攏有入心。","透早，教師就準備教材、整理教室。到頂晡，伊講課、寫黑板。教室內傳出學生朗讀的聲。到下晡，伊改作業、看功課。到暗時，伊改作業、準備隔工。九月底的卡片，一張一張，攏是學生的心意。同事請教伊帶班的撇步。老師一句話，學生會記誠久。向望班上攏和和氣氣。","透早，教師就準備教材、整理教室。到頂晡，伊寫黑板、指導學生。教室的風扇，嗡嗡轉。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。考無好的學生，予伊鼓勵甲閣有信心。學生比賽得獎，第一个報伊。蹲予低，才聽會著學生的心聲。希望做老師做甲有尊嚴。","透早，教師就準備教材、整理教室。到頂晡，伊寫黑板、指導學生。教室的風扇，嗡嗡轉。到下晡，伊改作業、看功課。到暗時，伊備課、改作業。學生講伊教了聽有。九月底的卡片，一張一張，攏是學生的心意。家長講囡仔開始愛讀冊矣。教冊是良心的事業。向望逐屆學生攏平安大漢。","透早，教師就準備教材、整理教室。到頂晡，伊點名、上課。作業簿疊佇桌頂，一落一落。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。家長會逐家攏感謝。家長講囡仔開始愛讀冊矣。九月底的卡片，一張一張，攏是學生的心意。一句鼓勵，有時比十擺責備較有效。向望逐屆學生攏平安大漢。"],"廟公":["開廟，廟公就點香敬神明、整理供桌換鮮花。到接待，伊接待香客紹介參拜、登記點燈寫名冊。神明生的鑼鼓，鬧熱滾滾。到顧廟，伊清香爐香灰篩過、顧金爐注意安全。到關廟，伊巡一輾、關廟門。顧廟幾十冬，香客變朋友。香客毋知按怎行，伊𤆬路講予清楚。一支香，一份心意。向望廟愈來愈興旺。","開廟，廟公就整理供桌換鮮花、開廟門。到接待，伊接待香客紹介參拜、登記點燈寫名冊。籤筒搖出，一支籤落。到顧廟，伊顧金爐注意安全、清香爐香灰篩過。到關廟，伊關廟門、巡一輾。進香團呵咾接待甲周到。香客講伊解籤解甲入心。廟是庄頭的中心。向望少年人捌廟的文化。","開廟，廟公就整理供桌換鮮花、點香敬神明。到接待，伊登記點燈寫名冊、解籤慢慢仔講。進香團的旗，一支一支入。到顧廟，伊顧金爐注意安全、清香爐香灰篩過。到關廟，伊巡一輾、關廟門。少年人予伊講甲對廟有興趣。香火燒的是敬，留的是心安。希望逐工開門攏順利。","開廟，廟公就點香敬神明、整理供桌換鮮花。到接待，伊解籤慢慢仔講、登記點燈寫名冊。籤筒搖出，一支籤落。到顧廟，伊顧金爐注意安全、掃廟埕。到關廟，伊關廟門、巡一輾。主委講廟交予伊顧真放心。外地的香客專工來揣伊。神明面前，逐家平等。希望信眾攏平安。","開廟，廟公就整理供桌換鮮花、點香敬神明。到接待，伊登記點燈寫名冊、接待香客紹介參拜。神明生的鑼鼓，鬧熱滾滾。到顧廟，伊掃廟埕、清香爐香灰篩過。到關廟，伊巡一輾、關廟門。外地的香客專工來揣伊。祭典辦了，逐家呵咾。解籤是解人的心。向望香火綿延。","開廟，廟公就整理供桌換鮮花、點香敬神明。到接待，伊接待香客紹介參拜、解籤慢慢仔講。關門的門閂，一聲沉沉。到顧廟，伊掃廟埕、顧金爐注意安全。到關廟，伊巡一輾、關廟門。香客毋知按怎行，伊𤆬路講予清楚。傳統愛有人顧，才傳會落去。向望祭典攏順利。","開廟，廟公就點香敬神明、整理供桌換鮮花。到接待，伊登記點燈寫名冊、解籤慢慢仔講。香爐的灰，篩甲幼幼。到顧廟，伊顧金爐注意安全、清香爐香灰篩過。到關廟，伊巡一輾、關廟門。老信眾逐工攏來𤆬伊開講。少年人予伊講甲對廟有興趣。廟是庄頭的中心。希望逐工開門攏順利。","開廟，廟公就整理供桌換鮮花、開廟門。到接待，伊登記點燈寫名冊、接待香客紹介參拜。廟鐘一聲，透早的靜。到顧廟，伊清香爐香灰篩過、顧金爐注意安全。到關廟，伊關廟門、巡一輾。少年人予伊講甲對廟有興趣。香客毋知按怎行，伊𤆬路講予清楚。廟門開著，心就有靠。向望香火綿延。"],"護理師":["白班，護理師就換藥、發藥。到小夜，伊照顧病人、打針。消毒水的味淡淡仔。到大夜，伊協助病人翻身、回應呼叫鈴。病人欲出院，伊共病人講愛好好仔照顧身體。病人講多謝，伊笑笑仔應。老人家毋敢落床，伊慢慢仔扶。共病人當做家己人照顧，就袂錯。希望明仔載交班順利。","白班，護理師就掛點滴、照顧病人。到小夜，伊發藥、照顧病人。呼叫鈴不時咧響。到大夜，伊整理交班的資料、協助病人翻身。家屬送來一盒餅，表示感謝。家屬問甲真詳細，伊耐心說明。病人歇了有較好，伊就放心。共病人照顧甲勇健，就是護士上歡喜的代誌。希望病人早日康復。","白班，護理師就照顧病人、巡房。到小夜，伊巡房、照顧病人。藥車捒過走廊，輪仔聲輕輕。到大夜，伊回應呼叫鈴、半暝巡病房。伊佇病房巡來巡去，一暝無閒甲天光。夜班的時，病房恬恬。家屬送來一盒餅，表示感謝。細節顧予好，病人才會安心。希望今暗的夜班順順利利。","白班，護理師就巡房、換藥。到小夜，伊巡房、量體溫。電腦頂的紀錄一筆一筆。到大夜，伊看監測的數值、半暝巡病房。同事鬥相共，代誌做較緊。伊佇病房巡來巡去，一暝無閒甲天光。老人家毋敢落床，伊慢慢仔扶。逐項記予清楚，才袂出差錯。向望逐个病人攏平安出院。","白班，護理師就照顧病人、掛點滴。到小夜，伊換藥、發藥。電腦頂的紀錄一筆一筆。到大夜，伊整理交班的資料、半暝巡病房。病人欲出院，伊共病人講愛好好仔照顧身體。夜班的時，病房恬恬。囡仔驚拍針，伊細聲共伊惜。半暝的呼叫鈴，嘛是責任。向望病房的病人攏睏會好。","白班，護理師就照顧病人、打針。到小夜，伊發藥、照顧病人。電腦頂的紀錄一筆一筆。到大夜，伊整理交班的資料、回應呼叫鈴。家屬送來一盒餅，表示感謝。同事鬥相共，代誌做較緊。夜班的時，病房恬恬。做護理師，上要緊的是同理心。希望人力有夠，逐家較袂忝。","白班，護理師就照顧病人、量血壓。到小夜，伊打針、換藥。口罩掛規工，面有壓痕。到大夜，伊協助病人翻身、整理交班的資料。病人半暝咧哀，伊隨去看。老人家毋敢落床，伊慢慢仔扶。同事鬥相共，代誌做較緊。共病人當做家己人照顧，就袂錯。向望逐个病人攏平安出院。","白班，護理師就發藥、照顧病人。到小夜，伊照顧病人、打針。體溫計嗶一聲。到大夜，伊協助病人翻身、整理交班的資料。夜班的時，病房恬恬。病人欲出院，伊共病人講愛好好仔照顧身體。同事鬥相共，代誌做較緊。細節顧予好，病人才會安心。向望同事攏身體勇健。"],"司機":["逐工透早，司機就檢查車況、開車，紲落來載人、停車。車一路駛過鬧熱的街市。紲落來加油、清車。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。路況看予遠，紅燈進前就先減速。人客坐佇車內，安全就交佇伊手裡。共逐家平安載到位，就是司機的本份。平安載人客到位。","天拄光，司機就檢查車況、開車，紲落來載人、停車。車一路駛過鬧熱的街市。了後加油、清車。路況看予遠，紅燈進前就先減速。人客坐佇車內，安全就交佇伊手裡。路況伊上熟，佗位好行、佗位塞車攏知影。共逐家平安載到位，就是司機的本份。平安載人客到位。","透早天拄光，司機就檢查車況、開車，紲落來閣載人、停車。車一路駛過鬧熱的街市。了後清車、收班。人客坐佇車內，安全就交佇伊手裡。路況伊上熟，佗位好行、佗位塞車攏知影。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。共逐家平安載到位，就是司機的本份。平安載人客到位。","逐工透早，司機就檢查車況、開車，了後載人。車一路駛過鬧熱的街市。紲落來清車、收班。路況看予遠，紅燈進前就先減速。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。路況伊上熟，佗位好行、佗位塞車攏知影。共逐家平安載到位，就是司機的本份。平安載人客到位。","天拄光，司機就檢查車況、開車，了後載人、停車。車一路駛過鬧熱的街市。紲落來清車、收班。人客坐佇車內，安全就交佇伊手裡。路況伊上熟，佗位好行、佗位塞車攏知影。路況看予遠，紅燈進前就先減速。共逐家平安載到位，就是司機的本份。平安載人客到位。","天拄光，司機就檢查車況、開車，紲落來載人、停車。車一路駛過鬧熱的街市。紲落來清車、收班。路況伊上熟，佗位好行、佗位塞車攏知影。路況看予遠，紅燈進前就先減速。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。共逐家平安載到位，就是司機的本份。平安載人客到位。","透早天拄光，司機就檢查車況、開車，紲落來閣載人、停車。車一路駛過鬧熱的街市。了後清車、收班。路況伊上熟，佗位好行、佗位塞車攏知影。人客坐佇車內，安全就交佇伊手裡。路況看予遠，紅燈進前就先減速。共逐家平安載到位，就是司機的本份。平安載人客到位。","透早天拄光，司機就檢查車況、開車，紲落來載人、停車。車一路駛過鬧熱的街市。紲落來清車。路況看予遠，紅燈進前就先減速。路況伊上熟，佗位好行、佗位塞車攏知影。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。共逐家平安載到位，就是司機的本份。平安載人客到位。"],"水電工":["水電工到現場，了後配管、牽電線。電表的指針跳一下。了後接水管、接電線，紲落來試水、試電。水管電線藏佇壁內，佗位有問題伊攏揣會著。厝主泡茶請伊，坐咧開講。老厝翻新，電攏換新的。學徒接的線一擺就過。動電進前先斷電，確認無電才落手。向望逐工攏平安收工。","水電工到現場，紲落來配管、牽電線。封膠的味淡淡仔。了後接水管、接電線，了後試水、試電。驗收一擺過，皆大歡喜。厝主半暝斷電，伊隨來處理。人客呵咾線路整理甲清楚。老厝翻新，電攏換新的。水電裝予妥當，厝內人用著才安全。燈一著，厝就有性命。向望半暝的急修愈少愈好。","水電工到現場，紲落來配管、牽電線。扳手一絲一絲共管仔鎖絚。了後接水管、接電線，了後試水、試電。學徒接的線一擺就過。人客呵咾線路整理甲清楚。人客講熱水總算有燒矣。老主顧厝裡的水電攏交予伊。漏水漏電，攏是厝主的煩惱，愛替人想。希望管線攏免閣漏。","水電工到現場，紲落來配管、牽電線。切溝的粉塵飛規間。紲落來接水管、接電線，紲落來試水。學徒接的線一擺就過。水電裝予妥當，厝內人用著才安全。人客呵咾線路整理甲清楚。厝主半暝斷電，伊隨來處理。急人所急，是做水電的價值。向望逐場施工攏平安。","水電工到現場，紲落來配管、牽電線。切溝的粉塵飛規間。了後接水管、接電線，紲落來試水、試電。老主顧厝裡的水電攏交予伊。水電裝予妥當，厝內人用著才安全。厝主半暝斷電，伊隨來處理。驗收一擺過，皆大歡喜。手藝好毋好，驗收就知。希望學徒緊會當獨立。","水電工到現場，紲落來配管、牽電線。扳手一絲一絲共管仔鎖絚。了後接水管、接電線，了後試水、試電。厝主講漏水修好矣，安心矣。水電裝予妥當，厝內人用著才安全。老厝翻新，電攏換新的。學徒接的線一擺就過。水電若做予好，厝內才用會安穩。希望學徒緊會當獨立。","水電工到現場，了後配管、牽電線。水管試水，一節一節看。紲落來閣接水管、接電線，紲落來試水。老主顧厝裡的水電攏交予伊。人客講熱水總算有燒矣。學徒接的線一擺就過。水電裝予妥當，厝內人用著才安全。水電若做予好，厝內才用會安穩。希望管線攏免閣漏。","水電工到現場，紲落來配管、牽電線。封膠的味淡淡仔。紲落來接水管、接電線，了後試水、試電。設計師呵咾管線藏甲媠。人客呵咾線路整理甲清楚。學徒接的線一擺就過。人客講熱水總算有燒矣。老主顧厝裡的水電攏交予伊。看袂著的所在，愈愛做予實。向望逐工攏平安收工。"],"木工":["天拄光，木工就量尺寸，紲落來鋸板。墨線彈落去，一逝烏烏。了後釘骨架、鎖螺絲，紲落來安裝、整理工具。人客講欲閣加做一組。老師傅點頭，講會使。囡仔的冊桌做好，規家歡喜。人客呵咾櫃仔做甲媠。電鋸聲槌仔聲，工場規工無恬過。共厝內裝潢甲媠媠，就是木工的功夫。希望人客滿意。","透早天拄光，木工就量尺寸，了後鋸板。榫接密密，看無縫。紲落來釘骨架、鎖螺絲，紲落來閣安裝、整理工具。學徒鑿的榫有進步矣。交件的時，人客隨付尾款。設計師講尺寸準甲真。舊人客紹介新人客來。柴料揀予著，做的物件才會耐用。一塊好料，愛拄著好師傅。向望逐件作品攏予人呵咾。","天拄光，木工就量尺寸，了後鋸板。收工的時，木屑掃做一堆。了後釘骨架、鎖螺絲，紲落來閣安裝、整理工具。柴料揀予著，做的物件才會耐用。同行來看伊的手路。交件的時，人客隨付尾款。設計師講尺寸準甲真。厝主講揀著的木紋有夠媠。做木工，目睭就是水平尺。希望人客滿意。","天拄光，木工就量尺寸，紲落來鋸板。木屑的芳味滿間攏是。紲落來釘骨架、鎖螺絲，了後安裝、整理工具。厝主講揀著的木紋有夠媠。設計師講尺寸準甲真。柴料揀予著，做的物件才會耐用。同行來看伊的手路。人客講欲閣加做一組。一分料，一分工。希望做的櫃仔用幾十冬。","逐工透早，木工就量尺寸，了後鋸板。收工的時，木屑掃做一堆。了後釘骨架、鎖螺絲，紲落來閣安裝、整理工具。人客呵咾櫃仔做甲媠。舊人客紹介新人客來。柴料揀予著，做的物件才會耐用。厝主講揀著的木紋有夠媠。共厝內裝潢甲媠媠，就是木工的功夫。向望學徒緊出師。","逐工透早，木工就量尺寸，了後鋸板。砂紙磨過，手感滑滑。紲落來釘骨架、鎖螺絲，了後安裝、整理工具。電鋸聲槌仔聲，工場規工無恬過。交件的時，人客隨付尾款。學徒鑿的榫有進步矣。厝主講揀著的木紋有夠媠。設計師講尺寸準甲真。慢慢仔做，才做會幼。向望這手路有人傳。","逐工透早，木工就量尺寸，了後鋸板。收工的時，木屑掃做一堆。紲落來釘骨架，紲落來安裝、整理工具。老師傅點頭，講會使。柴料揀予著，做的物件才會耐用。囡仔的冊桌做好，規家歡喜。交件的時，人客隨付尾款。榫頭密毋密，是師傅的面子。希望逐工收工攏平安。","逐工透早，木工就量尺寸，了後鋸板。砂紙磨過，手感滑滑。紲落來釘骨架、鎖螺絲，了後安裝、整理工具。舊人客紹介新人客來。人客講欲閣加做一組。柴料揀予著，做的物件才會耐用。囡仔的冊桌做好，規家歡喜。交件的時，人客隨付尾款。家私會舊，手路袂舊。希望人客滿意。"],"鐵工":["透早天拄光，鐵工就起火，紲落來燒鐵、燒紅。鐵鎚敲落，鏗一聲。紲落來閣槌拍、塑形，紲落來磨光。囡仔佇新欄杆邊耍，大人放心。學徒的焊道有進步。設計師講樓梯的線條媠。規間工場，攏是燒鐵的味。同行來借特殊的模具。硬的材料，愛軟的耐心。希望施工攏平安。","逐工透早，鐵工就起火，了後燒鐵、燒紅。磨焊道，火星一逝一逝。了後槌拍、塑形，紲落來磨光。鐵件量予準、裁予齊，鬥起來才會密。人客講門開關真順手。舊鐵窗換新，厝主安心矣。設計師講樓梯的線條媠。厚的薄的攏有各自的拍法，力頭愛掠予準。一支鐵管，量準才落刀。希望施工攏平安。","逐工透早，鐵工就起火，了後燒鐵、燒紅。收工的時，鐵屑掃做堆。了後槌拍、塑形，紲落來磨光。舊鐵窗換新，厝主安心矣。設計師講樓梯的線條媠。人客講門開關真順手。鐵件量予準、裁予齊，鬥起來才會密。厚的薄的攏有各自的拍法，力頭愛掠予準。焊道看會出師傅的心。向望學徒緊學會曉。","天拄光，鐵工就起火，了後燒鐵、燒紅。收工的時，鐵屑掃做堆。了後槌拍、塑形，紲落來磨光。厚的薄的攏有各自的拍法，力頭愛掠予準。社區的案做了，管委會呵咾。鐵件量予準、裁予齊，鬥起來才會密。規間工場，攏是燒鐵的味。鐵是硬的，功夫是活的。希望目睭顧予好。","逐工透早，鐵工就起火，紲落來燒鐵、燒紅。鐵門推過，軌道輾輾響。紲落來槌拍、塑形，紲落來磨光。學徒的焊道有進步。厝主講鐵門裝了有夠在。舊鐵窗換新，厝主安心矣。同行來借特殊的模具。鐵件量予準、裁予齊，鬥起來才會密。鐵件牢毋牢，人命關天。向望逐件鐵工攏焊甲牢。","逐工透早，鐵工就起火，了後燒鐵、燒紅。鐵管疊佇車斗，一支一支。紲落來槌拍、塑形，紲落來磨光。學徒的焊道有進步。厚的薄的攏有各自的拍法，力頭愛掠予準。同行來借特殊的模具。完工驗收，一擺就過。鐵件量予準、裁予齊，鬥起來才會密。鐵件牢毋牢，人命關天。希望人客的門窗攏耐用。","透早天拄光，鐵工就起火，了後燒鐵、燒紅。面罩掀開，汗規面。紲落來槌拍、塑形，紲落來磨光。鐵件量予準、裁予齊，鬥起來才會密。同行來借特殊的模具。完工驗收，一擺就過。學徒的焊道有進步。厝主講鐵門裝了有夠在。火花是鐵工的日常。希望這手藝有人接。","透早天拄光，鐵工就起火，紲落來燒鐵。面罩掀開，汗規面。紲落來槌拍、塑形，紲落來閣磨光。規間工場，攏是燒鐵的味。囡仔佇新欄杆邊耍，大人放心。厝主講鐵門裝了有夠在。人客呵咾欄杆焊甲幼。鐵件量予準、裁予齊，鬥起來才會密。鐵是硬的，功夫是活的。希望這手藝有人接。"],"裁縫師":["接單，裁縫師就看版型、量人客尺寸。到裁製，伊畫粉線裁布、縫鈕仔。鈕仔盒仔內，一格一格排甲真齊。到修整，伊試穿看合軀、熨衫燙平。到交件，伊包裝掛牌、交件收數。老主顧的衫攏交予伊做。改好的西裝，人客穿了滿意。量身是量人，嘛是量心。向望目睭顧予好。","接單，裁縫師就量人客尺寸、確認布料。到裁製，伊縫鈕仔、畫粉線裁布。線輪一排，色水齊全。到修整，伊試穿看合軀、改長短。到交件，伊交件收數、包裝掛牌。人客講這領衫穿十冬猶真勇。少年人提設計圖來請教。剪落去進前，愛想三遍。希望手工的價值有人捌。","接單，裁縫師就確認布料、量人客尺寸。到裁製，伊畫粉線裁布、車縫。熨斗行過，蒸氣一陣。到修整，伊熨衫燙平、改長短。到交件，伊交件收數、包裝掛牌。學徒車的線愈來愈直。老主顧的衫攏交予伊做。人客試穿，講合軀甲真。剪落去進前，愛想三遍。向望逐領衫攏合軀。","接單，裁縫師就量人客尺寸、確認布料。到裁製，伊車縫、畫粉線裁布。熨斗行過，蒸氣一陣。到修整，伊熨衫燙平、試穿看合軀。到交件，伊包裝掛牌、交件收數。老主顧的衫攏交予伊做。隔壁店的嘛來借版型。人客紹介朋友專程來。衫是照人做的，毋是人照衫。向望好布愈來愈好揣。","接單，裁縫師就確認布料、量人客尺寸。到裁製，伊畫粉線裁布、縫鈕仔。粉線畫佇布面，一逝白白。到修整，伊熨衫燙平、試穿看合軀。到交件，伊交件收數、包裝掛牌。學徒車的線愈來愈直。少年人提設計圖來請教。衫是照人做的，毋是人照衫。向望這手藝有人肯學。","接單，裁縫師就量人客尺寸、看版型。到裁製，伊畫粉線裁布、縫鈕仔。皮尺掛佇頷頸，隨時通量。到修整，伊熨衫燙平、試穿看合軀。到交件，伊包裝掛牌、交件收數。改好的西裝，人客穿了滿意。隔壁店的嘛來借版型。人客紹介朋友專程來。一針一線，攏是功夫。向望逐領衫攏合軀。","接單，裁縫師就量人客尺寸、看版型。到裁製，伊畫粉線裁布、車縫。車台的聲，噠噠噠規工。到修整，伊試穿看合軀、改長短。到交件，伊交件收數、包裝掛牌。囡仔的制服改了拄好。學徒車的線愈來愈直。人客紹介朋友專程來。量身是量人，嘛是量心。希望老主顧攏繼續交關。","接單，裁縫師就量人客尺寸、確認布料。到裁製，伊縫鈕仔、畫粉線裁布。車台的聲，噠噠噠規工。到修整，伊改長短、試穿看合軀。到交件，伊交件收數、包裝掛牌。人客紹介朋友專程來。人客講這領衫穿十冬猶真勇。人客試穿，講合軀甲真。一針一線，攏是功夫。希望老主顧攏繼續交關。"]};
+const JOBS = Object.keys(SAMPLES);
+let live = true;   // API 活無
+
 let hist = JSON.parse(localStorage.getItem('xny_hist') || '[]');
 
-// 範例籤
-$('#chips').innerHTML = SAMPLES.map(s=>`<button class="chip">${s}</button>`).join('');
+$('#chips').innerHTML = JOBS.slice(0,10).map(s=>`<button class="chip">${s}</button>`).join('');
 $('#chips').onclick = e => { if(e.target.classList.contains('chip')){ $('#q').value = e.target.textContent; run(); } };
 
-// 設定
-$('#btn-set').onclick = () => { $('#base').value = S.base(); $('#key').value = S.key(); $('#dlg').showModal(); };
+/* 設定 */
+$('#btn-set').onclick = () => {
+  $('#base').value = localStorage.getItem('xny_base') || '';
+  $('#key').value  = localStorage.getItem('xny_key')  || '';
+  $('#dlg').showModal();
+};
 $('#dlg-x').onclick = () => $('#dlg').close();
+$('#dlg-reset').onclick = () => {
+  localStorage.removeItem('xny_base'); localStorage.removeItem('xny_key');
+  $('#dlg').close(); quota();
+};
 $('#dlg-ok').onclick = () => {
-  localStorage.setItem('xny_base', $('#base').value.trim().replace(/\/$/,''));
-  localStorage.setItem('xny_key',  $('#key').value.trim());
+  const b = $('#base').value.trim().replace(/\/$/,''), k = $('#key').value.trim();
+  b ? localStorage.setItem('xny_base', b) : localStorage.removeItem('xny_base');
+  k ? localStorage.setItem('xny_key',  k) : localStorage.removeItem('xny_key');
   $('#dlg').close(); quota();
 };
 
-// 額度
+/* 額度／活無 */
 async function quota(){
-  if(!S.key()) { $('#meter').innerHTML = '金鑰猶未設'; return; }
   try{
-    const r = await fetch(`${S.base()}/quota?key=${encodeURIComponent(S.key())}`);
+    const r = await fetch(`${S.base()}/quota?key=${encodeURIComponent(S.key())}`, {signal: AbortSignal.timeout(6000)});
     const d = await r.json();
     if(!r.ok) throw 0;
-    $('#meter').innerHTML = `今仔日 <b>${d.used_pieces}</b> 篇 · <b>${d.used_tokens}</b> tok · 賰 ${d.remaining}`;
-  }catch{ $('#meter').textContent = '額度讀袂著'; }
+    live = d.global_remaining > 0 && d.remaining > 0;
+    if(live){
+      $('#meter').className = 'meter';
+      $('#meter').innerHTML = `今仔日 <b>${d.used_pieces}</b>／${d.daily_quota} 篇 · 賰 <b>${d.remaining}</b>`;
+      $('#dot').className = 'dot';
+      $('#mode-lbl').textContent = '職業 → 台語敘事';
+    }else offline('今仔日的額度用了矣');
+  }catch{ offline('即時生成暫停'); }
+}
+function offline(why){
+  live = false;
+  $('#meter').className = 'meter off';
+  $('#meter').innerHTML = `<b>${why}</b> · 顯示預生樣本`;
+  $('#dot').className = 'dot off';
+  $('#mode-lbl').textContent = '職業 → 台語敘事（預生樣本）';
 }
 
-// 生成
+/* 生成 */
 $('#go').onclick = run;
 $('#q').addEventListener('keydown', e => { if(e.key==='Enter') run(); });
 
@@ -237,48 +263,67 @@ async function run(){
   const n = +$('#n').value;
   const out = $('#out');
   if(!query){ out.innerHTML = err('輸入一个職業才會使生成。'); return; }
-  if(!S.key()){ out.innerHTML = err('金鑰猶未設，先去頂懸「設定」填。'); return; }
-  if(location.protocol==='https:' && S.base().startsWith('http://')){
-    out.innerHTML = err('這頁是 https，API 網址是 http——瀏覽器會擋（混合內容）。去「設定」換做 https 的 tunnel 網址。');
-    return;
-  }
 
   const go = $('#go');
   go.disabled = true; go.innerHTML = '<i class="spin"></i>生成中';
   out.innerHTML = '';
   try{
+    if(!live) throw new Error('__FALLBACK__');
     const res = await fetch(S.base()+'/generate', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':S.key()},
-      body: JSON.stringify({query, n})
+      body: JSON.stringify({query, n}),
+      signal: AbortSignal.timeout(120000)
     });
     const d = await res.json().catch(()=>({}));
+    if(res.status===429){ offline(d.error || '額度用了'); throw new Error('__FALLBACK__'); }
     if(!res.ok) throw new Error(msg(res.status, d.error));
-    render(d);
+    render(d, false);
     hist.unshift({q:d.query, p:d.pieces, t:Date.now(), texts:d.texts});
     hist = hist.slice(0,30);
     localStorage.setItem('xny_hist', JSON.stringify(hist));
     drawHist(); quota();
   }catch(e){
-    out.innerHTML = err(e.message || '連袂著 API——檢查 Base URL 佮伺服器（CORS 有開無？）。');
+    if(e.message === '__FALLBACK__' || e.name === 'TypeError' || e.name === 'TimeoutError'){
+      if(live) offline('即時生成暫停');
+      fallback(query, n);
+    }else{
+      out.innerHTML = err(e.message || '生成失敗');
+    }
   }finally{
     go.disabled = false; go.textContent = '生成';
   }
 }
 
+/* 保底：對樣本內揀 */
+function fallback(query, n){
+  const key = JOBS.find(j => j === query) || JOBS.find(j => j.includes(query) || query.includes(j));
+  if(!key){
+    $('#out').innerHTML = note(`即時生成這馬袂通，這台只有下跤這幾个職業的預生樣本：${JOBS.join('、')}。`)
+      + `<div class="empty"><div class="big">試看下跤的籤</div></div>`;
+    return;
+  }
+  const texts = SAMPLES[key].slice(0, n);
+  render({query:key, pieces:texts.length,
+          chars:texts.reduce((a,t)=>a+cp(t),0),
+          tokens_est:Math.round(texts.reduce((a,t)=>a+cp(t),0)*1.3), texts}, true);
+}
+
 const msg = (code, e) => ({
-  400:'請輸入查詢。', 401:'金鑰毋著，請檢查設定。',
-  429: e || '今仔日的額度用了矣。', 500:'服務暫時無法度，請閣試。'
+  400:'請輸入查詢。', 401:'金鑰毋著。', 403:'來源無允准。',
+  422: e || '這个職業庫內揣無。', 500:'服務暫時無法度，請閣試。'
 }[code] || e || `生成失敗（${code}）`);
 
-const err = t => `<div class="err">${t}</div>`;
-const esc = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const cp  = t => [...t].length;
+const err  = t => `<div class="err">${t}</div>`;
+const note = t => `<div class="note">${t}</div>`;
+const esc  = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const cp   = t => [...t].length;
 
-function render(d){
-  $('#out').innerHTML = `
+function render(d, isSample){
+  $('#out').innerHTML = (isSample ? note('即時生成這馬袂通，下跤是預生樣本。') : '') + `
     <div class="meta"><strong>${esc(d.query)}</strong>
-      <span>${d.pieces} 篇</span><span>${d.chars} 字</span><span>~${d.tokens_est} tok</span></div>
+      <span>${d.pieces} 篇</span><span>${d.chars} 字</span><span>~${d.tokens_est} tok</span>
+      ${isSample?'<span>預生樣本</span>':''}</div>
     ${d.texts.map((t,i)=>piece(t,i)).join('')}`;
 }
 
@@ -297,7 +342,7 @@ function piece(t,i){
       <div class="tabs">
         <button aria-selected="true">台⇄華</button><button aria-selected="false">台⇄英</button>
       </div>
-      <div class="pane"><span class="hold">對照管線猶未接（掛帳）。骨架已留，接落去只是換內容。</span></div>
+      <div class="pane"><span class="hold">對照管線猶未接（掛帳）。</span></div>
     </div>
   </article>`;
 }
@@ -314,7 +359,6 @@ $('#out').onclick = e => {
   }
 };
 
-// 記錄
 function drawHist(){
   $('#hist-empty').style.display = hist.length ? 'none' : 'block';
   $('#hist').innerHTML = hist.map((h,i)=>`<li><button data-h="${i}">
@@ -326,7 +370,7 @@ $('#hist').onclick = e => {
   const b = e.target.closest('button[data-h]'); if(!b) return;
   const h = hist[+b.dataset.h];
   render({query:h.q, pieces:h.p, chars:h.texts.reduce((a,t)=>a+cp(t),0),
-          tokens_est:Math.round(h.texts.reduce((a,t)=>a+cp(t),0)*1.3), texts:h.texts});
+          tokens_est:Math.round(h.texts.reduce((a,t)=>a+cp(t),0)*1.3), texts:h.texts}, false);
 };
 $('#btn-clear').onclick = () => { hist=[]; localStorage.removeItem('xny_hist'); drawHist(); };
 
