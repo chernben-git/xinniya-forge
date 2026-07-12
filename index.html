@@ -363,9 +363,9 @@ const note = t => `<div class="note">${t}</div>`;
 const esc  = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const cp   = t => [...t].length;
 
-let curTexts = [], curTailos = [], curMach = {}, curZh = {}, curEn = {};
+let curTexts = [], curTailos = [], curZhsCanon = [], curMach = {}, curZhMach = {}, curZh = {}, curEn = {};
 function render(d, isSample){
-  curTexts = d.texts; curTailos = (d.tailos||[]).slice(); curMach = {}; curZh = {}; curEn = {};
+  curTexts = d.texts; curTailos = (d.tailos||[]).slice(); curZhsCanon = (d.zhs||[]).slice(); curMach = {}; curZhMach = {}; curZh = {}; curEn = {};
   $('#out').innerHTML = (isSample ? note('即時生成這馬袂通，下跤是預生樣本。') : '') + `
     <div class="meta"><strong>${esc(d.query)}</strong>
       <span>${d.pieces} 篇</span><span>${d.chars} 字</span><span>~${d.tokens_est} tok</span>
@@ -395,10 +395,11 @@ function piece(t,i,tl){
 }
 /* 行間組版: 台語逐句一逝,下跤綴羅/華/英(顯示由.piece class管) */
 const splitHan = t => t.split('。').filter(s=>s.trim());
-function bodyHtml(t, tl, zhArr, enArr, mach){
+function bodyHtml(t, tl, zhArr, enArr, mach, zhMach){
   const hs = splitHan(t);
   const ts = (tl && !tl.includes('⟨')) ? tl.split('.').map(s=>s.trim()).filter(Boolean) : null;
   let out = mach ? `<span class="mach">機轉台羅・參考用（母語判準版整備中）</span>` : '';
+  if(zhArr && zhMach) out += `<span class="mach">機轉中文・參考用</span>`;
   hs.forEach((seg,k)=>{
     out += `<span class="sent">${esc(seg)}。</span>`;
     if(ts && ts[k]) out += `<span class="line tl">${esc(ts[k])}.</span>`;
@@ -408,7 +409,7 @@ function bodyHtml(t, tl, zhArr, enArr, mach){
   return out;
 }
 function renderBody(i){
-  $('#b'+i).innerHTML = bodyHtml(curTexts[i], curTailos[i], curZh[i], curEn[i], !!curMach[i]);
+  $('#b'+i).innerHTML = bodyHtml(curTexts[i], curTailos[i], curZh[i], curEn[i], !!curMach[i], !!curZhMach[i]);
 }
 
 /* 羅: 庫有→直開;庫無→中繼機轉(標示) */
@@ -433,6 +434,16 @@ async function loadTl(i, btn){
 async function loadZh(i, btn){
   const p = $('#p'+i);
   if(curZh[i]){ p.classList.toggle('show-zh'); btn.classList.toggle('on'); return; }
+  // ★中文用新爾雅: 三軌引擎的判準華語有就直用(零MT)
+  if(curZhsCanon[i]){
+    const hs = splitHan(curTexts[i]);
+    let zs = curZhsCanon[i].split(/[。.]/).map(s=>s.trim()).filter(Boolean);
+    if(zs.length > hs.length) zs = zs.slice(0, hs.length-1).concat(zs.slice(hs.length-1).join('，'));
+    curZh[i] = zs;
+    renderBody(i);
+    p.classList.add('show-zh'); btn.classList.add('on');
+    return;
+  }
   btn.textContent = '…';
   try{
     const r = await fetch(RELAY+'/translate/from-taigi', {
@@ -446,7 +457,7 @@ async function loadZh(i, btn){
     const hs = splitHan(curTexts[i]);
     let zs = zh.split(/[。.]/).map(s=>s.trim()).filter(Boolean);
     if(zs.length > hs.length) zs = zs.slice(0, hs.length-1).concat(zs.slice(hs.length-1).join('，'));
-    curZh[i] = zs;
+    curZh[i] = zs; curZhMach[i] = true;
     renderBody(i);
     p.classList.add('show-zh'); btn.classList.add('on'); btn.textContent = '中文';
   }catch{ btn.textContent = '中文'; hint('華語對照這馬袂通。'); }
