@@ -110,6 +110,13 @@
         font-size:12px;color:var(--ink-2);cursor:pointer}
   .mini:hover{border-color:var(--ink-3);color:var(--ink)}
   .body{padding:16px 18px;font-size:16.5px;line-height:2.05;white-space:pre-wrap;word-break:break-word}
+  /* v3: 台羅雙行對排(預設隱,撳「羅」顯) */
+  .body .sent{display:block}
+  .body .tl{display:none;font-family:var(--mono);font-size:12.5px;color:var(--ink-3);
+            line-height:1.55;margin:-6px 0 10px;letter-spacing:.01em}
+  .piece.show-tl .body .tl{display:block}
+  .mini.on{border-color:var(--moss);color:var(--moss);background:#f3f6f3}
+  .mini.playing{border-color:var(--seal);color:var(--seal)}
   .contrast{border-top:1px dashed var(--line);padding:12px 18px;background:#fcfbf8;display:none}
   .contrast.open{display:block}
   .contrast .tabs{display:flex;gap:6px;margin-bottom:9px}
@@ -294,7 +301,7 @@ async function run(){
     if(res.status===429){ offline(d.error || '額度用了'); throw new Error('__FALLBACK__'); }
     if(!res.ok) throw new Error(msg(res.status, d.error));
     render(d, false);
-    hist.unshift({q:d.query, p:d.pieces, t:Date.now(), texts:d.texts});
+    hist.unshift({q:d.query, p:d.pieces, t:Date.now(), texts:d.texts, tailos:d.tailos||[]});
     hist = hist.slice(0,30);
     localStorage.setItem('xny_hist', JSON.stringify(hist));
     drawHist(); quota();
@@ -330,6 +337,15 @@ const msg = (code, e) => ({
 }[code] || e || `生成失敗（${code}）`);
 
 const err  = t => `<div class="err">${t}</div>`;
+/* v3: 雙行組版——漢字切「。」台羅切「.」,段段對齊 */
+function dual(t, tl){
+  const hs = t.split('。').filter(Boolean);
+  const ts = tl.split('.').map(s=>s.trim()).filter(Boolean);
+  return hs.map((hSeg,k)=>
+    `<span class="sent">${esc(hSeg)}。</span>` +
+    (ts[k] ? `<span class="tl">${esc(ts[k])}.</span>` : '')
+  ).join('');
+}
 const note = t => `<div class="note">${t}</div>`;
 const esc  = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const cp   = t => [...t].length;
@@ -340,22 +356,25 @@ function render(d, isSample){
       <span>${d.pieces} 篇</span><span>${d.chars} 字</span><span>~${d.tokens_est} tok</span>
       ${isSample?'<span>預生樣本</span>':''}
       ${live && !isSample ? `<button class="again" id="again">閣生一批</button>` : ''}</div>
-    ${d.texts.map((t,i)=>piece(t,i)).join('')}`;
+    ${d.texts.map((t,i)=>piece(t,i,(d.tailos||[])[i])).join('')}`;
   const ag = $('#again');
   if(ag) ag.onclick = () => { $('#q').value = d.query; run(); };
 }
 
-function piece(t,i){
-  return `<article class="piece">
+function piece(t,i,tl){
+  const hasTl = tl && !tl.includes('⟨');
+  return `<article class="piece" id="p${i}">
     <div class="piece-top">
       <span class="idx">${String(i+1).padStart(2,'0')}</span>
       <span class="n">${cp(t)} 字</span>
       <span class="acts">
         <button class="mini" data-copy="${i}">抄</button>
+        ${hasTl ? `<button class="mini" data-tl="${i}">羅</button>` : ''}
+        ${hasTl ? `<button class="mini" data-tts="${i}">🔊</button>` : ''}
         <button class="mini" data-ct="${i}">對照</button>
       </span>
     </div>
-    <div class="body" id="b${i}">${esc(t)}</div>
+    <div class="body" id="b${i}" data-tailo="${tl ? esc(tl) : ''}">${hasTl ? dual(t, tl) : esc(t)}</div>
     <div class="contrast" id="c${i}">
       <div class="tabs">
         <button aria-selected="true">台⇄華</button><button aria-selected="false">台⇄英</button>
@@ -365,12 +384,45 @@ function piece(t,i){
   </article>`;
 }
 
+const audioCache = {};   // 篇級快取(仝篇免重合成)
+async function playTts(i, btn){
+  const tl = $('#b'+i).dataset.tailo || '';
+  if(!tl || tl.includes('⟨')) return;
+  if(btn.classList.contains('playing')) return;
+  btn.classList.add('playing'); const old = btn.textContent; btn.textContent = '…';
+  try{
+    let b64 = audioCache[tl];
+    if(!b64){
+      const clean = tl.replace(/[,.]/g,' ').replace(/\s+/g,' ').trim();
+      const r = await fetch(RELAY+'/tts', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ text: clean, textType:'roma', speaker:'male' }),
+        signal: AbortSignal.timeout(60000)
+      });
+      const d = await r.json();
+      if(!d.audioBase64) throw 0;
+      b64 = audioCache[tl] = d.audioBase64;
+    }
+    const a = new Audio('data:audio/wav;base64,'+b64);
+    a.onended = () => { btn.classList.remove('playing'); btn.textContent = old; };
+    a.onerror = () => { btn.classList.remove('playing'); btn.textContent = old; };
+    a.play();
+  }catch(_e){
+    btn.classList.remove('playing'); btn.textContent = old;
+    hint('語音服務這馬袂通。');
+  }
+}
 $('#out').onclick = e => {
   const b = e.target.closest('button'); if(!b) return;
   if(b.dataset.copy !== undefined){
     navigator.clipboard.writeText($('#b'+b.dataset.copy).textContent);
     b.textContent = '抄好'; setTimeout(()=>b.textContent='抄', 1200);
   }
+  if(b.dataset.tl !== undefined){
+    $('#p'+b.dataset.tl).classList.toggle('show-tl');
+    b.classList.toggle('on');
+  }
+  if(b.dataset.tts !== undefined) playTts(b.dataset.tts, b);
   if(b.dataset.ct !== undefined) $('#c'+b.dataset.ct).classList.toggle('open');
   if(b.parentElement?.classList.contains('tabs')){
     [...b.parentElement.children].forEach(x=>x.setAttribute('aria-selected', x===b));
@@ -443,7 +495,7 @@ $('#hist').onclick = e => {
   const b = e.target.closest('button[data-h]'); if(!b) return;
   const h = hist[+b.dataset.h];
   render({query:h.q, pieces:h.p, chars:h.texts.reduce((a,t)=>a+cp(t),0),
-          tokens_est:Math.round(h.texts.reduce((a,t)=>a+cp(t),0)*1.3), texts:h.texts}, false);
+          tokens_est:Math.round(h.texts.reduce((a,t)=>a+cp(t),0)*1.3), texts:h.texts, tailos:h.tailos||[]}, false);
 };
 $('#btn-clear').onclick = () => { hist=[]; localStorage.removeItem('xny_hist'); drawHist(); };
 
