@@ -218,6 +218,8 @@
 const $ = s => document.querySelector(s);
 
 /* ═══ 內建設定(用戶免填) ═══ */
+const VOICE_LIVE = false;   // ★語音正式開關: 冰焰母語聽讀驗收過才改 true(一字轉全站)
+const DEV = localStorage.getItem('xny_dev') === '1';   // 工程版旗仔(console設)
 const API_DEFAULT = 'https://taigi.bitfull.tw';
 const KEY_DEFAULT = 'xny_pub_624uu0dq';
 const S = {
@@ -362,7 +364,7 @@ function render(d, isSample){
 }
 
 function piece(t,i,tl){
-  const hasTl = tl && !tl.includes('⟨');
+  const hasTl = (VOICE_LIVE || DEV) && tl && !tl.includes('⟨');   // 工程版才見羅/🔊
   return `<article class="piece" id="p${i}">
     <div class="piece-top">
       <span class="idx">${String(i+1).padStart(2,'0')}</span>
