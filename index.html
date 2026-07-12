@@ -112,9 +112,15 @@
   .body{padding:16px 18px;font-size:16.5px;line-height:2.05;white-space:pre-wrap;word-break:break-word}
   /* v3: 台羅雙行對排(預設隱,撳「羅」顯) */
   .body .sent{display:block}
-  .body .tl{display:none;font-family:var(--mono);font-size:12.5px;color:var(--ink-3);
-            line-height:1.55;margin:-6px 0 10px;letter-spacing:.01em}
+  .body .line{display:none;font-size:12.5px;color:var(--ink-3);line-height:1.6;margin:-6px 0 10px}
+  .body .tl{font-family:var(--mono);letter-spacing:.01em}
+  .body .zh{font-size:13.5px}
+  .body .en{font-size:13px;font-style:italic}
   .piece.show-tl .body .tl{display:block}
+  .piece.show-zh .body .zh{display:block}
+  .piece.show-en .body .en{display:block}
+  .body .mach{display:none;font-family:var(--mono);font-size:11px;color:var(--amber);margin-bottom:6px}
+  .piece.show-tl .body .mach{display:block}
   .mini.on{border-color:var(--moss);color:var(--moss);background:#f3f6f3}
   .mini.playing{border-color:var(--seal);color:var(--seal)}
   .contrast{border-top:1px dashed var(--line);padding:12px 18px;background:#fcfbf8;display:none}
@@ -218,8 +224,8 @@
 const $ = s => document.querySelector(s);
 
 /* ═══ 內建設定(用戶免填) ═══ */
-const VOICE_LIVE = true;    // ★2026-07-13 冰焰驗收「語音正確」→ 轉正全站
-if (location.hash === '#dev') {   // 工程模式一鍵: 網址尾掛 #dev 全設
+const VOICE_LIVE = true;    // 2026-07-13 冰焰驗收「語音正確」轉正
+if (location.hash === '#dev') {
   localStorage.setItem('xny_dev','1');
   localStorage.setItem('xny_key','xny_dev_binghuo');
   history.replaceState(null,'',location.pathname);
@@ -372,31 +378,43 @@ function render(d, isSample){
 
 function piece(t,i,tl){
   const gate = VOICE_LIVE || DEV;
-  const hasTl = gate && tl && !tl.includes('⟨');
   return `<article class="piece" id="p${i}">
     <div class="piece-top">
       <span class="idx">${String(i+1).padStart(2,'0')}</span>
       <span class="n">${cp(t)} 字</span>
       <span class="acts">
         <button class="mini" data-copy="${i}">抄</button>
-        ${gate ? `<button class="mini" data-tl="${i}">羅</button>` : ''}
+        ${gate ? `<button class="mini" data-tl="${i}">台羅</button>` : ''}
+        <button class="mini" data-zh="${i}">中文</button>
+        <button class="mini" data-en="${i}">英文</button>
         ${gate ? `<button class="mini" data-tts="${i}">🔊</button>` : ''}
-        <button class="mini" data-ct="${i}">對照</button>
       </span>
     </div>
-    <div class="body" id="b${i}" data-tailo="${tl ? esc(tl) : ''}">${hasTl ? dual(t, tl) : esc(t)}</div>
-    <div class="contrast" id="c${i}">
-      <div class="tabs">
-        <button aria-selected="true" data-pane="zh">台⇄華</button><button aria-selected="false" data-pane="en">台⇄英</button>
-      </div>
-      <div class="pane" id="cp${i}"><span class="hold">撳頂懸分頁載入對照。</span></div>
-    </div>
+    <div class="body" id="b${i}">${bodyHtml(t, tl, null, null, false)}</div>
   </article>`;
 }
-/* 羅(lazy): 庫無台羅→中繼機轉(標「機轉」,毋是母語判準) */
+/* 行間組版: 台語逐句一逝,下跤綴羅/華/英(顯示由.piece class管) */
+const splitHan = t => t.split('。').filter(s=>s.trim());
+function bodyHtml(t, tl, zhArr, enArr, mach){
+  const hs = splitHan(t);
+  const ts = (tl && !tl.includes('⟨')) ? tl.split('.').map(s=>s.trim()).filter(Boolean) : null;
+  let out = mach ? `<span class="mach">機轉台羅・參考用（母語判準版整備中）</span>` : '';
+  hs.forEach((seg,k)=>{
+    out += `<span class="sent">${esc(seg)}。</span>`;
+    if(ts && ts[k]) out += `<span class="line tl">${esc(ts[k])}.</span>`;
+    if(zhArr && zhArr[k]) out += `<span class="line zh">${esc(zhArr[k])}。</span>`;
+    if(enArr && enArr[k]) out += `<span class="line en">${esc(enArr[k])}</span>`;
+  });
+  return out;
+}
+function renderBody(i){
+  $('#b'+i).innerHTML = bodyHtml(curTexts[i], curTailos[i], curZh[i], curEn[i], !!curMach[i]);
+}
+
+/* 羅: 庫有→直開;庫無→中繼機轉(標示) */
 async function loadTl(i, btn){
   const p = $('#p'+i);
-  if($('#b'+i).dataset.tailo){ p.classList.toggle('show-tl'); btn.classList.toggle('on'); return; }
+  if(curTailos[i] && !curTailos[i].includes('⟨')){ p.classList.toggle('show-tl'); btn.classList.toggle('on'); return; }
   btn.textContent = '…';
   try{
     const r = await fetch(RELAY+'/taigi-to-tailo', {
@@ -407,17 +425,15 @@ async function loadTl(i, btn){
     const d = await r.json();
     if(!d.tailo) throw 0;
     curTailos[i] = d.tailo; curMach[i] = true;
-    $('#b'+i).dataset.tailo = d.tailo;
-    $('#b'+i).innerHTML = `<span class="tl">（機轉台羅・參考用）</span>` + dual(curTexts[i], d.tailo);
-    p.classList.add('show-tl'); btn.classList.add('on'); btn.textContent = '羅';
-  }catch{ btn.textContent = '羅'; hint('台羅服務這馬袂通。'); }
+    renderBody(i);
+    p.classList.add('show-tl'); btn.classList.add('on'); btn.textContent = '台羅';
+  }catch{ btn.textContent = '台羅'; hint('台羅服務這馬袂通。'); }
 }
-/* 對照(lazy): 台→華(中繼MT);台→英 = 華閣轉英 */
-async function loadContrast(i, kind){
-  const pane = $('#cp'+i);
-  const cache = kind==='zh' ? curZh : curEn;
-  if(cache[i]){ pane.innerHTML = esc(cache[i]); return; }
-  pane.innerHTML = '<span class="hold">轉譯中…</span>';
+/* 華: 台→華(中繼MT),句界對拆 */
+async function loadZh(i, btn){
+  const p = $('#p'+i);
+  if(curZh[i]){ p.classList.toggle('show-zh'); btn.classList.toggle('on'); return; }
+  btn.textContent = '…';
   try{
     const r = await fetch(RELAY+'/translate/from-taigi', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -427,27 +443,59 @@ async function loadContrast(i, kind){
     const d = await r.json();
     const zh = d.chText || d.text || '';
     if(!zh) throw 0;
-    curZh[i] = zh;
-    if(kind==='zh'){ pane.innerHTML = esc(zh); return; }
-    const r2 = await fetch(RELAY+'/translate/mandarin-to-world', {
+    const hs = splitHan(curTexts[i]);
+    let zs = zh.split(/[。.]/).map(s=>s.trim()).filter(Boolean);
+    if(zs.length > hs.length) zs = zs.slice(0, hs.length-1).concat(zs.slice(hs.length-1).join('，'));
+    curZh[i] = zs;
+    renderBody(i);
+    p.classList.add('show-zh'); btn.classList.add('on'); btn.textContent = '中文';
+  }catch{ btn.textContent = '中文'; hint('華語對照這馬袂通。'); }
+}
+/* 英: 華閣轉英(鏈) */
+async function loadEn(i, btn){
+  const p = $('#p'+i);
+  if(curEn[i]){ p.classList.toggle('show-en'); btn.classList.toggle('on'); return; }
+  btn.textContent = '…';
+  try{
+    if(!curZh[i]){
+      const r0 = await fetch(RELAY+'/translate/from-taigi', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ text: curTexts[i] }),
+        signal: AbortSignal.timeout(90000)
+      });
+      const d0 = await r0.json();
+      const zh0 = d0.chText || d0.text || '';
+      if(!zh0) throw 0;
+      const hs0 = splitHan(curTexts[i]);
+      let zs0 = zh0.split(/[。.]/).map(s=>s.trim()).filter(Boolean);
+      if(zs0.length > hs0.length) zs0 = zs0.slice(0, hs0.length-1).concat(zs0.slice(hs0.length-1).join('，'));
+      curZh[i] = zs0;
+    }
+    const r = await fetch(RELAY+'/translate/mandarin-to-world', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ text: zh, targetLang: 'en' }),
+      body: JSON.stringify({ text: curZh[i].join('。')+'。', targetLang: 'en' }),
       signal: AbortSignal.timeout(90000)
     });
-    const d2 = await r2.json();
-    curEn[i] = d2.translated || '';
-    pane.innerHTML = esc(curEn[i] || '轉袂出來。');
-  }catch{ pane.innerHTML = '<span class="hold">對照服務這馬袂通。</span>'; }
+    const d = await r.json();
+    const en = d.translated || '';
+    if(!en) throw 0;
+    const hs = splitHan(curTexts[i]);
+    let es = en.split(/(?<=[.!?])\s+/).map(s=>s.trim()).filter(Boolean);
+    if(es.length > hs.length) es = es.slice(0, hs.length-1).concat(es.slice(hs.length-1).join(' '));
+    curEn[i] = es;
+    renderBody(i);
+    p.classList.add('show-en'); btn.classList.add('on'); btn.textContent = '英文';
+  }catch{ btn.textContent = '英文'; hint('英語對照這馬袂通。'); }
 }
 
-const audioCache = {};   // 篇級快取(仝篇免重合成)
+/* 🔊 雙路: 庫台羅→roma精準 / 無→漢字直送(同翻譯機) */
+const audioCache = {};
 async function playTts(i, btn){
-  const tl = $('#b'+i).dataset.tailo || '';
   if(btn.classList.contains('playing')) return;
   btn.classList.add('playing'); const old = btn.textContent; btn.textContent = '…';
   try{
-    // 雙路: 有台羅→roma精準;無→漢字直送中繼(同taigi-chatbot送法,中繼內轉)
-    const useRoma = tl && !tl.includes('⟨');
+    const tl = curTailos[i] || '';
+    const useRoma = tl && !tl.includes('⟨') && !curMach[i];
     const payload = useRoma
       ? { text: tl.replace(/[,.]/g,' ').replace(/\s+/g,' ').trim(), textType:'roma', speaker:'male' }
       : { text: curTexts[i], speaker:'male' };
@@ -472,24 +520,17 @@ async function playTts(i, btn){
     hint('語音服務這馬袂通。');
   }
 }
+
 $('#out').onclick = e => {
   const b = e.target.closest('button'); if(!b) return;
   if(b.dataset.copy !== undefined){
-    navigator.clipboard.writeText($('#b'+b.dataset.copy).textContent);
+    navigator.clipboard.writeText(curTexts[+b.dataset.copy] || $('#b'+b.dataset.copy).textContent);
     b.textContent = '抄好'; setTimeout(()=>b.textContent='抄', 1200);
   }
   if(b.dataset.tl !== undefined) loadTl(b.dataset.tl, b);
+  if(b.dataset.zh !== undefined) loadZh(b.dataset.zh, b);
+  if(b.dataset.en !== undefined) loadEn(b.dataset.en, b);
   if(b.dataset.tts !== undefined) playTts(b.dataset.tts, b);
-  if(b.dataset.ct !== undefined){
-    const c = $('#c'+b.dataset.ct);
-    c.classList.toggle('open');
-    if(c.classList.contains('open')) loadContrast(b.dataset.ct, 'zh');
-  }
-  if(b.parentElement?.classList.contains('tabs')){
-    [...b.parentElement.children].forEach(x=>x.setAttribute('aria-selected', x===b));
-    const art = b.closest('.piece');
-    loadContrast(art.id.slice(1), b.dataset.pane);
-  }
 };
 
 /* ═══ 語音輸入：講台語 → 中繼 ASR → 變查詢 ═══ */
