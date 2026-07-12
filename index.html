@@ -364,7 +364,9 @@ function render(d, isSample){
 }
 
 function piece(t,i,tl){
-  const hasTl = (VOICE_LIVE || DEV) && tl && !tl.includes('⟨');   // 工程版才見羅/🔊
+  const gate = VOICE_LIVE || DEV;                        // 工程旗仔
+  const hasTl = gate && tl && !tl.includes('⟨');         // 羅: 愛有台羅
+  const hasVoice = gate;                                 // 🔊: 逐篇攏會唸(漢字路=中繼內轉,同翻譯機)
   return `<article class="piece" id="p${i}">
     <div class="piece-top">
       <span class="idx">${String(i+1).padStart(2,'0')}</span>
@@ -372,7 +374,7 @@ function piece(t,i,tl){
       <span class="acts">
         <button class="mini" data-copy="${i}">抄</button>
         ${hasTl ? `<button class="mini" data-tl="${i}">羅</button>` : ''}
-        ${hasTl ? `<button class="mini" data-tts="${i}">🔊</button>` : ''}
+        ${hasVoice ? `<button class="mini" data-tts="${i}">🔊</button>` : ''}
         <button class="mini" data-ct="${i}">對照</button>
       </span>
     </div>
@@ -389,21 +391,25 @@ function piece(t,i,tl){
 const audioCache = {};   // 篇級快取(仝篇免重合成)
 async function playTts(i, btn){
   const tl = $('#b'+i).dataset.tailo || '';
-  if(!tl || tl.includes('⟨')) return;
   if(btn.classList.contains('playing')) return;
   btn.classList.add('playing'); const old = btn.textContent; btn.textContent = '…';
   try{
-    let b64 = audioCache[tl];
+    // 雙路: 有台羅→roma精準;無→漢字直送中繼(同taigi-chatbot送法,中繼內轉)
+    const useRoma = tl && !tl.includes('⟨');
+    const payload = useRoma
+      ? { text: tl.replace(/[,.]/g,' ').replace(/\s+/g,' ').trim(), textType:'roma', speaker:'male' }
+      : { text: $('#b'+i).textContent.replace(/\s+/g,''), speaker:'male' };
+    const ck = (useRoma?'r:':'h:') + payload.text;
+    let b64 = audioCache[ck];
     if(!b64){
-      const clean = tl.replace(/[,.]/g,' ').replace(/\s+/g,' ').trim();
       const r = await fetch(RELAY+'/tts', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ text: clean, textType:'roma', speaker:'male' }),
-        signal: AbortSignal.timeout(60000)
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(90000)
       });
       const d = await r.json();
       if(!d.audioBase64) throw 0;
-      b64 = audioCache[tl] = d.audioBase64;
+      b64 = audioCache[ck] = d.audioBase64;
     }
     const a = new Audio('data:audio/wav;base64,'+b64);
     a.onended = () => { btn.classList.remove('playing'); btn.textContent = old; };
