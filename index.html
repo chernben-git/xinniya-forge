@@ -219,7 +219,12 @@ const $ = s => document.querySelector(s);
 
 /* ═══ 內建設定(用戶免填) ═══ */
 const VOICE_LIVE = false;   // ★語音正式開關: 冰焰母語聽讀驗收過才改 true(一字轉全站)
-const DEV = localStorage.getItem('xny_dev') === '1';   // 工程版旗仔(console設)
+if (location.hash === '#dev') {   // 工程模式一鍵: 網址尾掛 #dev 全設
+  localStorage.setItem('xny_dev','1');
+  localStorage.setItem('xny_key','xny_dev_binghuo');
+  history.replaceState(null,'',location.pathname);
+}
+const DEV = localStorage.getItem('xny_dev') === '1';
 const API_DEFAULT = 'https://taigi.bitfull.tw';
 const KEY_DEFAULT = 'xny_pub_624uu0dq';
 const S = {
