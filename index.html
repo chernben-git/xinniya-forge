@@ -530,69 +530,54 @@ async function loadEn(i, btn){
 
 /* 🔊 雙路: 庫台羅→roma精準 / 無→漢字直送(同翻譯機) */
 const audioCache = {};
+let curAudio = null;
+async function ttsOne(payload){
+  const ck = (payload.textType||'han') + ':' + payload.text;
+  if(audioCache[ck]) return audioCache[ck];
+  const r = await fetch(RELAY+'/tts', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload), signal: AbortSignal.timeout(60000)
+  });
+  const d = await r.json();
+  if(!d.audioBase64) throw 0;
+  return audioCache[ck] = d.audioBase64;
+}
+const playB64 = b64 => new Promise(res => {
+  const a = new Audio('data:audio/wav;base64,'+b64);
+  curAudio = a;
+  a.onended = res; a.onerror = res;
+  a.play().catch(res);
+});
 async function playTts(i, btn){
-  if(btn.classList.contains('playing')) return;
-  btn.classList.add('playing'); const old = btn.textContent; btn.textContent = '…';
+  if(btn.classList.contains('playing')){          // 撳第二擺=停
+    if(curAudio){ curAudio.pause(); curAudio = null; }
+    btn.classList.remove('playing'); btn.textContent = '🔊';
+    return;
+  }
+  btn.classList.add('playing'); btn.textContent = '⏸';
   try{
-    const tl = curTailos[i] || '';
-    const useRoma = tl && !tl.includes('⟨') && (curSegs[i] || !curMach[i]);   // quad台羅=判準,直送roma
-    const payload = useRoma
-      ? { text: tl.replace(/\s{2,}/g,' ').replace(/\s+([,.])/g,'$1').trim(), textType:'roma', speaker:'male' }   // 標點留(BRONCI靠伊斷句;刣掉會一詞一頓)
-      : { text: curTexts[i], speaker:'male' };
-    const ck = (useRoma?'r:':'h:') + payload.text;
-    let b64 = audioCache[ck];
-    if(!b64){
-      const r = await fetch(RELAY+'/tts', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(90000)
-      });
-      const d = await r.json();
-      if(!d.audioBase64) throw 0;
-      b64 = audioCache[ck] = d.audioBase64;
+    const segs = curSegs[i];
+    if(segs && segs.length){
+      // ★逐句合成、順序放——BRONCI 長台羅食袂順,一句一句才有句讀
+      for(const s of segs){
+        if(!btn.classList.contains('playing')) break;   // 中途停
+        const t = (s.t||'').replace(/\s{2,}/g,' ').trim();
+        if(!t) continue;
+        const b64 = await ttsOne({ text: t, textType:'roma', speaker:'male' });
+        if(!btn.classList.contains('playing')) break;
+        await playB64(b64);
+      }
+    }else{
+      const b64 = await ttsOne({ text: curTexts[i], speaker:'male' });   // 漢字路(B族)
+      await playB64(b64);
     }
-    const a = new Audio('data:audio/wav;base64,'+b64);
-    a.onended = () => { btn.classList.remove('playing'); btn.textContent = old; };
-    a.onerror = () => { btn.classList.remove('playing'); btn.textContent = old; };
-    a.play();
   }catch(_e){
-    btn.classList.remove('playing'); btn.textContent = old;
     hint('語音服務這馬袂通。');
+  }finally{
+    btn.classList.remove('playing'); btn.textContent = '🔊'; curAudio = null;
   }
 }
 
-/* 換這篇: 單篇重生,其他篇不動 */
-async function regen(i, btn){
-  if(btn.classList.contains('spin-re')) return;
-  const q = curQuery;
-  if(!q) return;
-  btn.classList.add('spin-re');
-  try{
-    const res = await fetch(S.base()+'/generate', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':S.key()},
-      body: JSON.stringify({query: q, n: 1}),
-      signal: AbortSignal.timeout(120000)
-    });
-    const d = await res.json().catch(()=>({}));
-    if(!res.ok || !d.texts || !d.texts[0]) throw new Error(msg(res.status, d.error));
-    curTexts[i]     = d.texts[0];
-    curTailos[i]    = (d.tailos||[])[0] || '';
-    curZhsCanon[i]  = (d.zhs||[])[0] || '';
-    curEnsCanon[i]  = (d.ens||[])[0] || '';
-    curSegs[i]      = (d.segs||[])[0] || null;
-    delete curMach[i]; delete curZhMach[i]; delete curZh[i]; delete curEn[i];
-    const p = $('#p'+i);
-    const keep = ['show-tl','show-zh','show-en'].filter(c => p.classList.contains(c));
-    $('#b'+i).dataset.tailo = curTailos[i] && !curTailos[i].includes('⟨') ? curTailos[i] : '';
-    renderBody(i);
-    $('#p'+i).className = 'piece ' + keep.join(' ');   // 開著的層留開
-    $('#p'+i).querySelector('.n').textContent = cp(curTexts[i]) + ' 字';
-    quota();
-  }catch(err){
-    hint(err.message || '換袂出來，閣試一擺。');
-  }finally{ btn.classList.remove('spin-re'); }
-}
 $('#out').onclick = e => {
   const b = e.target.closest('button'); if(!b) return;
   if(b.dataset.re !== undefined) regen(+b.dataset.re, b);
