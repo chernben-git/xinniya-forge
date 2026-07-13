@@ -124,6 +124,7 @@
   .mini.on{border-color:var(--moss);color:var(--moss);background:#f3f6f3}
   .badge{font-size:10.5px;color:var(--moss);border:1px solid var(--moss);border-radius:99px;
          padding:1px 7px;letter-spacing:.03em}
+  .mini.spin-re{animation:sp .7s linear infinite;pointer-events:none}
   .mini.playing{border-color:var(--seal);color:var(--seal)}
   .contrast{border-top:1px dashed var(--line);padding:12px 18px;background:#fcfbf8;display:none}
   .contrast.open{display:block}
@@ -411,8 +412,9 @@ const note = t => `<div class="note">${t}</div>`;
 const esc  = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const cp   = t => [...t].length;
 
-let curTexts = [], curTailos = [], curZhsCanon = [], curEnsCanon = [], curSegs = [], curMach = {}, curZhMach = {}, curZh = {}, curEn = {};
+let curQuery = '', curTexts = [], curTailos = [], curZhsCanon = [], curEnsCanon = [], curSegs = [], curMach = {}, curZhMach = {}, curZh = {}, curEn = {};
 function render(d, isSample){
+  curQuery = isSample ? '' : d.query;
   curTexts = d.texts; curTailos = (d.tailos||[]).slice();
   curZhsCanon = (d.zhs||[]).slice(); curEnsCanon = (d.ens||[]).slice(); curSegs = (d.segs||[]).slice();
   curMach = {}; curZhMach = {}; curZh = {}; curEn = {};
@@ -436,6 +438,7 @@ function piece(t,i,tl){
       <span class="n">${cp(t)} 字</span>
       ${quad ? '<span class="badge">判準四語</span>' : ''}
       <span class="acts">
+        ${gate || live ? `<button class="mini" data-re="${i}" title="換這篇">↻</button>` : ''}
         <button class="mini" data-copy="${i}">抄</button>
         ${gate && hasTl ? `<button class="mini" data-tl="${i}">台羅</button>` : ''}
         ${quad ? `<button class="mini" data-zh="${i}">中文</button>` : ''}
@@ -536,8 +539,41 @@ async function playTts(i, btn){
   }
 }
 
+/* 換這篇: 單篇重生,其他篇不動 */
+async function regen(i, btn){
+  if(btn.classList.contains('spin-re')) return;
+  const q = curQuery;
+  if(!q) return;
+  btn.classList.add('spin-re');
+  try{
+    const res = await fetch(S.base()+'/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':S.key()},
+      body: JSON.stringify({query: q, n: 1}),
+      signal: AbortSignal.timeout(120000)
+    });
+    const d = await res.json().catch(()=>({}));
+    if(!res.ok || !d.texts || !d.texts[0]) throw new Error(msg(res.status, d.error));
+    curTexts[i]     = d.texts[0];
+    curTailos[i]    = (d.tailos||[])[0] || '';
+    curZhsCanon[i]  = (d.zhs||[])[0] || '';
+    curEnsCanon[i]  = (d.ens||[])[0] || '';
+    curSegs[i]      = (d.segs||[])[0] || null;
+    delete curMach[i]; delete curZhMach[i]; delete curZh[i]; delete curEn[i];
+    const p = $('#p'+i);
+    const keep = ['show-tl','show-zh','show-en'].filter(c => p.classList.contains(c));
+    $('#b'+i).dataset.tailo = curTailos[i] && !curTailos[i].includes('⟨') ? curTailos[i] : '';
+    renderBody(i);
+    $('#p'+i).className = 'piece ' + keep.join(' ');   // 開著的層留開
+    $('#p'+i).querySelector('.n').textContent = cp(curTexts[i]) + ' 字';
+    quota();
+  }catch(err){
+    hint(err.message || '換袂出來，閣試一擺。');
+  }finally{ btn.classList.remove('spin-re'); }
+}
 $('#out').onclick = e => {
   const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.re !== undefined) regen(+b.dataset.re, b);
   if(b.dataset.copy !== undefined){
     navigator.clipboard.writeText(curTexts[+b.dataset.copy] || $('#b'+b.dataset.copy).textContent);
     b.textContent = '抄好'; setTimeout(()=>b.textContent='抄', 1200);
