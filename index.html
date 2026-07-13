@@ -86,6 +86,23 @@
   .again:hover{background:var(--seal);color:#fff}
   .again[disabled]{opacity:.5;cursor:progress}
   .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+  /* 目錄 */
+  .dirbar{display:flex;gap:8px;align-items:center;margin-top:11px;flex-wrap:wrap}
+  .dirbtn{border:1px solid var(--line);background:var(--wash);border-radius:99px;padding:4px 13px;
+          font-size:13px;color:var(--ink-2);cursor:pointer}
+  .dirbtn:hover{border-color:var(--moss);color:var(--moss)}
+  .dirbtn.on{background:var(--moss);border-color:var(--moss);color:#fff}
+  .dir{display:none;border:1px solid var(--line);border-radius:var(--r);background:var(--card);
+       margin-top:11px;padding:14px 16px;max-height:340px;overflow-y:auto}
+  .dir.open{display:block}
+  .dir h4{font-family:var(--serif);font-size:13px;color:var(--seal);margin:12px 0 6px;
+          letter-spacing:.05em;font-weight:500}
+  .dir h4:first-child{margin-top:0}
+  .dir .grp{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:2px}
+  .dir .it{border:1px solid var(--line);background:none;border-radius:7px;padding:2px 9px;
+           font-size:12.5px;color:var(--ink-2);cursor:pointer}
+  .dir .it:hover{border-color:var(--seal);color:var(--seal);background:#fdf6f5}
+  .dir .cnt{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-left:5px}
   .chip{border:1px solid var(--line);background:none;border-radius:99px;padding:3px 11px;
         font-size:13px;color:var(--ink-2);cursor:pointer}
   .chip:hover{border-color:var(--seal);color:var(--seal)}
@@ -225,6 +242,11 @@
         <button class="go" id="go">生成</button>
       </div>
       <div class="chips" id="chips"></div>
+      <div class="dirbar">
+        <button class="dirbtn" data-dir="venue">📍 生活場域 <span class="cnt">29 大類</span></button>
+        <button class="dirbtn" data-dir="occ">🔧 職業敘事 <span class="cnt">146 種</span></button>
+      </div>
+      <div class="dir" id="dir"></div>
       <div id="mic-hint"></div>
     </div>
     <div id="out"></div>
@@ -638,6 +660,79 @@ const blobB64 = b => new Promise((res,rej)=>{
   r.onerror = rej;
   r.readAsDataURL(b);
 });
+
+
+/* ═══ 目錄: A族29大類(venue_type,實數) + B族146職業 ═══ */
+const DIR_VENUE = [
+  ['居住 residence', 52, ['厝','灶跤','客廳','房間','眠床','浴間','後尾','門口埕','樓梯間','陽台']],
+  ['買賣 commerce', 44, ['菜市仔','百貨公司','手機店','衫仔店','銀樓','維修店','便利商店','超級市場','藥房','花店']],
+  ['娛樂 leisure', 29, ['夜市','公園','電影院','KTV','網咖','溫泉','游泳池','球場','海水浴場','遊樂園']],
+  ['交通 traffic', 23, ['火車站','公車站','機場','港口','捷運站','客運站','加油站','停車場','碼頭','高鐵站']],
+  ['公共 public', 20, ['圖書館','公所','活動中心','公園管理處','里民中心']],
+  ['教育 education', 18, ['學校','教室','幼稚園','補習班','大學','圖書室','研究所','托兒所']],
+  ['醫療 medical', 13, ['病院','診所','藥局','牙科','眼科','復健科','急診室','月內房']],
+  ['廟宇 religion_temple', 11, ['廟','城隍廟','媽祖廟','土地公廟','關帝廟','廟埕','宮']],
+  ['水利 waterworks', 10, ['水庫','圳溝','水塔','抽水站','溪邊']],
+  ['工地 worksite', 10, ['工地','工廠','鐵工廠','木工廠','機車行']],
+  ['飲食 food', 10, ['麵店','咖啡廳','餐廳','漢堡王','早餐店','飲料店','小食部','熱炒店']],
+  ['農場 farm', 6, ['田','果子園','菜園','牧場','雞寮','豬椆']],
+  ['行政 admin', 6, ['戶政事務所','監理站','地政事務所','稅捐處','區公所']],
+  ['戶外 outdoor', 6, ['山頂','海邊','溪邊','郊外','草埔','海岸']],
+  ['古蹟 heritage', 5, ['古厝','老街','博物館','美術館','紀念館']],
+  ['金融 finance', 4, ['銀行','郵局','保險公司','當鋪']],
+  ['宗教 religion', 3, ['佛寺','道場','神壇']],
+  ['佛教 religion_buddhist', 3, ['佛寺','禪堂','菜堂']],
+  ['警政 police', 2, ['派出所','警察局']],
+  ['法律 legal', 2, ['法院','律師事務所']],
+  ['辦公 office', 1, ['辦公室']],
+  ['祖先 religion_ancestor', 1, ['祖厝']],
+  ['教堂 religion_church', 1, ['教堂']],
+  ['清真 religion_mosque', 1, ['清真寺']]
+];
+const DIR_OCC = [
+  ['傳統工藝', ['石工','木工','鐵工','木匠','泥水工','板模工','電焊工','油漆工','車床工','鉗工','模具師傅','裁縫師','修鞋師傅','鎖匙師傅','土師']],
+  ['食', ['總舖師','廚師','麵包師傅','咖啡師','餐廳服務生','早餐店店員','飲料店店員','夜市攤販']],
+  ['醫護', ['醫師','護理師','藥師','牙醫','獸醫','物理治療師','職能治療師','驗光師','看護','照顧服務員','救護員','法醫']],
+  ['農漁牧', ['農夫','漁夫','果農','茶農','花農','菜農','養豬戶','養雞戶','養魚戶','船長']],
+  ['運輸', ['公車司機','計程車司機','貨車司機','遊覽車司機','清潔隊司機','挖土機司機','吊車司機','堆高機司機','司機','機師','空服員','外送員','宅配員','郵差']],
+  ['技術工程', ['工程師','系統工程師','軟體工程師','CNC技師','技師','技工','技術員','水電工','冷氣師傅','機車師傅','汽車修理師傅','資訊維修員','電信維修員','網路管理員']],
+  ['公職法律', ['公務員','警察','消防員','法官','檢察官','律師','戶政人員','地政人員','稅務人員','里長','郵局櫃台']],
+  ['服務商業', ['店員','超商店員','收銀員','業務員','保險業務','銀行員','房屋仲介','採購員','理髮師','美容師','寵物美容師','按摩師傅','健身教練','導遊','房務員','飯店櫃台','診所櫃台','銀樓店員','花店店員','洗衣店師傅','洗車員','肉販','魚販','菜販']],
+  ['教育文化', ['教師','幼教老師','補習班老師','圖書館員','博物館員','記者']],
+  ['工廠', ['作業員','組裝員','包裝員','品管員','機台操作員','倉管員','理貨員','物流調度員','領班','廠長']],
+  ['信仰', ['廟公','牧師','地理師']],
+  ['其他', ['老闆','老闆娘','保母','社工','清潔工','粗工','保全','管理員','園丁','公園管理員','救生員','資源回收員','工地主任','搬家師傅','加油站員工','腳踏車店老闆','會計']]
+];
+let dirOpen = null;
+function drawDir(kind){
+  const d = $('#dir');
+  if(dirOpen === kind){ d.classList.remove('open'); dirOpen = null;
+    document.querySelectorAll('.dirbtn').forEach(b=>b.classList.remove('on')); return; }
+  dirOpen = kind;
+  document.querySelectorAll('.dirbtn').forEach(b=>b.classList.toggle('on', b.dataset.dir===kind));
+  d.classList.add('open');
+  d.innerHTML = kind === 'venue'
+    ? `<div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">
+         撳落即生 · <b style="color:var(--moss)">四語判準</b>（台語・台羅・中文・英文）</div>` +
+      DIR_VENUE.map(([n,c,items])=>
+        `<h4>${esc(n)}<span class="cnt">${c} 場所</span></h4>
+         <div class="grp">${items.map(x=>`<button class="it">${esc(x)}</button>`).join('')}</div>`).join('')
+    : `<div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">
+         撳落即生 · 台語＋語音（<span style="color:var(--amber)">四語整備中</span>）</div>` +
+      DIR_OCC.map(([n,items])=>
+        `<h4>${esc(n)}<span class="cnt">${items.length}</span></h4>
+         <div class="grp">${items.map(x=>`<button class="it">${esc(x)}</button>`).join('')}</div>`).join('');
+}
+document.querySelector('.dirbar').onclick = e => {
+  const b = e.target.closest('.dirbtn'); if(b) drawDir(b.dataset.dir);
+};
+$('#dir').onclick = e => {
+  const b = e.target.closest('.it'); if(!b) return;
+  $('#q').value = b.textContent;
+  $('#dir').classList.remove('open'); dirOpen = null;
+  document.querySelectorAll('.dirbtn').forEach(x=>x.classList.remove('on'));
+  run();
+};
 
 function drawHist(){
   $('#hist-empty').style.display = hist.length ? 'none' : 'block';
