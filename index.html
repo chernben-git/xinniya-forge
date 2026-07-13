@@ -556,21 +556,10 @@ async function playTts(i, btn){
   }
   btn.classList.add('playing'); btn.textContent = '⏸';
   try{
-    const segs = curSegs[i];
-    if(segs && segs.length){
-      // ★逐句合成、順序放——BRONCI 長台羅食袂順,一句一句才有句讀
-      for(const s of segs){
-        if(!btn.classList.contains('playing')) break;   // 中途停
-        const t = (s.t||'').replace(/\s{2,}/g,' ').trim();
-        if(!t) continue;
-        const b64 = await ttsOne({ text: t, textType:'roma', speaker:'male' });
-        if(!btn.classList.contains('playing')) break;
-        await playB64(b64);
-      }
-    }else{
-      const b64 = await ttsOne({ text: curTexts[i], speaker:'male' });   // 漢字路(B族)
-      await playB64(b64);
-    }
+    // ★漢字路(A/B族仝款): 咱的台羅詞界用空格,廖教授TTS共空格當停頓→逐詞頓
+    //   漢字直送,中繼內轉,唸了順。台羅照顯佇網頁做判準展示,唸的時陣毋送。
+    const b64 = await ttsOne({ text: curTexts[i], speaker:'male' });
+    await playB64(b64);
   }catch(_e){
     hint('語音服務這馬袂通。');
   }finally{
