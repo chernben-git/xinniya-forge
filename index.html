@@ -537,7 +537,7 @@ async function playTts(i, btn){
     const tl = curTailos[i] || '';
     const useRoma = tl && !tl.includes('⟨') && (curSegs[i] || !curMach[i]);   // quad台羅=判準,直送roma
     const payload = useRoma
-      ? { text: tl.replace(/[,.]/g,' ').replace(/\s+/g,' ').trim(), textType:'roma', speaker:'male' }
+      ? { text: tl.replace(/\s{2,}/g,' ').replace(/\s+([,.])/g,'$1').trim(), textType:'roma', speaker:'male' }   // 標點留(BRONCI靠伊斷句;刣掉會一詞一頓)
       : { text: curTexts[i], speaker:'male' };
     const ck = (useRoma?'r:':'h:') + payload.text;
     let b64 = audioCache[ck];
