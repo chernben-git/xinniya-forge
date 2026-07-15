@@ -41,13 +41,18 @@
 
   /* ══════════ 頂列 ══════════ */
   /* iframe內嵌: 藏自己的header(外框index已有), stage補位 */
+  /* iframe內嵌: 藏外框重複件, 內容置中限寬(桌機免散開) */
   body.embed .topbar{display:none}
   body.embed .fab{display:none !important}
   body.embed .cats{display:none !important}
   body.embed .rail{display:none !important}
   body.embed .backdrop{display:none !important}
-  body.embed .stage{padding-top:0 !important; grid-template-columns:1fr !important}
   body.embed{--top:0px}
+  body.embed .stage{padding-top:0 !important; padding:20px 24px 40px}
+  body.embed #v-forge{max-width:920px; margin:0 auto; width:100%; overflow-y:visible}
+  body.embed .forge-hero, body.embed .panel, body.embed #out{max-width:100%}
+  /* 手機窄屏照舊 */
+  @media(max-width:760px){ body.embed .stage{padding:12px 14px 30px} }
   .topbar{
     position:fixed; top:0; left:0; right:0; height:var(--top); z-index:50;
     display:flex; align-items:center; gap:12px; padding:0 16px;
