@@ -2,588 +2,336 @@
 <html lang="nan-Hant-TW">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>新爾雅 CS · 台語知識引擎</title>
-<meta name="description" content="新爾雅台語知識引擎 — 上億篇台語文章・千億字語料・四語判準同步（漢字/台羅/中文/英文）。讓台語通往世界語言的橋樑：生文、翻譯、打字、AI 對話、發音評分，向台語 LLM 佮辭海百科前進。">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新爾雅台語文章產生器｜台語・台羅・中文・英文 4 語對照</title>
+<meta name="description" content="新爾雅台語知識引擎——上億篇生成空間，23 場域 122 職業，台語/台羅/中文/英文 4 語對照，語音朗讀。">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --void:#100e0c; --void-2:#181512;
-    --ink:#f3ede1; --ink-2:#b8ad98; --ink-3:#7d7565;
-    --seal:#c8352a; --seal-l:#e0574c;
-    --gold:#c79a3e; --gold-l:#e0bd6a;
-    --moss:#5c8a6f; --jade:#3f5d4a;
-    --glass:rgba(243,237,225,.055);
-    --glass-2:rgba(243,237,225,.09);
-    --glass-bd:rgba(243,237,225,.14);
+    --ink:#1b1a17; --ink-2:#55524b; --ink-3:#8d887e;
+    --paper:#faf8f3; --card:#fff; --line:#e3ddd1;
+    --seal:#9c2b1f; --moss:#3f5d4a; --wash:#f1ece1; --amber:#8a6a1f;
+    --r:10px;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --han:"Noto Sans TC","Iansui","Noto Sans CJK TC",system-ui,sans-serif;
     --serif:"Noto Serif TC",serif;
-    --sans:"Noto Sans TC",system-ui,sans-serif;
-    --mono:"Space Mono","IBM Plex Mono",monospace;
-    --top:58px;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    background:var(--void); color:var(--ink);
-    font-family:var(--sans); line-height:1.7;
-    -webkit-font-smoothing:antialiased; overflow:hidden;
-  }
-  body::before{
-    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-    background:
-      radial-gradient(60% 45% at 80% 6%, rgba(199,154,62,.13), transparent 60%),
-      radial-gradient(50% 40% at 8% 92%, rgba(200,53,42,.10), transparent 60%),
-      radial-gradient(40% 30% at 52% 55%, rgba(92,138,111,.06), transparent 70%);
-  }
-  button{font-family:inherit; color:inherit; background:none; border:none; cursor:pointer}
-  a{color:inherit; text-decoration:none}
-  :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:6px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--han);
+       font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  button,input,select{font-family:inherit;font-size:inherit}
 
-  /* ══════════ 頂列 ══════════ */
-  .topbar{
-    position:fixed; top:0; left:0; right:0; height:var(--top); z-index:50;
-    display:flex; align-items:center; gap:12px; padding:0 16px;
-    background:rgba(16,14,12,.78); backdrop-filter:blur(16px);
-    border-bottom:1px solid var(--glass-bd);
-  }
-  .burger{display:none; width:38px; height:38px; border-radius:10px;
-    border:1px solid var(--glass-bd); background:var(--glass);
-    font-size:17px; line-height:1; flex-shrink:0}
-  .brand{font-family:var(--serif); font-weight:900; font-size:19px; letter-spacing:.08em; white-space:nowrap}
-  .brand em{font-style:normal; color:var(--seal-l)}
-  .brand .cs{font-family:var(--mono); font-size:10px; color:var(--gold);
-    border:1px solid rgba(199,154,62,.4); border-radius:99px; padding:1px 8px;
-    margin-left:8px; letter-spacing:.12em; vertical-align:2px}
-  .top-sp{flex:1}
-  .meter{font-size:12px; color:var(--ink-3); display:flex; align-items:center; gap:8px; white-space:nowrap}
-  .meter b{color:var(--gold-l); font-weight:700}
-  .dot{width:8px; height:8px; border-radius:50%; background:var(--moss);
-    box-shadow:0 0 8px rgba(92,138,111,.8); flex-shrink:0}
-  .dot.off{background:var(--seal-l); box-shadow:0 0 8px rgba(224,87,76,.8)}
-  .gear{width:38px; height:38px; border-radius:10px; border:1px solid var(--glass-bd);
-    background:var(--glass); font-size:15px; transition:.2s; flex-shrink:0}
-  .gear:hover{border-color:var(--gold); color:var(--gold-l)}
+  header{display:flex;align-items:center;gap:14px;padding:14px 20px;
+         border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:20}
+  .logo{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.06em}
+  .logo em{font-style:normal;color:var(--seal)}
+  .ver{font-family:var(--mono);font-size:11px;color:var(--ink-3);border:1px solid var(--line);
+       border-radius:99px;padding:1px 8px}
+  .spacer{flex:1}
+  .meter{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+  .meter b{color:var(--moss);font-weight:500}
+  .meter.off b{color:var(--amber)}
+  .ghost{background:none;border:1px solid var(--line);border-radius:var(--r);padding:6px 12px;
+         color:var(--ink-3);cursor:pointer;font-size:13px}
+  .ghost:hover{border-color:var(--ink-3);color:var(--ink)}
 
-  /* ══════════ 殼: 三欄 ══════════ */
-  .shell{
-    position:fixed; inset:var(--top) 0 0 0; z-index:1;
-    display:grid; grid-template-columns:226px minmax(0,1fr) 306px;
-    gap:16px; padding:16px;
-    transition:grid-template-columns .35s cubic-bezier(.2,.8,.2,1);
-  }
-  .shell.cats-min{grid-template-columns:226px minmax(0,1fr) 52px}
+  nav{display:flex;gap:2px;padding:0 20px;background:var(--card);border-bottom:1px solid var(--line)}
+  .tab{border:0;background:none;padding:10px 14px;color:var(--ink-3);cursor:pointer;
+       border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--seal);font-weight:500}
+  .tab[disabled]{opacity:.45;cursor:not-allowed}
+  .tab .soon{font-family:var(--mono);font-size:10px;margin-left:5px}
 
-  /* ══════════ 左欄 主題 ══════════ */
-  .rail{
-    display:flex; flex-direction:column; gap:6px; overflow-y:auto;
-    background:var(--glass); backdrop-filter:blur(14px);
-    border:1px solid var(--glass-bd); border-radius:16px; padding:14px 12px;
-  }
-  .rail-h{font-family:var(--mono); font-size:10px; color:var(--ink-3);
-    letter-spacing:.22em; padding:4px 10px 8px}
-  .rbtn{
-    display:flex; align-items:center; gap:11px; text-align:left;
-    font-size:14.5px; color:var(--ink-2); padding:11px 12px; border-radius:11px;
-    border-left:3px solid transparent; transition:.18s; width:100%;
-  }
-  .rbtn .ic{font-size:17px; width:22px; text-align:center; flex-shrink:0}
-  .rbtn:hover{background:var(--glass-2); color:var(--ink)}
-  .rbtn.on{
-    background:linear-gradient(90deg, rgba(200,53,42,.16), rgba(200,53,42,.03));
-    border-left-color:var(--seal); color:var(--ink);
-  }
-  .rbtn.on .lb{color:var(--gold-l)}
-  .rbtn.soon{opacity:.45; cursor:default}
-  .rbtn .tag-soon{font-family:var(--mono); font-size:9px; color:var(--gold);
-    border:1px solid rgba(199,154,62,.35); border-radius:99px; padding:0 7px; margin-left:auto}
-  .rbtn .tag-line{font-family:var(--mono); font-size:9px; color:#3ec46d;
-    border:1px solid rgba(62,196,109,.4); border-radius:99px; padding:0 7px; margin-left:auto}
-  .rail-div{height:1px; background:var(--glass-bd); margin:8px 6px}
-  .rail-ft{margin-top:auto; padding:10px 10px 4px; font-size:11.5px; color:var(--ink-3); line-height:2}
-  .rail-ft a{display:block; transition:.2s}
-  .rail-ft a:hover{color:var(--gold-l)}
+  main{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 105px)}
+  aside{border-right:1px solid var(--line);padding:16px;background:var(--card)}
+  .aside-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .aside-h span{font-size:12px;letter-spacing:.1em;color:var(--ink-3)}
+  .aside-h button{border:0;background:none;color:var(--ink-3);font-size:12px;cursor:pointer}
+  .aside-h button:hover{color:var(--seal)}
+  .hist-empty{font-size:13px;color:var(--ink-3);text-align:center;padding:26px 0}
+  .hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+  .hist li button{width:100%;text-align:left;border:1px solid transparent;background:none;
+       padding:7px 9px;border-radius:8px;cursor:pointer;color:var(--ink-2)}
+  .hist li button:hover{background:var(--wash);border-color:var(--line);color:var(--ink)}
+  .hist .q{color:var(--ink);font-weight:500}
+  .hist .m{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
 
-  /* ══════════ 中央舞台 ══════════ */
-  .stage{position:relative; min-width:0; display:flex; flex-direction:column; overflow:hidden}
-  .view{display:none; flex:1; min-height:0; flex-direction:column}
-  .view.on{display:flex}
+  section.work{padding:22px 26px;max-width:900px}
 
-  /* —— 生文 view —— */
-  #v-forge{overflow-y:auto; padding-right:2px}
-  .forge-hero{padding:6px 4px 16px}
-  .eyebrow{font-family:var(--mono); font-size:11px; color:var(--gold); letter-spacing:.24em; margin-bottom:8px}
-  .forge-hero h1{font-family:var(--serif); font-weight:900; font-size:clamp(21px,2.6vw,29px);
-    line-height:1.3; letter-spacing:.02em}
-  .forge-hero h1 .r{color:var(--seal-l)}
-  .forge-hero .sub{font-size:13.5px; color:var(--ink-2); margin-top:6px; max-width:560px}
-  .stats-mini{display:flex; flex-wrap:wrap; gap:9px; margin-top:14px}
-  .sm{position:relative; overflow:hidden; background:var(--glass); backdrop-filter:blur(12px);
-    border:1px solid var(--glass-bd); border-radius:12px; padding:8px 15px; min-width:104px}
-  .sm::after{content:""; position:absolute; top:0; left:0; right:0; height:2px;
-    background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:.55}
-  .sm b{font-family:var(--serif); font-weight:900; font-size:16px; color:var(--gold-l);
-    display:block; line-height:1.25}
-  .sm span{font-size:10.5px; color:var(--ink-3); letter-spacing:.04em}
+  .console{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:16px}
+  .console-lbl{font-size:12px;letter-spacing:.1em;color:var(--ink-3);margin-bottom:10px;
+       display:flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:99px;background:var(--moss);display:inline-block;flex:none}
+  .dot.off{background:var(--amber)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  #q{flex:1;min-width:200px;border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;
+     background:var(--paper);color:var(--ink)}
+  #q:focus{outline:2px solid var(--moss);outline-offset:-1px;background:#fff}
+  #n{border:1px solid var(--line);border-radius:var(--r);padding:11px;background:var(--paper)}
+  .go{background:var(--seal);color:#fff;border:0;border-radius:var(--r);padding:11px 22px;
+      font-weight:500;cursor:pointer;letter-spacing:.05em}
+  .go:hover{background:#87241a}
+  .go[disabled]{opacity:.55;cursor:progress}
+  .mic{border:1px solid var(--line);background:var(--paper);border-radius:var(--r);
+       padding:0 14px;cursor:pointer;font-size:17px;line-height:1;color:var(--ink-2)}
+  .mic:hover{border-color:var(--moss)}
+  .mic.rec{background:var(--seal);border-color:var(--seal);animation:pulse 1.1s ease-in-out infinite}
+  .mic[disabled]{opacity:.45;cursor:not-allowed}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+  @media(prefers-reduced-motion:reduce){.mic.rec{animation:none}}
+  #mic-hint{font-size:12.5px;color:var(--ink-3);margin-top:8px;min-height:0}
+  #mic-hint:not(:empty){min-height:20px}
+  .again{border:1px solid var(--seal);background:none;color:var(--seal);border-radius:var(--r);
+         padding:7px 16px;font-size:13.5px;cursor:pointer;margin-left:auto}
+  .again:hover{background:var(--seal);color:#fff}
+  .again[disabled]{opacity:.5;cursor:progress}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+  /* 目錄 */
+  .dirbar{display:flex;gap:8px;align-items:center;margin-top:11px;flex-wrap:wrap}
+  .dirbtn{border:1px solid var(--line);background:var(--wash);border-radius:99px;padding:4px 13px;
+          font-size:13px;color:var(--ink-2);cursor:pointer}
+  .dirbtn:hover{border-color:var(--moss);color:var(--moss)}
+  .dirbtn.on{background:var(--moss);border-color:var(--moss);color:#fff}
+  .dir{display:none;border:1px solid var(--line);border-radius:var(--r);background:var(--card);
+       margin-top:11px;padding:14px 16px;max-height:340px;overflow-y:auto}
+  .dir.open{display:block}
+  .dir h4{font-family:var(--serif);font-size:13px;color:var(--seal);margin:12px 0 6px;
+          letter-spacing:.05em;font-weight:500}
+  .dir h4:first-child{margin-top:0}
+  .dir .grp{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:2px}
+  .dir .it{border:1px solid var(--line);background:none;border-radius:7px;padding:2px 9px;
+           font-size:12.5px;color:var(--ink-2);cursor:pointer}
+  .dir .it:hover{border-color:var(--seal);color:var(--seal);background:#fdf6f5}
+  .dir .cnt{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-left:5px}
+  .chip{border:1px solid var(--line);background:none;border-radius:99px;padding:3px 11px;
+        font-size:13px;color:var(--ink-2);cursor:pointer}
+  .chip:hover{border-color:var(--seal);color:var(--seal)}
 
-  .panel{background:var(--glass); backdrop-filter:blur(14px);
-    border:1px solid var(--glass-bd); border-radius:16px; padding:16px;
-    position:relative; overflow:hidden}
-  .panel::after{content:""; position:absolute; top:0; left:0; right:0; height:2px;
-    background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:.5; pointer-events:none}
+  .err{margin-top:14px;border-left:3px solid var(--seal);background:#fdf3f1;padding:10px 13px;
+       border-radius:0 8px 8px 0;color:#7d211a;font-size:14px}
+  .note{border-left:3px solid var(--amber);background:#fdf9ee;padding:9px 13px;
+        border-radius:0 8px 8px 0;color:#6f5716;font-size:13.5px;margin:16px 0 0}
 
-  .qrow{display:flex; gap:9px; align-items:stretch}
-  .mic{width:46px; border-radius:12px; border:1px solid var(--glass-bd);
-    background:var(--glass-2); font-size:17px; flex-shrink:0; transition:.2s}
-  .mic:hover{border-color:var(--gold)}
-  .mic.rec{background:rgba(200,53,42,.25); border-color:var(--seal-l); animation:pulse 1.1s infinite}
-  @keyframes pulse{50%{box-shadow:0 0 0 7px rgba(200,53,42,.12)}}
-  #q{flex:1; min-width:0; font-size:15.5px; font-family:var(--sans); color:var(--ink);
-    background:rgba(16,14,12,.5); border:1px solid var(--glass-bd); border-radius:12px;
-    padding:12px 14px; transition:.2s}
-  #q::placeholder{color:var(--ink-3)}
-  #q:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(199,154,62,.14)}
-  #n{font-size:14px; color:var(--ink-2); background:rgba(16,14,12,.5);
-    border:1px solid var(--glass-bd); border-radius:12px; padding:0 8px; flex-shrink:0}
-  #n option{background:var(--void-2)}
-  #go{
-    font-size:15px; font-weight:700; color:#fff; padding:0 24px; border-radius:12px;
-    background:linear-gradient(135deg,var(--seal),#a52a20);
-    box-shadow:0 6px 20px rgba(200,53,42,.36); transition:.2s; flex-shrink:0;
-  }
-  #go:hover{transform:translateY(-1px); box-shadow:0 9px 26px rgba(200,53,42,.48)}
-  #go:disabled{opacity:.55; transform:none; cursor:wait}
-  .spin{display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.35);
-    border-top-color:#fff; border-radius:50%; animation:rot .7s linear infinite; margin-right:7px; vertical-align:-2px}
-  @keyframes rot{to{transform:rotate(360deg)}}
-  #mic-hint{font-size:12px; color:var(--ink-3); margin-top:8px; min-height:17px}
-  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:11px}
-  .chip{font-size:13px; color:var(--ink-2); border:1px solid var(--glass-bd);
-    border-radius:99px; padding:5px 14px; background:var(--glass); transition:.18s}
-  .chip:hover{border-color:var(--gold); color:var(--gold-l); transform:translateY(-1px)}
+  .meta{display:flex;gap:16px;align-items:baseline;margin:22px 0 12px;flex-wrap:wrap;
+        font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+  .meta strong{font-family:var(--han);font-size:15px;color:var(--ink);letter-spacing:.04em}
+  .piece{border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:14px;
+         overflow:hidden}
+  .piece-top{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--wash);
+             background:var(--wash)}
+  .idx{font-family:var(--mono);font-size:11px;color:#fff;background:var(--moss);
+       border-radius:4px;padding:1px 6px}
+  .piece-top .n{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+  .piece-top .acts{margin-left:auto;display:flex;gap:4px}
+  .mini{border:1px solid var(--line);background:#fff;border-radius:7px;padding:3px 9px;
+        font-size:12px;color:var(--ink-2);cursor:pointer}
+  .mini:hover{border-color:var(--ink-3);color:var(--ink)}
+  .body{padding:16px 18px;font-size:16.5px;line-height:2.05;white-space:pre-wrap;word-break:break-word}
+  /* v3: 台羅雙行對排(預設隱,撳「羅」顯) */
+  .body .sent{display:block}
+  .body .line{display:none;font-size:12.5px;color:var(--ink-3);line-height:1.6;margin:-6px 0 10px}
+  .body .tl{font-family:var(--mono);letter-spacing:.01em}
+  .body .zh{font-size:13.5px}
+  .body .en{font-size:13px;font-style:italic}
+  .piece.show-tl .body .tl{display:block}
+  .piece.show-zh .body .zh{display:block}
+  .piece.show-en .body .en{display:block}
+  .body .mach{display:none;font-family:var(--mono);font-size:11px;color:var(--amber);margin-bottom:6px}
+  .piece.show-tl .body .mach{display:block}
+  .mini.on{border-color:var(--moss);color:var(--moss);background:#f3f6f3}
+  .badge{font-size:10.5px;color:var(--moss);border:1px solid var(--moss);border-radius:99px;
+         padding:1px 7px;letter-spacing:.03em}
+  .mini.spin-re{animation:sp .7s linear infinite;pointer-events:none}
+  .mini.playing{border-color:var(--seal);color:var(--seal)}
+  .contrast{border-top:1px dashed var(--line);padding:12px 18px;background:#fcfbf8;display:none}
+  .contrast.open{display:block}
+  .contrast .tabs{display:flex;gap:6px;margin-bottom:9px}
+  .contrast .tabs button{border:1px solid var(--line);background:#fff;border-radius:99px;
+       padding:2px 11px;font-size:12px;color:var(--ink-2);cursor:pointer}
+  .contrast .tabs button[aria-selected="true"]{border-color:var(--moss);color:var(--moss)}
+  .contrast .pane{font-size:14px;color:var(--ink-3);line-height:1.9}
+  .contrast .pane .hold{font-family:var(--mono);font-size:12px}
 
-  /* —— 輸出 —— */
-  #out{margin-top:16px}
-  .meta{display:flex; align-items:center; flex-wrap:wrap; gap:12px; font-size:12.5px;
-    color:var(--ink-3); padding:2px 4px 12px}
-  .meta strong{font-family:var(--serif); font-size:17px; color:var(--gold-l); font-weight:700}
-  .again{font-size:12.5px; color:var(--ink-2); border:1px solid var(--glass-bd); border-radius:99px;
-    padding:4px 14px; background:var(--glass); margin-left:auto; transition:.18s}
-  .again:hover{border-color:var(--gold); color:var(--gold-l)}
-  .piece{
-    background:var(--glass); backdrop-filter:blur(14px);
-    border:1px solid var(--glass-bd); border-radius:16px;
-    padding:15px 17px 13px; margin-bottom:13px;
-    box-shadow:0 10px 32px rgba(0,0,0,.32); transition:border-color .2s;
-  }
-  .piece:hover{border-color:rgba(199,154,62,.3)}
-  .piece-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:9px}
-  .idx{font-family:var(--mono); font-size:11px; color:var(--gold); letter-spacing:.1em}
-  .piece-top .n{font-size:11.5px; color:var(--ink-3)}
-  .badge{font-size:10.5px; color:var(--moss); border:1px solid rgba(92,138,111,.55);
-    border-radius:99px; padding:1px 9px; letter-spacing:.04em}
-  .acts{margin-left:auto; display:flex; gap:6px; flex-wrap:wrap}
-  .mini{font-size:12px; color:var(--ink-2); border:1px solid var(--glass-bd); border-radius:8px;
-    padding:3px 10px; background:rgba(16,14,12,.35); transition:.16s}
-  .mini:hover{border-color:var(--gold); color:var(--gold-l)}
-  .mini.on{border-color:var(--gold); color:var(--gold-l); background:rgba(199,154,62,.12)}
-  .mini.playing{border-color:var(--seal-l); color:var(--seal-l)}
-  .body{font-size:16.5px; line-height:1.95}
-  .sent{display:block; font-family:var(--serif); font-weight:500}
-  .line{display:none; font-size:13px; line-height:1.55; padding:1px 0 7px 2px}
-  .line.tl{font-family:var(--mono); color:var(--gold); font-size:12.5px}
-  .line.zh{color:var(--ink-2)}
-  .line.en{color:var(--moss); font-style:italic}
-  .piece.show-tl .line.tl{display:block}
-  .piece.show-zh .line.zh{display:block}
-  .piece.show-en .line.en{display:block}
-  .mach{display:block; font-size:11px; color:var(--seal-l); margin-bottom:6px}
-  .err,.note{font-size:13.5px; border-radius:12px; padding:11px 15px; margin-bottom:12px}
-  .err{color:var(--seal-l); border:1px solid rgba(200,53,42,.4); background:rgba(200,53,42,.08)}
-  .note{color:var(--gold); border:1px solid rgba(199,154,62,.35); background:rgba(199,154,62,.07)}
-  .empty{text-align:center; padding:44px 16px; color:var(--ink-3)}
-  .empty .big{font-family:var(--serif); font-size:19px; color:var(--ink-2); margin-bottom:8px}
+  .empty{border:1px dashed var(--line);border-radius:var(--r);padding:52px 20px;text-align:center;
+         color:var(--ink-3);margin-top:22px}
+  .empty .big{font-family:var(--serif);font-size:20px;color:var(--ink-2);margin-bottom:6px}
+  /* hero */
+  .hero{margin:0 0 18px}
+  .hero h1{font-family:var(--serif);font-size:26px;margin:0 0 2px;letter-spacing:.04em}
+  .hero h1 em{font-style:normal;color:var(--seal)}
+  .hero .sub{color:var(--ink-3);font-size:14px;margin-bottom:12px}
+  .stats{display:flex;gap:8px;flex-wrap:wrap}
+  .stat{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 13px}
+  .stat b{font-family:var(--serif);font-size:16px;color:var(--seal);display:block;line-height:1.2}
+  .stat span{font-size:11.5px;color:var(--ink-3)}
+  /* LINE卡 */
+  .linecard{display:flex;gap:18px;align-items:center;border:1px solid var(--line);
+            border-radius:var(--r);background:var(--card);padding:18px;margin:26px 0 10px;flex-wrap:wrap}
+  .linecard img{width:112px;height:112px;border:1px solid var(--line);border-radius:8px;flex:none}
+  .linecard .t{font-family:var(--serif);font-size:17px;margin-bottom:4px}
+  .linecard .t b{color:#06c755}
+  .linecard ul{margin:6px 0 8px;padding-left:0;list-style:none;font-size:13.5px;color:var(--ink-2);
+               line-height:1.9}
+  .linecard a.btn{display:inline-block;background:#06c755;color:#fff;border-radius:8px;
+                  padding:7px 16px;text-decoration:none;font-size:14px}
+  .linecard a.btn:hover{background:#05b34c}
 
-  /* —— 使用說明 / 歷史 —— */
-  .fold{margin-top:14px; background:var(--glass); border:1px solid var(--glass-bd);
-    border-radius:14px; overflow:hidden}
-  .fold summary{cursor:pointer; list-style:none; padding:12px 16px; font-size:13.5px;
-    color:var(--ink-2); display:flex; align-items:center; gap:9px; user-select:none; transition:.2s}
-  .fold summary::-webkit-details-marker{display:none}
-  .fold summary:hover{color:var(--gold-l)}
-  .fold summary::after{content:"⌄"; margin-left:auto; transition:transform .25s; color:var(--ink-3)}
-  .fold[open] summary::after{transform:rotate(180deg)}
-  .fold-bd{padding:2px 18px 15px; font-size:13px; color:var(--ink-3); line-height:2}
-  .fold-bd b{color:var(--ink-2)}
-  #hist{list-style:none}
-  #hist button{display:flex; align-items:baseline; gap:10px; width:100%; text-align:left;
-    padding:7px 8px; border-radius:9px; transition:.15s}
-  #hist button:hover{background:var(--glass-2)}
-  #hist .q{font-size:13.5px; color:var(--ink-2)}
-  #hist .m{font-size:11px; color:var(--ink-3); margin-left:auto; font-family:var(--mono)}
-  .clear-h{font-size:11.5px; color:var(--ink-3); margin-top:6px; padding:3px 8px;
-    border:1px solid var(--glass-bd); border-radius:8px}
-  .clear-h:hover{color:var(--seal-l); border-color:rgba(200,53,42,.4)}
+  dialog{border:1px solid var(--line);border-radius:14px;padding:0;width:min(440px,92vw);
+         box-shadow:0 20px 50px rgba(0,0,0,.14)}
+  dialog::backdrop{background:rgba(27,26,23,.32)}
+  .dlg{padding:20px}
+  .dlg h2{font-family:var(--serif);font-size:17px;margin:0 0 4px}
+  .dlg p{margin:0 0 16px;font-size:13px;color:var(--ink-3)}
+  .fld{margin-bottom:13px}
+  .fld label{display:block;font-size:12px;color:var(--ink-2);margin-bottom:5px}
+  .fld input{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+             font-family:var(--mono);font-size:13px;background:var(--paper)}
+  .dlg-foot{display:flex;justify-content:space-between;gap:8px;margin-top:6px;align-items:center}
+  .dlg-foot .right{display:flex;gap:8px}
 
-  /* —— iframe views —— */
-  .vtool{display:flex; align-items:center; gap:10px; padding:0 4px 11px}
-  .vtool .vt{font-family:var(--serif); font-weight:700; font-size:16.5px}
-  .vtool .vd{font-size:12px; color:var(--ink-3)}
-  .vtool .sp{flex:1}
-  .vbtn{font-size:12.5px; color:var(--ink-2); border:1px solid var(--glass-bd); border-radius:9px;
-    padding:6px 13px; background:var(--glass); transition:.18s; white-space:nowrap}
-  .vbtn:hover{border-color:var(--gold); color:var(--gold-l)}
-  .frame-wrap{flex:1; min-height:0; border-radius:16px; overflow:hidden;
-    border:1px solid var(--glass-bd);
-    background:var(--void-2);
-    box-shadow:0 14px 44px rgba(0,0,0,.4), inset 0 0 0 1px rgba(199,154,62,.12)}
-  .frame-wrap iframe{width:100%; height:100%; border:0; display:block; background:#fff}
-  .view.fs{position:fixed; inset:0; z-index:70; background:var(--void); padding:10px; display:flex}
-  .view.fs .vtool{padding-top:6px}
+  .spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.4);
+        border-top-color:#fff;border-radius:99px;animation:sp .7s linear infinite;margin-right:7px;
+        vertical-align:-1px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
+  @media(max-width:760px){main{grid-template-columns:1fr}aside{display:none}section.work{padding:16px}}
 
-  /* ══════════ 右欄 分類尋寶 ══════════ */
-  .cats{
-    display:flex; flex-direction:column; overflow:hidden;
-    background:var(--glass); backdrop-filter:blur(14px);
-    border:1px solid var(--glass-bd); border-radius:16px;
-  }
-  .cats-h{display:flex; align-items:center; gap:9px; padding:14px 14px 10px; flex-shrink:0}
-  .cats-h .t{font-family:var(--mono); font-size:10px; color:var(--ink-3); letter-spacing:.22em}
-  .cats-min-btn{margin-left:auto; width:28px; height:28px; border-radius:8px;
-    border:1px solid var(--glass-bd); background:var(--glass); font-size:12px;
-    color:var(--ink-3); transition:.2s}
-  .cats-min-btn:hover{border-color:var(--gold); color:var(--gold-l)}
-  .cats-x{display:none}
-  .cats-bd{flex:1; overflow-y:auto; padding:0 12px 14px}
-  .shell.cats-min .cats-bd,.shell.cats-min .cats-h .t{display:none}
-  .shell.cats-min .cats-h{justify-content:center; padding:14px 6px}
-  .shell.cats-min .cats-min-btn{margin:0}
-
-  .cat{margin-bottom:11px; border-radius:14px;
-    background:var(--glass-2); border:1px solid var(--glass-bd);
-    box-shadow:0 8px 26px rgba(0,0,0,.3);
-    transition:transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s, border-color .22s;
-    overflow:hidden}
-  .cat:hover{transform:translateY(-2px); border-color:rgba(199,154,62,.4);
-    box-shadow:0 14px 34px rgba(0,0,0,.42)}
-  .cat summary{cursor:pointer; list-style:none; user-select:none;
-    display:flex; align-items:center; gap:9px; padding:12px 14px}
-  .cat summary::-webkit-details-marker{display:none}
-  .cat .ct{font-size:13.5px; font-weight:500; color:var(--ink)}
-  .cat .cn{font-family:var(--mono); font-size:10px; color:var(--gold);
-    border:1px solid rgba(199,154,62,.3); border-radius:99px; padding:0 8px}
-  .cat summary::after{content:"⌄"; margin-left:auto; color:var(--ink-3);
-    transition:transform .25s; font-size:13px}
-  .cat[open] summary::after{transform:rotate(180deg)}
-  .cat-bd{padding:2px 12px 12px}
-  .cat-note{font-size:11px; color:var(--ink-3); padding:0 2px 9px}
-  .cat-note b{color:var(--moss); font-weight:500}
-  .grp-h{display:flex; align-items:baseline; gap:8px; font-size:12px; color:var(--gold-l);
-    font-family:var(--serif); font-weight:700; padding:8px 2px 6px}
-  .grp-h .gc{font-family:var(--mono); font-size:9.5px; color:var(--ink-3); font-weight:400}
-  .grp{display:flex; flex-wrap:wrap; gap:6px}
-  .it{font-size:12px; color:var(--ink-2); border:1px solid var(--glass-bd); border-radius:8px;
-    padding:4px 10px; background:rgba(16,14,12,.35);
-    transition:transform .16s, border-color .16s, color .16s}
-  .it:hover{transform:translateY(-2px); border-color:var(--gold); color:var(--gold-l)}
-  .cat-link{display:flex; align-items:center; gap:9px; width:100%; text-align:left;
-    font-size:13px; color:var(--ink-2); padding:9px 10px; border-radius:10px; transition:.16s}
-  .cat-link:hover{background:rgba(16,14,12,.35); color:var(--gold-l)}
-  .cat-link .arr{margin-left:auto; color:var(--ink-3); font-size:10.5px; text-align:right; max-width:56%; line-height:1.5}
-  .soon-lb{font-family:var(--mono); font-size:9px; color:var(--gold); margin-left:auto;
-    border:1px solid rgba(199,154,62,.3); border-radius:99px; padding:0 7px}
-
-  /* ══════════ 手機 FAB + 抽屜 ══════════ */
-  .fab{display:none}
-  .backdrop{display:none}
-
-  /* ══════════ 設定 dialog ══════════ */
-  dialog{
-    border:1px solid var(--glass-bd); border-radius:18px; padding:22px;
-    background:var(--void-2); color:var(--ink); max-width:420px; width:calc(100vw - 40px);
-    box-shadow:0 24px 70px rgba(0,0,0,.6);
-  }
-  dialog::backdrop{background:rgba(10,8,6,.66); backdrop-filter:blur(4px)}
-  dialog h3{font-family:var(--serif); font-size:17px; margin-bottom:14px}
-  dialog label{display:block; font-size:12px; color:var(--ink-3); margin:10px 0 4px}
-  dialog input{width:100%; font-size:14px; color:var(--ink); background:rgba(16,14,12,.5);
-    border:1px solid var(--glass-bd); border-radius:10px; padding:9px 12px; font-family:var(--mono)}
-  dialog input:focus{outline:none; border-color:var(--gold)}
-  .dlg-row{display:flex; gap:9px; margin-top:18px}
-  .dlg-row .sp{flex:1}
-  .dbtn{font-size:13px; padding:8px 18px; border-radius:10px; border:1px solid var(--glass-bd);
-    color:var(--ink-2); transition:.2s}
-  .dbtn:hover{border-color:var(--gold); color:var(--gold-l)}
-  .dbtn.pri{background:linear-gradient(135deg,var(--seal),#a52a20); color:#fff; border:none; font-weight:700}
-  .line-dlg{max-width:500px}
-  .lg-scroll{max-height:min(60vh,520px); overflow-y:auto; padding-right:4px}
-  .lg-sec{border:1px solid var(--glass-bd); border-radius:12px; background:var(--glass);
-    padding:10px 14px; margin-bottom:9px}
-  .lg-sec b{font-size:13.5px; color:var(--gold-l); display:block; margin-bottom:2px}
-  .lg-sec p{font-size:12.5px; color:var(--ink-2); line-height:1.8}
-  .lg-join{display:flex; align-items:center; gap:16px; margin-top:12px;
-    border:1px solid rgba(62,196,109,.35); border-radius:14px; padding:13px 15px;
-    background:rgba(62,196,109,.06)}
-  .lg-join img{width:88px; height:88px; border-radius:10px; background:#fff; padding:4px; flex-shrink:0}
-  .lg-add{display:inline-block; background:#06c755 !important; text-align:center}
-  .lg-mail{font-size:12px; color:var(--ink-3); margin-top:9px}
-  .lg-mail a{color:var(--gold-l)}
-  @media (max-width:960px){ .lg-join{flex-direction:column} .lg-join img{width:120px; height:120px} }
-
-  /* ══════════ Scrollbar ══════════ */
-  ::-webkit-scrollbar{width:9px; height:9px}
-  ::-webkit-scrollbar-thumb{background:rgba(243,237,225,.14); border-radius:99px}
-  ::-webkit-scrollbar-thumb:hover{background:rgba(199,154,62,.4)}
-  ::-webkit-scrollbar-track{background:transparent}
-
-  /* ══════════ 中尺寸 ══════════ */
-  @media (max-width:1180px){
-    .shell{grid-template-columns:210px minmax(0,1fr) 268px; gap:13px; padding:13px}
-  }
-
-  /* ══════════ 手機 (≤960px): 崩堆疊 ══════════ */
-  @media (max-width:960px){
-    .shell{grid-template-columns:1fr; gap:0; padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
-    .shell.cats-min{grid-template-columns:1fr}
-    .burger{display:block}
-    .meter{font-size:11px}
-    .meter .mtxt{display:none}
-
-    /* 左欄 → 頂列下拉 */
-    .rail{
-      position:fixed; top:var(--top); left:0; right:0; z-index:45;
-      border-radius:0 0 18px 18px; border-top:none;
-      background:rgba(16,14,12,.94); backdrop-filter:blur(20px);
-      max-height:calc(100vh - var(--top)); overflow-y:auto;
-      transform:translateY(-112%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
-      box-shadow:0 24px 60px rgba(0,0,0,.55);
-    }
-    .rail.open{transform:translateY(0)}
-    .rail-ft{margin-top:8px}
-
-    /* 右欄 → 底部抽屜 */
-    .cats{
-      position:fixed; left:0; right:0; bottom:0; z-index:46;
-      max-height:76vh; border-radius:20px 20px 0 0;
-      background:rgba(16,14,12,.95); backdrop-filter:blur(20px);
-      transform:translateY(104%); transition:transform .34s cubic-bezier(.2,.8,.2,1);
-      box-shadow:0 -18px 60px rgba(0,0,0,.55);
-      padding-bottom:env(safe-area-inset-bottom);
-    }
-    .cats.open{transform:translateY(0)}
-    .cats-h{padding:13px 16px 9px}
-    .cats-h::before{content:""; position:absolute; top:7px; left:50%; transform:translateX(-50%);
-      width:42px; height:4px; border-radius:99px; background:rgba(243,237,225,.22)}
-    .cats-min-btn{display:none}
-    .cats-x{display:block; margin-left:auto; width:30px; height:30px; border-radius:9px;
-      border:1px solid var(--glass-bd); background:var(--glass); font-size:13px; color:var(--ink-2)}
-
-    .fab{
-      display:flex; align-items:center; gap:8px;
-      position:fixed; right:14px; bottom:calc(16px + env(safe-area-inset-bottom)); z-index:44;
-      font-size:13px; font-weight:500; color:var(--ink);
-      background:rgba(24,21,18,.92); backdrop-filter:blur(14px);
-      border:1px solid rgba(199,154,62,.45); border-radius:99px; padding:10px 18px;
-      box-shadow:0 10px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(199,154,62,.12);
-      transition:.2s;
-    }
-    .fab:active{transform:scale(.96)}
-    .backdrop{display:block; position:fixed; inset:0; z-index:40;
-      background:rgba(10,8,6,.55); backdrop-filter:blur(2px);
-      opacity:0; pointer-events:none; transition:opacity .28s}
-    .backdrop.on{opacity:1; pointer-events:auto}
-
-    .stage{overflow:visible}
-    #v-forge{padding-right:0}
-    .forge-hero{padding:2px 2px 13px}
-    .forge-hero h1{font-size:21px}
-    .qrow{flex-wrap:wrap}
-    #q{flex:1 1 100%; order:-1}
-    .mic{width:46px; height:44px}
-    #n{height:44px}
-    #go{flex:1; height:44px}
-    .body{font-size:16px}
-    .acts{margin-left:0; width:100%}
-    .view.fs{padding:0}
-    .view.fs .vtool{padding:9px 12px}
-    .view.fs .frame-wrap{border-radius:0; border:none}
-  }
-  @media (prefers-reduced-motion:reduce){
-    *,*::before,*::after{transition-duration:.01ms !important; animation-duration:.01ms !important}
-  }
+  /* ── v4.4: 橋樑標語 / 路線 / LINE指引窗 ── */
+  .hero .sub2{font-size:13.5px;color:var(--seal);margin-top:4px;letter-spacing:.02em}
+  .roadline{font-size:12px;color:var(--ink-3);margin-top:10px;letter-spacing:.03em}
+  .roadline b{color:var(--amber)}
+  .btn.ghostb{background:none;border:1px solid var(--line);color:var(--ink-2)}
+  .btn.ghostb:hover{border-color:var(--seal);color:var(--seal)}
+  #dlg-line .dlg{max-width:520px}
+  .lg-scroll{max-height:min(56vh,480px);overflow-y:auto;margin:10px 0;padding-right:4px}
+  .lg-sec{border:1px solid var(--line);border-radius:10px;background:var(--wash);padding:9px 13px;margin-bottom:8px}
+  .lg-sec b{font-size:13.5px;color:var(--seal);display:block;margin-bottom:2px}
+  .lg-sec p{font-size:12.5px;color:var(--ink-2);line-height:1.75;margin:0}
+  .lg-join{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--line)}
+  .lg-join .right{margin-left:auto}
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <button class="burger" id="burger" aria-label="主題選單">☰</button>
-  <div class="brand">新爾雅<em>。</em><span class="cs">CS</span></div>
-  <div class="top-sp"></div>
-  <div class="meter" id="meter"><span class="mtxt">連線中…</span></div>
-  <span class="dot" id="dot"></span>
-  <button class="gear" id="btn-set" aria-label="設定">⚙</button>
+<header>
+  <div class="logo">新<em>爾</em>雅 · 生文</div>
+  <span class="ver">Corpus v4.4</span>
+  <div class="spacer"></div>
+  <div class="meter" id="meter">聯線中…</div>
+  <button class="ghost" id="btn-set">設定</button>
 </header>
 
-<div class="shell" id="shell">
+<nav role="tablist">
+  <button class="tab" role="tab" aria-selected="true">文章生成</button>
+  <button class="tab" role="tab" aria-selected="false" disabled>句子生成<span class="soon">掛帳</span></button>
+  <button class="tab" role="tab" aria-selected="false" disabled>改文<span class="soon">掛帳</span></button>
+</nav>
 
-  <!-- ══ 左欄 ══ -->
-  <nav class="rail" id="rail">
-    <div class="rail-h">主題</div>
-    <button class="rbtn on" data-view="forge"><span class="ic">📝</span><span class="lb">生文</span></button>
-    <button class="rbtn" data-view="trans"><span class="ic">🌐</span><span class="lb">翻譯機</span></button>
-    <button class="rbtn" data-view="type"><span class="ic">⌨️</span><span class="lb">台語打字</span></button>
-    <button class="rbtn soon" tabindex="-1"><span class="ic">🤖</span><span class="lb">AI 對話</span><span class="tag-soon">整備中</span></button>
-    <div class="rail-div"></div>
-    <a class="rbtn" href="https://lin.ee/zkftVc3" target="_blank" rel="noopener"><span class="ic">🔊</span><span class="lb">發音評分</span><span class="tag-line">LINE</span></a>
-    <a class="rbtn" href="https://lin.ee/zkftVc3" target="_blank" rel="noopener"><span class="ic">🎓</span><span class="lb">學習</span><span class="tag-line">LINE</span></a>
-    <div class="rail-ft">
-      <a href="features.html">🧭 功能總覽</a>
-      <a href="#" id="rail-guide">📱 LINE Bot 指引</a>
-      <a href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">LINE 官方帳號 ↗</a>
-      <a href="mailto:chernben@gmail.com">chernben@gmail.com</a>
-    </div>
-  </nav>
-
-  <!-- ══ 中央舞台 ══ -->
-  <main class="stage">
-
-    <!-- 生文 (原生) -->
-    <section class="view on" id="v-forge">
-      <div class="forge-hero">
-        <div class="eyebrow">XIN ERYA · TAIGI ENGINE</div>
-        <h1>讓<span class="r">台語</span>通往世界語言的橋樑</h1>
-        <div class="sub">台語文章生成，四語同步——台羅、中文、英文逐句判準對齊，毋是機器翻譯。</div>
-        <div class="stats-mini">
-          <div class="sm"><b>上億篇</b><span>台語文章</span></div>
-          <div class="sm"><b>千億字</b><span>台語語料</span></div>
-          <div class="sm"><b>四語</b><span>判準同步</span></div>
-          <div class="sm"><b>台語 LLM</b><span>辭海百科・建置中</span></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="qrow">
-          <input id="q" placeholder="拍字，抑是撳🎤講台語…（例：消防員、菜市仔）" autocomplete="off">
-          <button class="mic" id="mic" title="講台語輸入">🎤</button>
-          <select id="n">
-            <option value="1">1 篇</option>
-            <option value="3" selected>3 篇</option>
-            <option value="5">5 篇</option>
-          </select>
-          <button id="go">生成</button>
-        </div>
-        <div id="mic-hint"></div>
-        <div class="chips" id="chips"></div>
-      </div>
-
-      <div id="out"></div>
-
-      <details class="fold">
-        <summary>📖 使用說明</summary>
-        <div class="fold-bd">
-          <b>按怎用：</b>頂懸拍一个查詢（職業抑是所在），撳「生成」。逐篇會使撳
-          <b>台羅／中文／英文</b> 展開行間對照，<b>🔊</b> 唸予你聽，<b>抄</b> 複製全文，<b>↻</b> 換這篇。<br>
-          <b>判準四語：</b>掛綠徽章的篇，四軌攏是新爾雅引擎判準出的——毋是機器翻譯。<br>
-          <b>右爿分類：</b>29 大類生活場域＋146 種職業，撳落即生。<br>
-          <b>額度：</b>逐工有免費額度；用了會轉預生樣本。
-        </div>
-      </details>
-
-      <details class="fold">
-        <summary>🕘 這擺的紀錄</summary>
-        <div class="fold-bd">
-          <div id="hist-empty">猶未生過。</div>
-          <ul id="hist"></ul>
-          <button class="clear-h" id="btn-clear">清掉紀錄</button>
-        </div>
-      </details>
-    </section>
-
-    <!-- 翻譯機 -->
-    <section class="view" id="v-trans">
-      <div class="vtool">
-        <span class="vt">🌐 台語翻譯機</span>
-        <span class="vd">咱兜的台語・多國語音文字互轉</span>
-        <span class="sp"></span>
-        <button class="vbtn" data-fs="v-trans">⛶ 全螢幕</button>
-        <a class="vbtn" href="taigi-translator.html" target="_blank" rel="noopener">↗ 新視窗</a>
-      </div>
-      <div class="frame-wrap"><iframe data-src="taigi-translator.html" title="台語翻譯機" allow="microphone; camera"></iframe></div>
-    </section>
-
-    <!-- 打字 -->
-    <section class="view" id="v-type">
-      <div class="vtool">
-        <span class="vt">⌨️ 台語打字</span>
-        <span class="vd">九萬字台語輸入</span>
-        <span class="sp"></span>
-        <button class="vbtn" data-fs="v-type">⛶ 全螢幕</button>
-        <a class="vbtn" href="taigi-typing.html" target="_blank" rel="noopener">↗ 新視窗</a>
-      </div>
-      <div class="frame-wrap"><iframe data-src="taigi-typing.html" title="台語打字"></iframe></div>
-    </section>
-
-  </main>
-
-  <!-- ══ 右欄 ══ -->
-  <aside class="cats" id="cats">
-    <div class="cats-h">
-      <span class="t">分類尋寶</span>
-      <button class="cats-min-btn" id="cats-min" title="收合">⟩</button>
-      <button class="cats-x" id="cats-x" aria-label="關掉">✕</button>
-    </div>
-    <div class="cats-bd" id="cats-bd"><!--CATS--></div>
+<main>
+  <aside>
+    <div class="aside-h"><span>生成記錄</span><button id="btn-clear">清</button></div>
+    <div class="hist-empty" id="hist-empty">猶未生過</div>
+    <ul class="hist" id="hist"></ul>
   </aside>
 
-</div>
-
-<button class="fab" id="fab">☰ 分類尋寶</button>
-<div class="backdrop" id="backdrop"></div>
+  <section class="work">
+    <div class="hero">
+      <h1>新<em>爾</em>雅台語文章產生器</h1>
+      <div class="sub">台語好極——知識引擎讀庫生成，毋是 AI 亂掰</div>
+      <div class="sub2">讓台語通往世界語言的橋樑・台語文章生成，四語同步</div>
+      <div class="stats">
+        <div class="stat"><b>上億篇</b><span>台語文・千億字</span></div>
+        <div class="stat"><b>0.01 秒</b><span>單篇生成</span></div>
+        <div class="stat"><b>23 場域</b><span>122 職業・4 大情境</span></div>
+        <div class="stat"><b>4 語判準</b><span>台語・台羅・中文・英文</span></div>
+      </div>
+      <div class="roadline">向 <b>台語 LLM</b>・<b>辭海百科</b> 前進——予機器嘛學會曉講正港台語</div>
+    </div>
+    <div class="console">
+      <div class="console-lbl"><i class="dot" id="dot"></i><span id="mode-lbl">職業 → 台語敘事</span></div>
+      <div class="row">
+        <input id="q" placeholder="石工、消防員、麵包師傅…" autocomplete="off">
+        <select id="n" aria-label="篇數">
+          <option>1</option><option selected>3</option><option>5</option><option>10</option>
+        </select>
+        <button class="mic" id="mic" title="講台語">🎤</button>
+        <button class="go" id="go">生成</button>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="dirbar">
+        <button class="dirbtn" data-dir="venue">📍 生活場域 <span class="cnt">29 大類</span></button>
+        <button class="dirbtn" data-dir="occ">🔧 職業敘事 <span class="cnt">146 種</span></button>
+      </div>
+      <div class="dir" id="dir"></div>
+      <div id="mic-hint"></div>
+    </div>
+    <div id="out"></div>
+    <div class="linecard">
+      <img src="https://qr-official.line.me/gs/M_509ymzdy_GW.png?oat_content=qr" alt="咱兜的台語 LINE QR">
+      <div>
+        <div class="t">📢 <b>【咱兜的台語】</b>台語文 LINE Bot・免費開放</div>
+        <ul>
+          <li>🎤 台語發音評分——唸一句，隨知你幾分</li>
+          <li>🔊 語音合成——拍字就會讀｜📝 台羅拼音教學</li>
+          <li>🤖 台語 AI 陪聊｜📖 每日台語（文字・圖片・影片・電台・繪本）</li>
+        </ul>
+        <a class="btn" href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">加入 LINE 開始學 →</a>
+        <button class="btn ghostb" id="btn-guide">📱 使用指引</button>
+        <span style="font-size:12px;color:var(--ink-3);margin-left:8px">一支手機，逐工學台語 🌿 免下載 App</span>
+        <div style="font-size:12px;color:var(--ink-3);margin-top:8px">聯繫：<a href="mailto:chernben@gmail.com" style="color:var(--seal)">chernben@gmail.com</a></div>
+      </div>
+    </div>
+  </section>
+</main>
 
 <dialog id="dlg">
-  <h3>設定</h3>
-  <label>API 位址（留空用預設）</label>
-  <input id="base" placeholder="https://taigi.bitfull.tw">
-  <label>金鑰（留空用公開鑰）</label>
-  <input id="key" placeholder="xny_…">
-  <div class="dlg-row">
-    <button class="dbtn" id="dlg-reset">還原預設</button>
-    <span class="sp"></span>
-    <button class="dbtn" id="dlg-x">關掉</button>
-    <button class="dbtn pri" id="dlg-ok">儲存</button>
+  <div class="dlg">
+    <h2>設定</h2>
+    <p>一般使用免設定。這爿是予開發者換 API 網址／金鑰用的，存佇這台機器（localStorage）。</p>
+    <div class="fld">
+      <label for="base">API Base URL</label>
+      <input id="base" placeholder="https://taigi.bitfull.tw">
+    </div>
+    <div class="fld">
+      <label for="key">API 金鑰</label>
+      <input id="key" type="password" placeholder="x-api-key">
+    </div>
+    <div class="dlg-foot">
+      <button class="ghost" id="dlg-reset">還原預設</button>
+      <span class="right">
+        <button class="ghost" id="dlg-x">取消</button>
+        <button class="go" id="dlg-ok">存起來</button>
+      </span>
+    </div>
   </div>
 </dialog>
 
-<dialog id="dlg-line" class="line-dlg">
-  <h3>📱 咱兜的台語 · LINE Bot 指引</h3>
-  <div class="lg-scroll">
-    <div class="lg-sec"><b>🗂️ 快速選單</b><p>拍「選單」抑是「開始」→ 開圖形選單 · 「平安」→ 今日學習狀態 · 「統計」→ 完整學習統計</p></div>
-    <div class="lg-sec"><b>🔊 台語語音合成</b><p>拍「？今天去哪裡吃飯」→ 隨聽台語 · 支援中／英／日／韓／泰文輸入 · 語音直接回覆</p></div>
-    <div class="lg-sec"><b>📝 臺羅拼音學習</b><p>拍「拼今天天氣很好」→ 臺羅對照＋語音 · 「聲調」→ 臺羅聲調入門</p></div>
-    <div class="lg-sec"><b>🤖 台語 AI 對話</b><p>拍「AI對話」開始台語陪聊（每日 3 次）· 「結束對話」離開</p></div>
-    <div class="lg-sec"><b>🎤 台語發音評分</b><p>拍「評分」開始 → 傳語音 → 閣傳任意訊息看結果 · 「評分成績」查個人成績 · 「取消評分」結束</p></div>
-    <div class="lg-sec"><b>📖 學習功能 6 型態</b><p>每日台語 · 看圖片 · 聽台語 · 看影片 · 聽電台 · 讀冊</p></div>
-    <div class="lg-sec"><b>📍 打卡</b><p>「台語打卡」友善環境打卡 · 「台語家庭」家庭打卡</p></div>
-    <div class="lg-sec"><b>📖 意識培育</b><p>拍「意識培育」→ 台語家庭意識培育手冊</p></div>
-    <div class="lg-join">
-      <img src="https://qr-official.line.me/gs/M_509ymzdy_GW.png" alt="LINE QR" loading="lazy">
-      <div>
-        <a class="dbtn pri lg-add" href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">＋ 加入 LINE 官方帳號</a>
-        <div class="lg-mail">聯繫：<a href="mailto:chernben@gmail.com">chernben@gmail.com</a></div>
-      </div>
+<dialog id="dlg-line">
+  <div class="dlg">
+    <h2>📱 咱兜的台語 · LINE Bot 指引 <span style="font-size:11px;color:var(--ink-3);font-weight:400">v5.16</span></h2>
+    <div class="lg-scroll">
+      <div class="lg-sec"><b>🗂️ 快速選單</b><p>拍「選單」抑是「開始」→ 開圖形選單 · 「平安」→ 今日學習狀態 · 「統計」→ 完整學習統計</p></div>
+      <div class="lg-sec"><b>🔊 台語語音合成</b><p>拍「？今天去哪裡吃飯」→ 隨聽台語 · 支援中／英／日／韓／泰文輸入 · 語音直接回覆，免等推播</p></div>
+      <div class="lg-sec"><b>📝 臺羅拼音學習</b><p>拍「拼今天天氣很好」→ 臺羅對照＋語音 · 「聲調」→ 臺羅聲調入門</p></div>
+      <div class="lg-sec"><b>🤖 台語 AI 對話</b><p>拍「AI對話」開始台語陪聊（每日 3 次）· 「結束對話」離開</p></div>
+      <div class="lg-sec"><b>🎤 台語發音評分</b><p>拍「評分」開始 → 傳語音 → 閣傳任意訊息看結果 · 「評分成績」查個人成績 · 「取消評分」結束</p></div>
+      <div class="lg-sec"><b>📖 學習功能 6 型態</b><p>每日台語 · 看圖片 · 聽台語 · 看影片 · 聽電台 · 讀冊</p></div>
+      <div class="lg-sec"><b>📍 打卡</b><p>「台語打卡」友善環境打卡 · 「台語家庭」家庭打卡</p></div>
+      <div class="lg-sec"><b>📖 意識培育</b><p>拍「意識培育」→ 台語家庭意識培育手冊</p></div>
     </div>
-  </div>
-  <div class="dlg-row">
-    <span class="sp"></span>
-    <button class="dbtn" id="dlg-line-x">關掉</button>
+    <div class="lg-join">
+      <a class="btn" href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">＋ 加入 LINE 官方帳號</a>
+      <span style="font-size:12px;color:var(--ink-3)">聯繫：<a href="mailto:chernben@gmail.com" style="color:var(--seal)">chernben@gmail.com</a></span>
+      <span class="right"><button class="ghost" id="dlg-line-x">關掉</button></span>
+    </div>
   </div>
 </dialog>
 
 <script>
 const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
 
-/* ═══════════ 設定 / 金鑰 (照 forge 頁) ═══════════ */
-const VOICE_LIVE = true;
+/* ═══ 內建設定(用戶免填) ═══ */
+const VOICE_LIVE = true;    // 2026-07-13 冰焰驗收「語音正確」轉正
 if (location.hash === '#dev') {
   localStorage.setItem('xny_dev','1');
   localStorage.setItem('xny_key','xny_dev_binghuo');
@@ -592,21 +340,346 @@ if (location.hash === '#dev') {
 const DEV = localStorage.getItem('xny_dev') === '1';
 const API_DEFAULT = 'https://taigi.bitfull.tw';
 const KEY_DEFAULT = 'xny_pub_624uu0dq';
-const RELAY = 'https://asr.bitfull.tw';
 const S = {
   base: () => localStorage.getItem('xny_base') || API_DEFAULT,
   key : () => localStorage.getItem('xny_key')  || KEY_DEFAULT
 };
 
-/* ═══════════ 保底樣本 (API拍袂通就用這) ═══════════ */
+/* ═══ 保底樣本(API拍袂通就用這) ═══ */
 const SAMPLES = {"石工":["透早天拄光，石工就揀石頭，了後切石水冷慢慢鋸、看紋路落鑿。鑿仔落石，鏗鏗鏗。紲落來鑿石、雕琢，紲落來閣磨光。廟方講伊修的石堵佮舊的仝款。文化局請伊修古蹟。學徒講伊一鎚就知深淺。紋路先看予明，落鑿才袂裂毋著爿。看石的目，是幾十冬的目。向望鎚聲會當響久久。","逐工透早，石工就揀石頭，紲落來剖石照線落刀、切石水冷慢慢鋸。石的紋理，一層一層現。紲落來鑿石、雕琢，紲落來磨光。石桌用幾十冬猶勇。規工佮石頭做伙，雙手生甲厚厚。粗胚先摃，幼工上尾才落手。刻佇石頂的，是欲留百年的。希望這行的價值予人捌。","透早天拄光，石工就揀石頭，了後剖石照線落刀、切石水冷慢慢鋸。石堵罩布掀開，紋路慢慢現。紲落來鑿石、雕琢，了後磨光。同行服伊看石的目力。石獅的神韻，予伊雕出來。做幾十冬，鎚聲就是伊的人生。廟方講伊修的石堵佮舊的仝款。慢是石工的節奏。希望雕出好石作。","透早天拄光，石工就揀石頭，了後剖石照線落刀、切石水冷慢慢鋸。鎚聲規工，一聲一聲。紲落來鑿石、雕琢，了後磨光。廟方講伊修的石堵佮舊的仝款。做幾十冬，鎚聲就是伊的人生。石獅的神韻，予伊雕出來。一塊石頭雕甲成形，就是石工的功夫。向望古蹟攏修會好。","天拄光，石工就揀石頭，紲落來切石水冷慢慢鋸、看紋路落鑿。廟埕的石獅，愈修愈有神。了後鑿石、雕琢，紲落來磨光。紋路先看予明，落鑿才袂裂毋著爿。老師傅的手路，予伊傳落來。做幾十冬，鎚聲就是伊的人生。同行服伊看石的目力。慢是石工的節奏。向望石的文化傳落去。","天拄光，石工就揀石頭，紲落來閣剖石照線落刀、切石水冷慢慢鋸。石的紋理，一層一層現。了後鑿石、雕琢，了後磨光。石頭雖然硬，經過伊的手就有形有款。廟方講伊修的石堵佮舊的仝款。墓碑的字，家屬看甲流目屎。廟的石堵，是先人的話。向望做的石獅攏有神。","透早天拄光，石工就揀石頭，了後剖石照線落刀、切石水冷慢慢鋸。日頭下的石，燒燙燙。紲落來閣鑿石、雕琢，了後磨光。粗胚先摃，幼工上尾才落手。石獅的神韻，予伊雕出來。老師傅的手路，予伊傳落來。墓碑的字，家屬看甲流目屎。看石的目，是幾十冬的目。希望刻的字攏予人數念。","透早天拄光，石工就揀石頭，了後切石水冷慢慢鋸、看紋路落鑿。石堵罩布掀開，紋路慢慢現。了後鑿石、雕琢，紲落來磨光。石頭雖然硬，經過伊的手就有形有款。廟方講伊修的石堵佮舊的仝款。做幾十冬，鎚聲就是伊的人生。石是硬的，功夫是軟磨出來的。向望逐件石作攏徛甲百年。"],"消防員":["逐工透早，消防員就隨通報全隊、接警報，了後穿裝備齊全。警鈴一響，規隊隨動。了後鬥民眾處理蜂巢佮蛇、救受困的動物，紲落來確認現場安全、收隊裝備歸位。小學生來隊上參觀，目睭金金看。阿嬤的貓困佇樹頂，伊救落來。一分鐘的準備，就是一條命。向望逐工攏平安收勤。","天拄光，消防員就確認地點佮狀況，了後穿裝備齊全、隨上車出勤。水帶的水壓，手扞予在。紲落來評估傷患先做緊急處置、鬥民眾處理蜂巢佮蛇，了後確認現場安全、收隊裝備歸位。囡仔講大漢欲做伊。宣導了後，社區攏裝住警器。救護毋分大細件，攏是人命。向望逐暝攏平靜。","逐工透早，消防員就確認地點佮狀況、隨通報全隊，了後穿裝備齊全、隨上車出勤。器材室的架，排甲整齊。紲落來鬥民眾處理蜂巢佮蛇、救受困的動物，紲落來確認現場安全、收隊裝備歸位。予救轉來的人，專工來說多謝。預防做予好，火警就較少。希望逐擺出勤攏平安，人攏救會著。","天拄光，消防員就隨通報全隊、接警報，了後穿裝備齊全、隨上車出勤。收勤的裝備，擦甲金金。了後鬥民眾處理蜂巢佮蛇、救受困的動物，了後確認現場安全、收隊裝備歸位。蜂巢處理好，厝主一直共伊道謝。傷患的家屬，拜託閣拜託。入隊的第一工就知，這是責任。向望逐暝攏平靜。","逐工透早，消防員就隨通報全隊，紲落來穿裝備齊全、隨上車出勤。訓練場的汗，一滴一滴。了後評估傷患先做緊急處置、鬥民眾處理蜂巢佮蛇，紲落來閣確認現場安全、收隊裝備歸位。小學生來隊上參觀，目睭金金看。救一條命，拚一秒都毋敢延遲。向望同仁攏平安。","透早天拄光，消防員就確認地點佮狀況、隨通報全隊，了後穿裝備齊全、隨上車出勤。火焰衝甲懸懸，伊扛水管衝入去，規身軀流甲攏是汗。紲落來救受困的動物、排除災害現場，紲落來確認現場安全、收隊裝備歸位。預防做予好，火警就較少。向望逐擺救護攏赴會著。","逐工透早，消防員就隨通報全隊、接警報，了後穿裝備齊全、隨上車出勤。收勤的裝備，擦甲金金。了後評估傷患先做緊急處置、鬥民眾處理蜂巢佮蛇，了後確認現場安全、收隊裝備歸位。宣導了後，社區攏裝住警器。救人的路，一秒都袂當延。希望火警愈少愈好。","逐工透早，消防員就確認地點佮狀況、隨通報全隊，了後穿裝備齊全、隨上車出勤。訓練場的汗，一滴一滴。了後評估傷患先做緊急處置、鬥民眾處理蜂巢佮蛇，了後確認現場安全、收隊裝備歸位。予救轉來的人，專工來說多謝。裝備顧予好，性命才有保障。希望裝備愈來愈齊。"],"麵包師傅":["透早天拄光，麵包師傅就開工，紲落來發麵、整形。收店前，賰的麵包算了了。了後入烘爐、顧火，紲落來排列。麵包好食，人客逐工攏會來買。囡仔鼻著芳味，拖阿母入來。生日蛋糕，予人客感動甲。半暝就起來做，人客毋知，毋過食會出來。一粒麵包，是一工的開始。向望囡仔攏食著健康的麵包。","天拄光，麵包師傅就開工，了後拌麵粉、發麵。奶油的芳味甜甜。了後入烘爐、顧火，紲落來出爐、排列。老人客講紅豆餡有古早味。逐工透早排隊等出爐。學生囝放學來買麵包做點心。出爐的時，人客拄好圍過來。發酵袂當催，親像人生。希望學徒緊學會曉手路。","天拄光，麵包師傅就開工，紲落來拌麵粉、發麵。麵團揉過，軟軟有彈。紲落來入烘爐、顧火，了後出爐、排列。天猶未光伊就開始無閒，規間店攏是麵包芳。囡仔上愛伊的菠蘿麵包。老主顧幾十冬攏買仝款。一粒好麵包，是透早三四點就起來做的。向望新口味逐家會甲意。","透早天拄光，麵包師傅就開工，紲落來拌麵粉、發麵。奶油的芳味甜甜。紲落來入烘爐、顧火，紲落來閣排列、賣。有人買規袋，講欲送人。學徒出師，開家己的店。老主顧幾十冬攏買仝款。囡仔鼻著芳味，拖阿母入來。人客逐工來，是上大的信任。希望新品攏受歡迎。","透早天拄光，麵包師傅就開工，了後拌麵粉、發麵。出爐的麵包，敲底叩叩。紲落來入烘爐、顧火，紲落來排列。熟客呵咾今仔日的吐司特別軟。出爐的時，人客拄好圍過來。天猶未光伊就開始無閒，規間店攏是麵包芳。做麵包，天未光就愛開始。希望天氣穩定，發酵才好掠。","逐工透早，麵包師傅就開工，紲落來拌麵粉、發麵。門市的架，出爐隨補滿。紲落來入烘爐、顧火，了後出爐、排列。囡仔鼻著芳味，拖阿母入來。人客講伊逐工攏來買仝一款。學徒做的頭一粒麵包出爐矣。新品一出，隨賣了了。麵包是活的，愛照起工。向望逐工的麵包攏發甲媠。","天拄光，麵包師傅就開工，紲落來發麵、整形。麵粉飛佇空中，白白一層。紲落來閣入烘爐、顧火，紲落來出爐。有人買規袋，講欲送人。生日蛋糕，予人客感動甲。逐工透早排隊等出爐。熟客呵咾今仔日的吐司特別軟。做這途，愛甘願早起。希望透早的頭一爐攏成功。","逐工透早，麵包師傅就開工，紲落來閣拌麵粉、發麵。奶油抹過，一輾一輾勻。紲落來入烘爐、顧火，紲落來出爐、排列。囡仔鼻著芳味，拖阿母入來。新品項一下晡就賣了了。半暝就起來做，人客毋知，毋過食會出來。材料誠實，滋味才誠實。向望逐工的麵包攏發甲媠。"],"農夫":["春天，農夫就犁田、插秧。到夏天，伊除草、施肥。透早的露水沾佇褲跤。到秋天，伊割稻、收成。到冬天，伊整理農具、休耕。天未光就落田，日頭落山才轉來。孫仔綴落田，掠水蛙掠甲歡喜。厝邊呵咾今年的稻仔媠。販仔來看貨，出價講會當。一粒米，百粒汗。向望做田人的辛苦有人知。","春天，農夫就播種、插秧。到夏天，伊沃水、除草。田水照著日頭，金爍爍。到秋天，伊曝穀、收成。到冬天，伊顧菜園、整理農具。收成好，某笑甲真歡喜。落一陣及時雨，逐家攏歡喜。一粒米百粒汗，攏是伊的辛苦。老農會的朋友來開講。天公疼戇人，戇人搰力做。向望這塊田會當一直種落去。","春天，農夫就播種、犁田。到夏天，伊除草、施肥。腳踏落田，泥土芳直直撲鼻。到秋天，伊曝穀、收成。到冬天，伊整理農具、顧菜園。隔壁田的老歲仔來借農具。傍晚坐佇田岸，看家己的田。落一陣及時雨，逐家攏歡喜。一粒米百粒汗，攏是伊的辛苦。做穡靠天，嘛靠家己的手。一心等待好收成。","春天，農夫就插秧、犁田。到夏天，伊除草、施肥。穀曝佇埕，日頭味芳芳。到秋天，伊曝穀、割稻。到冬天，伊整理農具、顧菜園。收成好，某笑甲真歡喜。孫仔綴落田，掠水蛙掠甲歡喜。傍晚坐佇田岸，看家己的田。隔壁田的老歲仔來借農具。田是祖公傳落來的，愛顧。向望這塊田會當一直種落去。","春天，農夫就犁田、插秧。到夏天，伊沃水、施肥。土的氣味，落雨了後特別厚。到秋天，伊曝穀、割稻。到冬天，伊整理農具、顧菜園。傍晚坐佇田岸，看家己的田。落一陣及時雨，逐家攏歡喜。厝邊呵咾今年的稻仔媠。販仔來看貨，出價講會當。春天種的是希望。向望田水充足，作穡順利。","春天，農夫就犁田、插秧。到夏天，伊施肥、沃水。水蛙佇田裡叫規暝。到秋天，伊收成、割稻。到冬天，伊顧菜園、整地。孫仔綴落田，掠水蛙掠甲歡喜。老農會的朋友來開講。囝兒轉來鬥割稻。販仔來看貨，出價講會當。天未光就落田，日頭落山才轉來。做田人，看天食飯。希望收成的價數好。","春天，農夫就插秧、犁田。到夏天，伊除草、施肥。透早的露水沾佇褲跤。到秋天，伊收成、曝穀。到冬天，伊整地、整理農具。天未光就落田，日頭落山才轉來。落一陣及時雨，逐家攏歡喜。一粒米百粒汗，攏是伊的辛苦。傍晚坐佇田岸，看家己的田。土會黏人，做田人離袂開。希望風颱莫來。","春天，農夫就插秧、犁田。到夏天，伊除草、施肥。土的氣味，落雨了後特別厚。到秋天，伊收成、割稻。到冬天，伊整理農具、休耕。囝兒轉來鬥割稻。天未光就落田，日頭落山才轉來。厝邊呵咾今年的稻仔媠。落一陣及時雨，逐家攏歡喜。土會黏人，做田人離袂開。希望明年閣是一个好年冬。"],"漁夫":["逐工透早，漁夫就準備漁具、出港，紲落來落網、收網。漁網拖起來，重甸甸。了後入港、卸魚，了後賣魚。這網起了滿滿，逐家攏歡喜。厝邊的船互相報魚訊。一網一網收起來，毋管收穫偌濟，攏是靠經驗佮體力。少年船員第一擺看著大尾魚。海上互相照應，是討海人的義氣。向望海湧平靜。","天拄光，漁夫就準備漁具、出港，紲落來閣落網、收網。燈火佇海面一點一點。了後入港、卸魚，紲落來賣魚。孫仔佇港邊看阿公的船轉來。起風進前拄好入港，好佳哉。漁會的人講今仔日行情好。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。海是漁夫的田。向望逐擺出海攏平安轉來。","透早天拄光，漁夫就準備漁具、出港，了後收網、掠魚。入港的時，燈塔的光一明一暗。紲落來入港、卸魚，紲落來賣魚。一網一網收起來，毋管收穫偌濟，攏是靠經驗佮體力。這網起了滿滿，逐家攏歡喜。老船長報伊一个好漁場。一網魚，是一家伙仔的向望。向望討海人攏受保庇。","逐工透早，漁夫就準備漁具、出港，紲落來閣落網、收網。燈火佇海面一點一點。紲落來入港，紲落來賣魚。賣了好價，請船員食一頓。某佇港邊等船入港。老船長報伊一个好漁場。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。海是漁夫的田。向望討海人攏受保庇。","透早天拄光，漁夫就準備漁具，紲落來落網、收網。漁網拖起來，重甸甸。紲落來入港、卸魚，紲落來賣魚。販仔佇岸邊搶欲交關。某佇港邊等船入港。賣了好價，請船員食一頓。孫仔佇港邊看阿公的船轉來。一網魚，是一家伙仔的向望。希望魚價好，一家伙仔快活。","天拄光，漁夫就準備漁具、出港，紲落來收網。魚佇甲板頂跳，魚鱗閃閃爍。紲落來閣入港、卸魚，了後賣魚。賣了好價，請船員食一頓。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。某佇港邊等船入港。起風進前拄好入港，好佳哉。海袂當貪，夠額就好。向望討海人攏受保庇。","透早天拄光，漁夫就準備漁具、出港，了後收網、掠魚。海風透早就拍佇面。紲落來入港、卸魚，了後賣魚。這網起了滿滿，逐家攏歡喜。老船長報伊一个好漁場。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。入港的燈火，是上溫暖的光。向望今仔日有好收穫。","天拄光，漁夫就準備漁具、出港，了後收網、掠魚。日頭對海面浮起來。紲落來入港、卸魚，紲落來賣魚。賣了好價，請船員食一頓。船身隨海湧搖來搖去，伊著愛看風向，也愛注意安全。一網一網收起來，毋管收穫偌濟，攏是靠經驗佮體力。一網魚，是一家伙仔的向望。向望海湧平靜。"],"老師":["透早，教師就準備教材、整理教室。到頂晡，伊寫黑板、指導學生。暗時的教案，寫甲燈跤。到下晡，伊上課、指導學生。到暗時，伊改作業、準備隔工。坐尾排的囡仔，予伊拉起來矣。家長講囡仔開始愛讀冊矣。畢業的學生轉來看伊。學生的目睭，騙袂過。希望學生大漢攏做好人。","透早，教師就備課、準備教材。到頂晡，伊點名、上課。考卷發落去，一片恬靜。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。考無好的學生，予伊鼓勵甲閣有信心。九月底的卡片，一張一張，攏是學生的心意。一枝粉筆，寫的是別人的未來。向望班上攏和和氣氣。","透早，教師就準備教材、整理教室。到頂晡，伊點名、上課。作業簿疊佇桌頂，一落一落。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。教過的學生做老師矣，轉來揣伊。九月底的卡片，一張一張，攏是學生的心意。老師一句話，學生會記誠久。希望做老師做甲有尊嚴。","透早，教師就準備教材、整理教室。到頂晡，伊講課、寫黑板。下課的鐘聲，一響規走廊活起來。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。學生比賽得獎，第一个報伊。教過的學生做老師矣，轉來揣伊。每一个學生攏有家己的光。向望教的攏有入心。","透早，教師就準備教材、整理教室。到頂晡，伊講課、寫黑板。教室內傳出學生朗讀的聲。到下晡，伊改作業、看功課。到暗時，伊改作業、準備隔工。九月底的卡片，一張一張，攏是學生的心意。同事請教伊帶班的撇步。老師一句話，學生會記誠久。向望班上攏和和氣氣。","透早，教師就準備教材、整理教室。到頂晡，伊寫黑板、指導學生。教室的風扇，嗡嗡轉。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。考無好的學生，予伊鼓勵甲閣有信心。學生比賽得獎，第一个報伊。蹲予低，才聽會著學生的心聲。希望做老師做甲有尊嚴。","透早，教師就準備教材、整理教室。到頂晡，伊寫黑板、指導學生。教室的風扇，嗡嗡轉。到下晡，伊改作業、看功課。到暗時，伊備課、改作業。學生講伊教了聽有。九月底的卡片，一張一張，攏是學生的心意。家長講囡仔開始愛讀冊矣。教冊是良心的事業。向望逐屆學生攏平安大漢。","透早，教師就準備教材、整理教室。到頂晡，伊點名、上課。作業簿疊佇桌頂，一落一落。到下晡，伊指導學生、改作業。到暗時，伊改作業、準備隔工。家長會逐家攏感謝。家長講囡仔開始愛讀冊矣。九月底的卡片，一張一張，攏是學生的心意。一句鼓勵，有時比十擺責備較有效。向望逐屆學生攏平安大漢。"],"廟公":["開廟，廟公就點香敬神明、整理供桌換鮮花。到接待，伊接待香客紹介參拜、登記點燈寫名冊。神明生的鑼鼓，鬧熱滾滾。到顧廟，伊清香爐香灰篩過、顧金爐注意安全。到關廟，伊巡一輾、關廟門。顧廟幾十冬，香客變朋友。香客毋知按怎行，伊𤆬路講予清楚。一支香，一份心意。向望廟愈來愈興旺。","開廟，廟公就整理供桌換鮮花、開廟門。到接待，伊接待香客紹介參拜、登記點燈寫名冊。籤筒搖出，一支籤落。到顧廟，伊顧金爐注意安全、清香爐香灰篩過。到關廟，伊關廟門、巡一輾。進香團呵咾接待甲周到。香客講伊解籤解甲入心。廟是庄頭的中心。向望少年人捌廟的文化。","開廟，廟公就整理供桌換鮮花、點香敬神明。到接待，伊登記點燈寫名冊、解籤慢慢仔講。進香團的旗，一支一支入。到顧廟，伊顧金爐注意安全、清香爐香灰篩過。到關廟，伊巡一輾、關廟門。少年人予伊講甲對廟有興趣。香火燒的是敬，留的是心安。希望逐工開門攏順利。","開廟，廟公就點香敬神明、整理供桌換鮮花。到接待，伊解籤慢慢仔講、登記點燈寫名冊。籤筒搖出，一支籤落。到顧廟，伊顧金爐注意安全、掃廟埕。到關廟，伊關廟門、巡一輾。主委講廟交予伊顧真放心。外地的香客專工來揣伊。神明面前，逐家平等。希望信眾攏平安。","開廟，廟公就整理供桌換鮮花、點香敬神明。到接待，伊登記點燈寫名冊、接待香客紹介參拜。神明生的鑼鼓，鬧熱滾滾。到顧廟，伊掃廟埕、清香爐香灰篩過。到關廟，伊巡一輾、關廟門。外地的香客專工來揣伊。祭典辦了，逐家呵咾。解籤是解人的心。向望香火綿延。","開廟，廟公就整理供桌換鮮花、點香敬神明。到接待，伊接待香客紹介參拜、解籤慢慢仔講。關門的門閂，一聲沉沉。到顧廟，伊掃廟埕、顧金爐注意安全。到關廟，伊巡一輾、關廟門。香客毋知按怎行，伊𤆬路講予清楚。傳統愛有人顧，才傳會落去。向望祭典攏順利。","開廟，廟公就點香敬神明、整理供桌換鮮花。到接待，伊登記點燈寫名冊、解籤慢慢仔講。香爐的灰，篩甲幼幼。到顧廟，伊顧金爐注意安全、清香爐香灰篩過。到關廟，伊巡一輾、關廟門。老信眾逐工攏來𤆬伊開講。少年人予伊講甲對廟有興趣。廟是庄頭的中心。希望逐工開門攏順利。","開廟，廟公就整理供桌換鮮花、開廟門。到接待，伊登記點燈寫名冊、接待香客紹介參拜。廟鐘一聲，透早的靜。到顧廟，伊清香爐香灰篩過、顧金爐注意安全。到關廟，伊關廟門、巡一輾。少年人予伊講甲對廟有興趣。香客毋知按怎行，伊𤆬路講予清楚。廟門開著，心就有靠。向望香火綿延。"],"護理師":["白班，護理師就換藥、發藥。到小夜，伊照顧病人、打針。消毒水的味淡淡仔。到大夜，伊協助病人翻身、回應呼叫鈴。病人欲出院，伊共病人講愛好好仔照顧身體。病人講多謝，伊笑笑仔應。老人家毋敢落床，伊慢慢仔扶。共病人當做家己人照顧，就袂錯。希望明仔載交班順利。","白班，護理師就掛點滴、照顧病人。到小夜，伊發藥、照顧病人。呼叫鈴不時咧響。到大夜，伊整理交班的資料、協助病人翻身。家屬送來一盒餅，表示感謝。家屬問甲真詳細，伊耐心說明。病人歇了有較好，伊就放心。共病人照顧甲勇健，就是護士上歡喜的代誌。希望病人早日康復。","白班，護理師就照顧病人、巡房。到小夜，伊巡房、照顧病人。藥車捒過走廊，輪仔聲輕輕。到大夜，伊回應呼叫鈴、半暝巡病房。伊佇病房巡來巡去，一暝無閒甲天光。夜班的時，病房恬恬。家屬送來一盒餅，表示感謝。細節顧予好，病人才會安心。希望今暗的夜班順順利利。","白班，護理師就巡房、換藥。到小夜，伊巡房、量體溫。電腦頂的紀錄一筆一筆。到大夜，伊看監測的數值、半暝巡病房。同事鬥相共，代誌做較緊。伊佇病房巡來巡去，一暝無閒甲天光。老人家毋敢落床，伊慢慢仔扶。逐項記予清楚，才袂出差錯。向望逐个病人攏平安出院。","白班，護理師就照顧病人、掛點滴。到小夜，伊換藥、發藥。電腦頂的紀錄一筆一筆。到大夜，伊整理交班的資料、半暝巡病房。病人欲出院，伊共病人講愛好好仔照顧身體。夜班的時，病房恬恬。囡仔驚拍針，伊細聲共伊惜。半暝的呼叫鈴，嘛是責任。向望病房的病人攏睏會好。","白班，護理師就照顧病人、打針。到小夜，伊發藥、照顧病人。電腦頂的紀錄一筆一筆。到大夜，伊整理交班的資料、回應呼叫鈴。家屬送來一盒餅，表示感謝。同事鬥相共，代誌做較緊。夜班的時，病房恬恬。做護理師，上要緊的是同理心。希望人力有夠，逐家較袂忝。","白班，護理師就照顧病人、量血壓。到小夜，伊打針、換藥。口罩掛規工，面有壓痕。到大夜，伊協助病人翻身、整理交班的資料。病人半暝咧哀，伊隨去看。老人家毋敢落床，伊慢慢仔扶。同事鬥相共，代誌做較緊。共病人當做家己人照顧，就袂錯。向望逐个病人攏平安出院。","白班，護理師就發藥、照顧病人。到小夜，伊照顧病人、打針。體溫計嗶一聲。到大夜，伊協助病人翻身、整理交班的資料。夜班的時，病房恬恬。病人欲出院，伊共病人講愛好好仔照顧身體。同事鬥相共，代誌做較緊。細節顧予好，病人才會安心。向望同事攏身體勇健。"],"司機":["逐工透早，司機就檢查車況、開車，紲落來載人、停車。車一路駛過鬧熱的街市。紲落來加油、清車。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。路況看予遠，紅燈進前就先減速。人客坐佇車內，安全就交佇伊手裡。共逐家平安載到位，就是司機的本份。平安載人客到位。","天拄光，司機就檢查車況、開車，紲落來載人、停車。車一路駛過鬧熱的街市。了後加油、清車。路況看予遠，紅燈進前就先減速。人客坐佇車內，安全就交佇伊手裡。路況伊上熟，佗位好行、佗位塞車攏知影。共逐家平安載到位，就是司機的本份。平安載人客到位。","透早天拄光，司機就檢查車況、開車，紲落來閣載人、停車。車一路駛過鬧熱的街市。了後清車、收班。人客坐佇車內，安全就交佇伊手裡。路況伊上熟，佗位好行、佗位塞車攏知影。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。共逐家平安載到位，就是司機的本份。平安載人客到位。","逐工透早，司機就檢查車況、開車，了後載人。車一路駛過鬧熱的街市。紲落來清車、收班。路況看予遠，紅燈進前就先減速。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。路況伊上熟，佗位好行、佗位塞車攏知影。共逐家平安載到位，就是司機的本份。平安載人客到位。","天拄光，司機就檢查車況、開車，了後載人、停車。車一路駛過鬧熱的街市。紲落來清車、收班。人客坐佇車內，安全就交佇伊手裡。路況伊上熟，佗位好行、佗位塞車攏知影。路況看予遠，紅燈進前就先減速。共逐家平安載到位，就是司機的本份。平安載人客到位。","天拄光，司機就檢查車況、開車，紲落來載人、停車。車一路駛過鬧熱的街市。紲落來清車、收班。路況伊上熟，佗位好行、佗位塞車攏知影。路況看予遠，紅燈進前就先減速。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。共逐家平安載到位，就是司機的本份。平安載人客到位。","透早天拄光，司機就檢查車況、開車，紲落來閣載人、停車。車一路駛過鬧熱的街市。了後清車、收班。路況伊上熟，佗位好行、佗位塞車攏知影。人客坐佇車內，安全就交佇伊手裡。路況看予遠，紅燈進前就先減速。共逐家平安載到位，就是司機的本份。平安載人客到位。","透早天拄光，司機就檢查車況、開車，紲落來載人、停車。車一路駛過鬧熱的街市。紲落來清車。路況看予遠，紅燈進前就先減速。路況伊上熟，佗位好行、佗位塞車攏知影。起步慢慢仔，煞車輕輕仔，人客坐著才袂搖。共逐家平安載到位，就是司機的本份。平安載人客到位。"],"水電工":["水電工到現場，了後配管、牽電線。電表的指針跳一下。了後接水管、接電線，紲落來試水、試電。水管電線藏佇壁內，佗位有問題伊攏揣會著。厝主泡茶請伊，坐咧開講。老厝翻新，電攏換新的。學徒接的線一擺就過。動電進前先斷電，確認無電才落手。向望逐工攏平安收工。","水電工到現場，紲落來配管、牽電線。封膠的味淡淡仔。了後接水管、接電線，了後試水、試電。驗收一擺過，皆大歡喜。厝主半暝斷電，伊隨來處理。人客呵咾線路整理甲清楚。老厝翻新，電攏換新的。水電裝予妥當，厝內人用著才安全。燈一著，厝就有性命。向望半暝的急修愈少愈好。","水電工到現場，紲落來配管、牽電線。扳手一絲一絲共管仔鎖絚。了後接水管、接電線，了後試水、試電。學徒接的線一擺就過。人客呵咾線路整理甲清楚。人客講熱水總算有燒矣。老主顧厝裡的水電攏交予伊。漏水漏電，攏是厝主的煩惱，愛替人想。希望管線攏免閣漏。","水電工到現場，紲落來配管、牽電線。切溝的粉塵飛規間。紲落來接水管、接電線，紲落來試水。學徒接的線一擺就過。水電裝予妥當，厝內人用著才安全。人客呵咾線路整理甲清楚。厝主半暝斷電，伊隨來處理。急人所急，是做水電的價值。向望逐場施工攏平安。","水電工到現場，紲落來配管、牽電線。切溝的粉塵飛規間。了後接水管、接電線，紲落來試水、試電。老主顧厝裡的水電攏交予伊。水電裝予妥當，厝內人用著才安全。厝主半暝斷電，伊隨來處理。驗收一擺過，皆大歡喜。手藝好毋好，驗收就知。希望學徒緊會當獨立。","水電工到現場，紲落來配管、牽電線。扳手一絲一絲共管仔鎖絚。了後接水管、接電線，了後試水、試電。厝主講漏水修好矣，安心矣。水電裝予妥當，厝內人用著才安全。老厝翻新，電攏換新的。學徒接的線一擺就過。水電若做予好，厝內才用會安穩。希望學徒緊會當獨立。","水電工到現場，了後配管、牽電線。水管試水，一節一節看。紲落來閣接水管、接電線，紲落來試水。老主顧厝裡的水電攏交予伊。人客講熱水總算有燒矣。學徒接的線一擺就過。水電裝予妥當，厝內人用著才安全。水電若做予好，厝內才用會安穩。希望管線攏免閣漏。","水電工到現場，紲落來配管、牽電線。封膠的味淡淡仔。紲落來接水管、接電線，了後試水、試電。設計師呵咾管線藏甲媠。人客呵咾線路整理甲清楚。學徒接的線一擺就過。人客講熱水總算有燒矣。老主顧厝裡的水電攏交予伊。看袂著的所在，愈愛做予實。向望逐工攏平安收工。"],"木工":["天拄光，木工就量尺寸，紲落來鋸板。墨線彈落去，一逝烏烏。了後釘骨架、鎖螺絲，紲落來安裝、整理工具。人客講欲閣加做一組。老師傅點頭，講會使。囡仔的冊桌做好，規家歡喜。人客呵咾櫃仔做甲媠。電鋸聲槌仔聲，工場規工無恬過。共厝內裝潢甲媠媠，就是木工的功夫。希望人客滿意。","透早天拄光，木工就量尺寸，了後鋸板。榫接密密，看無縫。紲落來釘骨架、鎖螺絲，紲落來閣安裝、整理工具。學徒鑿的榫有進步矣。交件的時，人客隨付尾款。設計師講尺寸準甲真。舊人客紹介新人客來。柴料揀予著，做的物件才會耐用。一塊好料，愛拄著好師傅。向望逐件作品攏予人呵咾。","天拄光，木工就量尺寸，了後鋸板。收工的時，木屑掃做一堆。了後釘骨架、鎖螺絲，紲落來閣安裝、整理工具。柴料揀予著，做的物件才會耐用。同行來看伊的手路。交件的時，人客隨付尾款。設計師講尺寸準甲真。厝主講揀著的木紋有夠媠。做木工，目睭就是水平尺。希望人客滿意。","天拄光，木工就量尺寸，紲落來鋸板。木屑的芳味滿間攏是。紲落來釘骨架、鎖螺絲，了後安裝、整理工具。厝主講揀著的木紋有夠媠。設計師講尺寸準甲真。柴料揀予著，做的物件才會耐用。同行來看伊的手路。人客講欲閣加做一組。一分料，一分工。希望做的櫃仔用幾十冬。","逐工透早，木工就量尺寸，了後鋸板。收工的時，木屑掃做一堆。了後釘骨架、鎖螺絲，紲落來閣安裝、整理工具。人客呵咾櫃仔做甲媠。舊人客紹介新人客來。柴料揀予著，做的物件才會耐用。厝主講揀著的木紋有夠媠。共厝內裝潢甲媠媠，就是木工的功夫。向望學徒緊出師。","逐工透早，木工就量尺寸，了後鋸板。砂紙磨過，手感滑滑。紲落來釘骨架、鎖螺絲，了後安裝、整理工具。電鋸聲槌仔聲，工場規工無恬過。交件的時，人客隨付尾款。學徒鑿的榫有進步矣。厝主講揀著的木紋有夠媠。設計師講尺寸準甲真。慢慢仔做，才做會幼。向望這手路有人傳。","逐工透早，木工就量尺寸，了後鋸板。收工的時，木屑掃做一堆。紲落來釘骨架，紲落來安裝、整理工具。老師傅點頭，講會使。柴料揀予著，做的物件才會耐用。囡仔的冊桌做好，規家歡喜。交件的時，人客隨付尾款。榫頭密毋密，是師傅的面子。希望逐工收工攏平安。","逐工透早，木工就量尺寸，了後鋸板。砂紙磨過，手感滑滑。紲落來釘骨架、鎖螺絲，了後安裝、整理工具。舊人客紹介新人客來。人客講欲閣加做一組。柴料揀予著，做的物件才會耐用。囡仔的冊桌做好，規家歡喜。交件的時，人客隨付尾款。家私會舊，手路袂舊。希望人客滿意。"],"鐵工":["透早天拄光，鐵工就起火，紲落來燒鐵、燒紅。鐵鎚敲落，鏗一聲。紲落來閣槌拍、塑形，紲落來磨光。囡仔佇新欄杆邊耍，大人放心。學徒的焊道有進步。設計師講樓梯的線條媠。規間工場，攏是燒鐵的味。同行來借特殊的模具。硬的材料，愛軟的耐心。希望施工攏平安。","逐工透早，鐵工就起火，了後燒鐵、燒紅。磨焊道，火星一逝一逝。了後槌拍、塑形，紲落來磨光。鐵件量予準、裁予齊，鬥起來才會密。人客講門開關真順手。舊鐵窗換新，厝主安心矣。設計師講樓梯的線條媠。厚的薄的攏有各自的拍法，力頭愛掠予準。一支鐵管，量準才落刀。希望施工攏平安。","逐工透早，鐵工就起火，了後燒鐵、燒紅。收工的時，鐵屑掃做堆。了後槌拍、塑形，紲落來磨光。舊鐵窗換新，厝主安心矣。設計師講樓梯的線條媠。人客講門開關真順手。鐵件量予準、裁予齊，鬥起來才會密。厚的薄的攏有各自的拍法，力頭愛掠予準。焊道看會出師傅的心。向望學徒緊學會曉。","天拄光，鐵工就起火，了後燒鐵、燒紅。收工的時，鐵屑掃做堆。了後槌拍、塑形，紲落來磨光。厚的薄的攏有各自的拍法，力頭愛掠予準。社區的案做了，管委會呵咾。鐵件量予準、裁予齊，鬥起來才會密。規間工場，攏是燒鐵的味。鐵是硬的，功夫是活的。希望目睭顧予好。","逐工透早，鐵工就起火，紲落來燒鐵、燒紅。鐵門推過，軌道輾輾響。紲落來槌拍、塑形，紲落來磨光。學徒的焊道有進步。厝主講鐵門裝了有夠在。舊鐵窗換新，厝主安心矣。同行來借特殊的模具。鐵件量予準、裁予齊，鬥起來才會密。鐵件牢毋牢，人命關天。向望逐件鐵工攏焊甲牢。","逐工透早，鐵工就起火，了後燒鐵、燒紅。鐵管疊佇車斗，一支一支。紲落來槌拍、塑形，紲落來磨光。學徒的焊道有進步。厚的薄的攏有各自的拍法，力頭愛掠予準。同行來借特殊的模具。完工驗收，一擺就過。鐵件量予準、裁予齊，鬥起來才會密。鐵件牢毋牢，人命關天。希望人客的門窗攏耐用。","透早天拄光，鐵工就起火，了後燒鐵、燒紅。面罩掀開，汗規面。紲落來槌拍、塑形，紲落來磨光。鐵件量予準、裁予齊，鬥起來才會密。同行來借特殊的模具。完工驗收，一擺就過。學徒的焊道有進步。厝主講鐵門裝了有夠在。火花是鐵工的日常。希望這手藝有人接。","透早天拄光，鐵工就起火，紲落來燒鐵。面罩掀開，汗規面。紲落來槌拍、塑形，紲落來閣磨光。規間工場，攏是燒鐵的味。囡仔佇新欄杆邊耍，大人放心。厝主講鐵門裝了有夠在。人客呵咾欄杆焊甲幼。鐵件量予準、裁予齊，鬥起來才會密。鐵是硬的，功夫是活的。希望這手藝有人接。"],"裁縫師":["接單，裁縫師就看版型、量人客尺寸。到裁製，伊畫粉線裁布、縫鈕仔。鈕仔盒仔內，一格一格排甲真齊。到修整，伊試穿看合軀、熨衫燙平。到交件，伊包裝掛牌、交件收數。老主顧的衫攏交予伊做。改好的西裝，人客穿了滿意。量身是量人，嘛是量心。向望目睭顧予好。","接單，裁縫師就量人客尺寸、確認布料。到裁製，伊縫鈕仔、畫粉線裁布。線輪一排，色水齊全。到修整，伊試穿看合軀、改長短。到交件，伊交件收數、包裝掛牌。人客講這領衫穿十冬猶真勇。少年人提設計圖來請教。剪落去進前，愛想三遍。希望手工的價值有人捌。","接單，裁縫師就確認布料、量人客尺寸。到裁製，伊畫粉線裁布、車縫。熨斗行過，蒸氣一陣。到修整，伊熨衫燙平、改長短。到交件，伊交件收數、包裝掛牌。學徒車的線愈來愈直。老主顧的衫攏交予伊做。人客試穿，講合軀甲真。剪落去進前，愛想三遍。向望逐領衫攏合軀。","接單，裁縫師就量人客尺寸、確認布料。到裁製，伊車縫、畫粉線裁布。熨斗行過，蒸氣一陣。到修整，伊熨衫燙平、試穿看合軀。到交件，伊包裝掛牌、交件收數。老主顧的衫攏交予伊做。隔壁店的嘛來借版型。人客紹介朋友專程來。衫是照人做的，毋是人照衫。向望好布愈來愈好揣。","接單，裁縫師就確認布料、量人客尺寸。到裁製，伊畫粉線裁布、縫鈕仔。粉線畫佇布面，一逝白白。到修整，伊熨衫燙平、試穿看合軀。到交件，伊交件收數、包裝掛牌。學徒車的線愈來愈直。少年人提設計圖來請教。衫是照人做的，毋是人照衫。向望這手藝有人肯學。","接單，裁縫師就量人客尺寸、看版型。到裁製，伊畫粉線裁布、縫鈕仔。皮尺掛佇頷頸，隨時通量。到修整，伊熨衫燙平、試穿看合軀。到交件，伊包裝掛牌、交件收數。改好的西裝，人客穿了滿意。隔壁店的嘛來借版型。人客紹介朋友專程來。一針一線，攏是功夫。向望逐領衫攏合軀。","接單，裁縫師就量人客尺寸、看版型。到裁製，伊畫粉線裁布、車縫。車台的聲，噠噠噠規工。到修整，伊試穿看合軀、改長短。到交件，伊交件收數、包裝掛牌。囡仔的制服改了拄好。學徒車的線愈來愈直。人客紹介朋友專程來。量身是量人，嘛是量心。希望老主顧攏繼續交關。","接單，裁縫師就量人客尺寸、確認布料。到裁製，伊縫鈕仔、畫粉線裁布。車台的聲，噠噠噠規工。到修整，伊改長短、試穿看合軀。到交件，伊交件收數、包裝掛牌。人客紹介朋友專程來。人客講這領衫穿十冬猶真勇。人客試穿，講合軀甲真。一針一線，攏是功夫。希望老主顧攏繼續交關。"]};
 const JOBS = Object.keys(SAMPLES);
-/* 四語判準籤: 場域+職業攏quad對齊矣 */
-const CHIPS = ['菜市仔','夜市','廟','咖啡廳','消防員','麵包師傅','老師','阿母'];
-let live = true;
+/* A族(quad四語)生活場景籤 —— 職業籤走B族(單軌),暫收 */
+const CHIPS_A = ['查埔','查某','阿母','阿公','囡仔','菜市仔','咖啡廳','夜市','廟','圖書館'];
+let live = true;   // API 活無
+
 let hist = JSON.parse(localStorage.getItem('xny_hist') || '[]');
 
-/* ═══════════ 目錄資料 ═══════════ */
+$('#chips').innerHTML = CHIPS_A.map(s=>`<button class="chip">${s}</button>`).join('');
+$('#chips').onclick = e => { if(e.target.classList.contains('chip')){ $('#q').value = e.target.textContent; run(); } };
+
+/* 設定 */
+$('#btn-set').onclick = () => {
+  $('#base').value = localStorage.getItem('xny_base') || '';
+  $('#key').value  = localStorage.getItem('xny_key')  || '';
+  $('#dlg').showModal();
+};
+$('#dlg-x').onclick = () => $('#dlg').close();
+$('#dlg-reset').onclick = () => {
+  localStorage.removeItem('xny_base'); localStorage.removeItem('xny_key');
+  $('#dlg').close(); quota();
+};
+$('#dlg-ok').onclick = () => {
+  const b = $('#base').value.trim().replace(/\/$/,''), k = $('#key').value.trim();
+  b ? localStorage.setItem('xny_base', b) : localStorage.removeItem('xny_base');
+  k ? localStorage.setItem('xny_key',  k) : localStorage.removeItem('xny_key');
+  $('#dlg').close(); quota();
+};
+
+/* LINE Bot 指引窗 */
+$('#btn-guide').onclick = () => $('#dlg-line').showModal();
+$('#dlg-line-x').onclick = () => $('#dlg-line').close();
+
+/* 額度／活無 */
+async function quota(){
+  try{
+    const r = await fetch(`${S.base()}/quota?key=${encodeURIComponent(S.key())}`, {signal: AbortSignal.timeout(6000)});
+    const d = await r.json();
+    if(!r.ok) throw 0;
+    live = d.global_remaining > 0 && d.remaining > 0;
+    if(live){
+      $('#meter').className = 'meter';
+      $('#meter').innerHTML = `今仔日 <b>${d.used_pieces}</b>／${d.daily_quota} 篇 · 賰 <b>${d.remaining}</b>`;
+      $('#dot').className = 'dot';
+      $('#mode-lbl').textContent = '職業 → 台語敘事';
+    }else offline('今仔日的額度用了矣');
+  }catch{ offline('即時生成暫停'); }
+}
+function offline(why){
+  live = false;
+  $('#meter').className = 'meter off';
+  $('#meter').innerHTML = `<b>${why}</b> · 顯示預生樣本`;
+  $('#dot').className = 'dot off';
+  $('#mode-lbl').textContent = '職業 → 台語敘事（預生樣本）';
+}
+
+/* 生成 */
+$('#go').onclick = run;
+$('#q').addEventListener('keydown', e => { if(e.key==='Enter') run(); });
+
+async function run(){
+  const query = $('#q').value.trim();
+  const n = +$('#n').value;
+  const out = $('#out');
+  if(!query){ out.innerHTML = err('輸入一个職業才會使生成。'); return; }
+
+  const go = $('#go');
+  go.disabled = true; go.innerHTML = '<i class="spin"></i>生成中';
+  out.innerHTML = '';
+  try{
+    if(!live) throw new Error('__FALLBACK__');
+    const res = await fetch(S.base()+'/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':S.key()},
+      body: JSON.stringify({query, n}),
+      signal: AbortSignal.timeout(120000)
+    });
+    const d = await res.json().catch(()=>({}));
+    if(res.status===429){ offline(d.error || '額度用了'); throw new Error('__FALLBACK__'); }
+    if(!res.ok) throw new Error(msg(res.status, d.error));
+    render(d, false);
+    hist.unshift({q:d.query, p:d.pieces, t:Date.now(), texts:d.texts, tailos:d.tailos||[]});
+    hist = hist.slice(0,30);
+    localStorage.setItem('xny_hist', JSON.stringify(hist));
+    drawHist(); quota();
+  }catch(e){
+    if(e.message === '__FALLBACK__' || e.name === 'TypeError' || e.name === 'TimeoutError'){
+      if(live) offline('即時生成暫停');
+      fallback(query, n);
+    }else{
+      out.innerHTML = err(e.message || '生成失敗');
+    }
+  }finally{
+    go.disabled = false; go.textContent = '生成';
+  }
+}
+
+/* 保底：對樣本內揀 */
+function fallback(query, n){
+  const key = JOBS.find(j => j === query) || JOBS.find(j => j.includes(query) || query.includes(j));
+  if(!key){
+    $('#out').innerHTML = note(`即時生成這馬袂通，這台只有下跤這幾个職業的預生樣本：${JOBS.join('、')}。`)
+      + `<div class="empty"><div class="big">試看下跤的籤</div></div>`;
+    return;
+  }
+  const texts = SAMPLES[key].slice(0, n);
+  render({query:key, pieces:texts.length,
+          chars:texts.reduce((a,t)=>a+cp(t),0),
+          tokens_est:Math.round(texts.reduce((a,t)=>a+cp(t),0)*1.3), texts}, true);
+}
+
+const msg = (code, e) => ({
+  400:'請輸入查詢。', 401:'金鑰毋著。', 403:'來源無允准。',
+  422: e || '這个職業庫內揣無。', 500:'服務暫時無法度，請閣試。',
+  503: e || '這馬人真濟，等幾秒仔閣試一擺。'
+}[code] || e || `生成失敗（${code}）`);
+
+const err  = t => `<div class="err">${t}</div>`;
+/* v3: 雙行組版——漢字切「。」台羅切「.」,段段對齊 */
+function dual(t, tl){
+  const hs = t.split('。').filter(Boolean);
+  const ts = tl.split('.').map(s=>s.trim()).filter(Boolean);
+  return hs.map((hSeg,k)=>
+    `<span class="sent">${esc(hSeg)}。</span>` +
+    (ts[k] ? `<span class="tl">${esc(ts[k])}.</span>` : '')
+  ).join('');
+}
+const note = t => `<div class="note">${t}</div>`;
+const esc  = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const cp   = t => [...t].length;
+
+let curQuery = '', curTexts = [], curTailos = [], curZhsCanon = [], curEnsCanon = [], curSegs = [], curMach = {}, curZhMach = {}, curZh = {}, curEn = {};
+function render(d, isSample){
+  curQuery = isSample ? '' : d.query;
+  curTexts = d.texts; curTailos = (d.tailos||[]).slice();
+  curZhsCanon = (d.zhs||[]).slice(); curEnsCanon = (d.ens||[]).slice(); curSegs = (d.segs||[]).slice();
+  curMach = {}; curZhMach = {}; curZh = {}; curEn = {};
+  $('#out').innerHTML = (isSample ? note('即時生成這馬袂通，下跤是預生樣本。') : '') + `
+    <div class="meta"><strong>${esc(d.query)}</strong>
+      <span>${d.pieces} 篇</span><span>${d.chars} 字</span><span>~${d.tokens_est} tok</span>
+      ${isSample?'<span>預生樣本</span>':''}
+      ${live && !isSample ? `<button class="again" id="again">閣生一批</button>` : ''}</div>
+    ${d.texts.map((t,i)=>piece(t,i,(d.tailos||[])[i])).join('')}`;
+  const ag = $('#again');
+  if(ag) ag.onclick = () => { $('#q').value = d.query; run(); };
+}
+
+function piece(t,i,tl){
+  const gate = VOICE_LIVE || DEV;
+  const quad = !!curSegs[i];                       // ★判準四軌(A族quad);B族無→中英鈕免顯
+  const hasTl = quad || (tl && !tl.includes('⟨'));
+  return `<article class="piece" id="p${i}">
+    <div class="piece-top">
+      <span class="idx">${String(i+1).padStart(2,'0')}</span>
+      <span class="n">${cp(t)} 字</span>
+      ${quad ? '<span class="badge">判準四語</span>' : ''}
+      <span class="acts">
+        ${gate || live ? `<button class="mini" data-re="${i}" title="換這篇">↻</button>` : ''}
+        <button class="mini" data-copy="${i}">抄</button>
+        ${gate && hasTl ? `<button class="mini" data-tl="${i}">台羅</button>` : ''}
+        ${quad ? `<button class="mini" data-zh="${i}">中文</button>` : ''}
+        ${quad ? `<button class="mini" data-en="${i}">英文</button>` : ''}
+        ${gate ? `<button class="mini" data-tts="${i}">🔊</button>` : ''}
+      </span>
+    </div>
+    <div class="body" id="b${i}">${curSegs[i] ? bodyHtmlSegs(curSegs[i]) : bodyHtml(t, tl, null, null, false)}</div>
+  </article>`;
+}
+/* 行間組版: 台語逐句一逝,下跤綴羅/華/英(顯示由.piece class管) */
+const splitHan = t => t.split('。').filter(s=>s.trim());
+/* quad segs: 逐句{h,t,z,e}天生對齊——零切句零走位 */
+function bodyHtmlSegs(segs, showTl, showZh, showEn){
+  return segs.map(s =>
+    `<span class="sent">${esc(s.h || '')}</span>` +
+    (s.t ? `<span class="line tl">${esc(s.t)}</span>` : '') +
+    (s.z ? `<span class="line zh">${esc(s.z)}</span>` : '') +
+    (s.e ? `<span class="line en">${esc(s.e)}</span>` : '')
+  ).join('');
+}
+function bodyHtml(t, tl, zhArr, enArr, mach, zhMach){
+  const hs = splitHan(t);
+  const ts = (tl && !tl.includes('⟨')) ? tl.split('.').map(s=>s.trim()).filter(Boolean) : null;
+  let out = mach ? `<span class="mach">機轉台羅・參考用（母語判準版整備中）</span>` : '';
+  if(zhArr && zhMach) out += `<span class="mach">機轉中文・參考用</span>`;
+  hs.forEach((seg,k)=>{
+    out += `<span class="sent">${esc(seg)}。</span>`;
+    if(ts && ts[k]) out += `<span class="line tl">${esc(ts[k])}.</span>`;
+    if(zhArr && zhArr[k]) out += `<span class="line zh">${esc(zhArr[k])}。</span>`;
+    if(enArr && enArr[k]) out += `<span class="line en">${esc(enArr[k])}</span>`;
+  });
+  return out;
+}
+function renderBody(i){
+  if(curSegs[i]) { $('#b'+i).innerHTML = bodyHtmlSegs(curSegs[i]); return; }
+  $('#b'+i).innerHTML = bodyHtml(curTexts[i], curTailos[i], curZh[i], curEn[i], !!curMach[i], !!curZhMach[i]);
+}
+
+/* 羅: 庫有→直開;庫無→中繼機轉(標示) */
+async function loadTl(i, btn){
+  const p = $('#p'+i);
+  if(curSegs[i] || (curTailos[i] && !curTailos[i].includes('⟨'))){ p.classList.toggle('show-tl'); btn.classList.toggle('on'); return; }
+  btn.textContent = '…';
+  try{
+    const r = await fetch(RELAY+'/taigi-to-tailo', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ text: curTexts[i] }),
+      signal: AbortSignal.timeout(60000)
+    });
+    const d = await r.json();
+    if(!d.tailo) throw 0;
+    curTailos[i] = d.tailo; curMach[i] = true;
+    renderBody(i);
+    p.classList.add('show-tl'); btn.classList.add('on'); btn.textContent = '台羅';
+  }catch{ btn.textContent = '台羅'; hint('台羅服務這馬袂通。'); }
+}
+/* 華: 台→華(中繼MT),句界對拆 */
+async function loadZh(i, btn){
+  if(!curSegs[i]) return;                          // 非判準軌無服務(MT路徑已廢)
+  $('#p'+i).classList.toggle('show-zh'); btn.classList.toggle('on');
+}
+async function loadEn(i, btn){
+  if(!curSegs[i]) return;                          // 非判準軌無服務(MT路徑已廢)
+  $('#p'+i).classList.toggle('show-en'); btn.classList.toggle('on');
+}
+
+/* 🔊 雙路: 庫台羅→roma精準 / 無→漢字直送(同翻譯機) */
+const audioCache = {};
+let curAudio = null;
+async function ttsOne(payload){
+  const ck = (payload.textType||'han') + ':' + payload.text;
+  if(audioCache[ck]) return audioCache[ck];
+  const r = await fetch(RELAY+'/tts', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload), signal: AbortSignal.timeout(60000)
+  });
+  const d = await r.json();
+  if(!d.audioBase64) throw 0;
+  return audioCache[ck] = d.audioBase64;
+}
+const playB64 = b64 => new Promise(res => {
+  const a = new Audio('data:audio/wav;base64,'+b64);
+  curAudio = a;
+  a.onended = res; a.onerror = res;
+  a.play().catch(res);
+});
+async function playTts(i, btn){
+  if(btn.classList.contains('playing')){          // 撳第二擺=停
+    if(curAudio){ curAudio.pause(); curAudio = null; }
+    btn.classList.remove('playing'); btn.textContent = '🔊';
+    return;
+  }
+  btn.classList.add('playing'); btn.textContent = '⏸';
+  try{
+    // ★漢字路(A/B族仝款): 咱的台羅詞界用空格,廖教授TTS共空格當停頓→逐詞頓
+    //   漢字直送,中繼內轉,唸了順。台羅照顯佇網頁做判準展示,唸的時陣毋送。
+    const b64 = await ttsOne({ text: curTexts[i], speaker:'male' });
+    await playB64(b64);
+  }catch(_e){
+    hint('語音服務這馬袂通。');
+  }finally{
+    btn.classList.remove('playing'); btn.textContent = '🔊'; curAudio = null;
+  }
+}
+
+$('#out').onclick = e => {
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.re !== undefined) regen(+b.dataset.re, b);
+  if(b.dataset.copy !== undefined){
+    navigator.clipboard.writeText(curTexts[+b.dataset.copy] || $('#b'+b.dataset.copy).textContent);
+    b.textContent = '抄好'; setTimeout(()=>b.textContent='抄', 1200);
+  }
+  if(b.dataset.tl !== undefined) loadTl(b.dataset.tl, b);
+  if(b.dataset.zh !== undefined) loadZh(b.dataset.zh, b);
+  if(b.dataset.en !== undefined) loadEn(b.dataset.en, b);
+  if(b.dataset.tts !== undefined) playTts(b.dataset.tts, b);
+};
+
+/* ═══ 語音輸入：講台語 → 中繼 ASR → 變查詢 ═══ */
+const RELAY = 'https://asr.bitfull.tw';
+let rec = null, chunks = [], recording = false;
+
+$('#mic').onclick = async () => {
+  if(recording){ rec.stop(); return; }
+  if(!navigator.mediaDevices?.getUserMedia){
+    hint('這台裝置袂當錄音（愛 https 佮麥克風權限）。'); return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    rec = new MediaRecorder(stream);
+    chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = async () => {
+      stream.getTracks().forEach(t=>t.stop());
+      recording = false;
+      $('#mic').classList.remove('rec');
+      $('#mic').disabled = true;
+      hint('聽拍中…');
+      const blob = new Blob(chunks, {type: rec.mimeType || 'audio/webm'});
+      if(blob.size < 2000){ hint('傷短，閣講一擺。'); $('#mic').disabled=false; return; }
+      try{
+        const b64 = await blobB64(blob);
+        const r = await fetch(RELAY+'/asr-web', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({audioBase64:b64, mimeType: blob.type.split(';')[0]}),
+          signal: AbortSignal.timeout(70000)
+        });
+        const d = await r.json();
+        const t = (d.transcript || '').trim();
+        if(!t){ hint('聽無，閣講一擺。'); return; }
+        $('#q').value = t;
+        hint(`聽著：「${esc(t)}」`);
+        run();
+      }catch(e){
+        hint('語音服務這馬袂通。');
+      }finally{ $('#mic').disabled=false; }
+    };
+    rec.start();
+    recording = true;
+    $('#mic').classList.add('rec');
+    hint('咧錄音…講一个職業，講煞閣撳一下。');
+  }catch{
+    hint('麥克風開袂起來——檢查瀏覽器的權限。');
+  }
+};
+const hint = t => $('#mic-hint').innerHTML = t;
+const blobB64 = b => new Promise((res,rej)=>{
+  const r = new FileReader();
+  r.onload = () => res(r.result.split(',')[1]);
+  r.onerror = rej;
+  r.readAsDataURL(b);
+});
+
+
+/* ═══ 目錄: A族29大類(venue_type,實數) + B族146職業 ═══ */
 const DIR_VENUE = [
   ['居住 residence', 52, ['厝','灶跤','客廳','房間','眠床','浴間','後尾','門口埕','樓梯間','陽台']],
   ['買賣 commerce', 44, ['菜市仔','百貨公司','手機店','衫仔店','銀樓','維修店','便利商店','超級市場','藥房','花店']],
@@ -647,435 +720,42 @@ const DIR_OCC = [
   ['信仰', ['廟公','牧師','地理師']],
   ['其他', ['老闆','老闆娘','保母','社工','清潔工','粗工','保全','管理員','園丁','公園管理員','救生員','資源回收員','工地主任','搬家師傅','加油站員工','腳踏車店老闆','會計']]
 ];
-
-/* ═══════════ 殼: 主題切換 ═══════════ */
-const VIEW_IDS = ['forge','trans','type'];
-function switchView(v){
-  VIEW_IDS.forEach(id=>{
-    $('#v-'+id).classList.toggle('on', id===v);
-  });
-  $$('.rbtn[data-view]').forEach(b=>b.classList.toggle('on', b.dataset.view===v));
-  // iframe lazy load: 第一擺開才掛 src
-  const fr = $('#v-'+v+' iframe');
-  if(fr && !fr.src) fr.src = fr.dataset.src;
-  closeRail();
+let dirOpen = null;
+function drawDir(kind){
+  const d = $('#dir');
+  if(dirOpen === kind){ d.classList.remove('open'); dirOpen = null;
+    document.querySelectorAll('.dirbtn').forEach(b=>b.classList.remove('on')); return; }
+  dirOpen = kind;
+  document.querySelectorAll('.dirbtn').forEach(b=>b.classList.toggle('on', b.dataset.dir===kind));
+  d.classList.add('open');
+  d.innerHTML = kind === 'venue'
+    ? `<div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">
+         撳落即生 · <b style="color:var(--moss)">四語判準</b>（台語・台羅・中文・英文）</div>` +
+      DIR_VENUE.map(([n,c,items])=>
+        `<h4>${esc(n)}<span class="cnt">${c} 場所</span></h4>
+         <div class="grp">${items.map(x=>`<button class="it">${esc(x)}</button>`).join('')}</div>`).join('')
+    : `<div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">
+         撳落即生 · 台語＋語音（<span style="color:var(--amber)">四語判準資料已備・近期上線</span>）</div>` +
+      DIR_OCC.map(([n,items])=>
+        `<h4>${esc(n)}<span class="cnt">${items.length}</span></h4>
+         <div class="grp">${items.map(x=>`<button class="it">${esc(x)}</button>`).join('')}</div>`).join('');
 }
-$$('.rbtn[data-view]').forEach(b=>{
-  b.onclick = () => switchView(b.dataset.view);
-});
-
-/* 全螢幕 iframe */
-$$('.vbtn[data-fs]').forEach(b=>{
-  b.onclick = () => {
-    const v = $('#'+b.dataset.fs);
-    const fs = v.classList.toggle('fs');
-    b.textContent = fs ? '✕ 退出全螢幕' : '⛶ 全螢幕';
-  };
-});
-
-/* ═══════════ 手機: 漢堡 / 抽屜 ═══════════ */
-const rail = $('#rail'), cats = $('#cats'), backdrop = $('#backdrop');
-function closeRail(){ rail.classList.remove('open'); syncBackdrop(); }
-function closeCats(){ cats.classList.remove('open'); syncBackdrop(); }
-function syncBackdrop(){
-  backdrop.classList.toggle('on', rail.classList.contains('open') || cats.classList.contains('open'));
-}
-$('#burger').onclick = () => { cats.classList.remove('open'); rail.classList.toggle('open'); syncBackdrop(); };
-$('#fab').onclick    = () => { rail.classList.remove('open'); cats.classList.add('open'); syncBackdrop(); };
-$('#cats-x').onclick = closeCats;
-backdrop.onclick = () => { closeRail(); closeCats(); };
-
-/* 電腦: 右欄收合 */
-$('#cats-min').onclick = () => {
-  const min = $('#shell').classList.toggle('cats-min');
-  $('#cats-min').textContent = min ? '⟨' : '⟩';
-  $('#cats-min').title = min ? '展開' : '收合';
+document.querySelector('.dirbar').onclick = e => {
+  const b = e.target.closest('.dirbtn'); if(b) drawDir(b.dataset.dir);
+};
+$('#dir').onclick = e => {
+  const b = e.target.closest('.it'); if(!b) return;
+  $('#q').value = b.textContent;
+  $('#dir').classList.remove('open'); dirOpen = null;
+  document.querySelectorAll('.dirbtn').forEach(x=>x.classList.remove('on'));
+  run();
 };
 
-/* ═══════════ 右欄: 分類小格 ═══════════ */
-const esc = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const LINE = 'https://lin.ee/zkftVc3';
-const isMobile = () => matchMedia('(max-width:960px)').matches;
-function buildCats(){
-  const open = isMobile() ? '' : ' open';   // 電腦預設展開,手機預設收合
-  const venueBd = DIR_VENUE.map(([n,c,items])=>
-    `<div class="grp-h">${esc(n)}<span class="gc">${c} 場所</span></div>
-     <div class="grp">${items.map(x=>`<button class="it">${esc(x)}</button>`).join('')}</div>`).join('');
-  const occBd = DIR_OCC.map(([n,items])=>
-    `<div class="grp-h">${esc(n)}<span class="gc">${items.length}</span></div>
-     <div class="grp">${items.map(x=>`<button class="it">${esc(x)}</button>`).join('')}</div>`).join('');
-  $('#cats-bd').innerHTML = `
-    <details class="cat"${open}>
-      <summary><span class="ct">📍 生活場域</span><span class="cn">29 大類</span></summary>
-      <div class="cat-bd">
-        <div class="cat-note">撳落即生 · <b>四語判準</b>（台語・台羅・中文・英文）</div>
-        ${venueBd}
-      </div>
-    </details>
-    <details class="cat"${open}>
-      <summary><span class="ct">🔧 職業敘事</span><span class="cn">146 種</span></summary>
-      <div class="cat-bd">
-        <div class="cat-note">撳落即生 · 台語＋語音（<b style="color:var(--gold)">四語判準資料已備・近期上線</b>）</div>
-        ${occBd}
-      </div>
-    </details>
-    <details class="cat"${open}>
-      <summary><span class="ct">🌐 語音・翻譯</span><span class="cn">3</span></summary>
-      <div class="cat-bd">
-        <button class="cat-link" data-goto="trans">🌐 台語翻譯機 <span class="arr">開 ›</span></button>
-        <button class="cat-link" data-goto="type">⌨️ 台語打字 <span class="arr">開 ›</span></button>
-        <div class="cat-link" style="cursor:default">🤖 AI 對話 <span class="soon-lb">整備中</span></div>
-      </div>
-    </details>
-    <details class="cat">
-      <summary><span class="ct">🎓 學習・LINE</span><span class="cn">8+</span></summary>
-      <div class="cat-bd">
-        <div class="cat-note">加 <b>咱兜的台語</b> LINE 官方帳號，功能隨用</div>
-        <button class="cat-link" data-line-guide>📱 LINE Bot 使用指引 <span class="arr">開 ›</span></button>
-        <a class="cat-link" href="${LINE}" target="_blank" rel="noopener">📖 每日學習 6 型態 <span class="arr">每日台語・看圖・聽台語・影片・電台・讀冊</span></a>
-        <a class="cat-link" href="${LINE}" target="_blank" rel="noopener">🎤 台語發音評分 <span class="arr">LINE ›</span></a>
-        <a class="cat-link" href="${LINE}" target="_blank" rel="noopener">🔊 語音合成 <span class="arr">中英日韓泰輸入 ›</span></a>
-        <a class="cat-link" href="${LINE}" target="_blank" rel="noopener">📝 臺羅拼音學習 <span class="arr">LINE ›</span></a>
-        <a class="cat-link" href="${LINE}" target="_blank" rel="noopener">🤖 台語 AI 陪聊 <span class="arr">LINE ›</span></a>
-        <a class="cat-link" href="${LINE}" target="_blank" rel="noopener">📍 台語打卡・家庭 <span class="arr">LINE ›</span></a>
-        <a class="cat-link" href="${LINE}" target="_blank" rel="noopener">📖 意識培育手冊 <span class="arr">LINE ›</span></a>
-      </div>
-    </details>`;
-}
-buildCats();
-$('#cats-bd').onclick = e => {
-  if(e.target.closest('[data-line-guide]')){ $('#dlg-line').showModal(); return; }
-  const it = e.target.closest('.it');
-  if(it){
-    switchView('forge');
-    $('#q').value = it.textContent;
-    closeCats();
-    run();
-    return;
-  }
-  const lk = e.target.closest('.cat-link[data-goto]');
-  if(lk){ switchView(lk.dataset.goto); closeCats(); }
-};
-
-/* ═══════════ 額度 / 活無 ═══════════ */
-async function quota(){
-  try{
-    const r = await fetch(`${S.base()}/quota?key=${encodeURIComponent(S.key())}`, {signal: AbortSignal.timeout(6000)});
-    const d = await r.json();
-    if(!r.ok) throw 0;
-    live = d.global_remaining > 0 && d.remaining > 0;
-    if(live){
-      $('#meter').innerHTML = `<span class="mtxt">今仔日 <b>${d.used_pieces}</b>／${d.daily_quota} 篇 · </span>賰 <b>${d.remaining}</b>`;
-      $('#dot').className = 'dot';
-    }else offline('今仔日的額度用了矣');
-  }catch{ offline('即時生成暫停'); }
-}
-function offline(why){
-  live = false;
-  $('#meter').innerHTML = `<span class="mtxt"><b>${why}</b> · </span>預生樣本`;
-  $('#dot').className = 'dot off';
-}
-
-/* ═══════════ 生成 ═══════════ */
-$('#go').onclick = run;
-$('#q').addEventListener('keydown', e => { if(e.key==='Enter') run(); });
-$('#chips').innerHTML = CHIPS.map(s=>`<button class="chip">${s}</button>`).join('');
-$('#chips').onclick = e => { if(e.target.classList.contains('chip')){ $('#q').value = e.target.textContent; run(); } };
-
-async function run(){
-  const query = $('#q').value.trim();
-  const n = +$('#n').value;
-  const out = $('#out');
-  if(!query){ out.innerHTML = err('拍一个職業抑是所在，才會使生成。'); return; }
-
-  const go = $('#go');
-  go.disabled = true; go.innerHTML = '<i class="spin"></i>生成中';
-  out.innerHTML = '';
-  try{
-    if(!live) throw new Error('__FALLBACK__');
-    const res = await fetch(S.base()+'/generate', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':S.key()},
-      body: JSON.stringify({query, n}),
-      signal: AbortSignal.timeout(120000)
-    });
-    const d = await res.json().catch(()=>({}));
-    if(res.status===429){ offline(d.error || '額度用了'); throw new Error('__FALLBACK__'); }
-    if(!res.ok) throw new Error(msg(res.status, d.error));
-    render(d, false);
-    hist.unshift({q:d.query, p:d.pieces, t:Date.now(), texts:d.texts, tailos:d.tailos||[]});
-    hist = hist.slice(0,30);
-    localStorage.setItem('xny_hist', JSON.stringify(hist));
-    drawHist(); quota();
-  }catch(e){
-    if(e.message === '__FALLBACK__' || e.name === 'TypeError' || e.name === 'TimeoutError'){
-      if(live) offline('即時生成暫停');
-      fallback(query, n);
-    }else{
-      out.innerHTML = err(e.message || '生成失敗');
-    }
-  }finally{
-    go.disabled = false; go.textContent = '生成';
-  }
-}
-
-/* 保底: 對樣本內揀 */
-function fallback(query, n){
-  const key = JOBS.find(j => j === query) || JOBS.find(j => j.includes(query) || query.includes(j));
-  if(!key){
-    $('#out').innerHTML = note(`即時生成這馬袂通，這台只有下跤這幾个職業的預生樣本：${JOBS.join('、')}。`)
-      + `<div class="empty"><div class="big">試看頂懸的籤</div></div>`;
-    return;
-  }
-  const texts = SAMPLES[key].slice(0, n);
-  render({query:key, pieces:texts.length,
-          chars:texts.reduce((a,t)=>a+cp(t),0),
-          tokens_est:Math.round(texts.reduce((a,t)=>a+cp(t),0)*1.3), texts}, true);
-}
-
-const msg = (code, e) => ({
-  400:'請輸入查詢。', 401:'金鑰毋著。', 403:'來源無允准。',
-  422: e || '這个查詢庫內揣無。', 500:'服務暫時無法度，請閣試。',
-  503: e || '這馬人真濟，等幾秒仔閣試一擺。'
-}[code] || e || `生成失敗（${code}）`);
-
-const err  = t => `<div class="err">${t}</div>`;
-const note = t => `<div class="note">${t}</div>`;
-const cp   = t => [...t].length;
-
-/* ═══════════ 組版 (segs判族: 有segs=判準四軌) ═══════════ */
-let curQuery = '', curTexts = [], curTailos = [], curZhsCanon = [], curEnsCanon = [], curSegs = [], curMach = {}, curZh = {}, curEn = {};
-function render(d, isSample){
-  curQuery = isSample ? '' : d.query;
-  curTexts = d.texts; curTailos = (d.tailos||[]).slice();
-  curZhsCanon = (d.zhs||[]).slice(); curEnsCanon = (d.ens||[]).slice(); curSegs = (d.segs||[]).slice();
-  curMach = {}; curZh = {}; curEn = {};
-  $('#out').innerHTML = (isSample ? note('即時生成這馬袂通，下跤是預生樣本。') : '') + `
-    <div class="meta"><strong>${esc(d.query)}</strong>
-      <span>${d.pieces} 篇</span><span>${d.chars} 字</span><span>~${d.tokens_est} tok</span>
-      ${isSample?'<span>預生樣本</span>':''}
-      ${live && !isSample ? `<button class="again" id="again">閣生一批</button>` : ''}</div>
-    ${d.texts.map((t,i)=>piece(t,i,(d.tailos||[])[i])).join('')}`;
-  const ag = $('#again');
-  if(ag) ag.onclick = () => { $('#q').value = d.query; run(); };
-}
-
-function piece(t,i,tl){
-  const gate = VOICE_LIVE || DEV;
-  const quad = !!curSegs[i];                       /* segs=判準四軌的證據 */
-  const hasTl = quad || (tl && !tl.includes('⟨'));
-  return `<article class="piece" id="p${i}">
-    <div class="piece-top">
-      <span class="idx">${String(i+1).padStart(2,'0')}</span>
-      <span class="n">${cp(t)} 字</span>
-      ${quad ? '<span class="badge">判準四語</span>' : ''}
-      <span class="acts">
-        ${live && curQuery ? `<button class="mini" data-re="${i}" title="換這篇">↻</button>` : ''}
-        <button class="mini" data-copy="${i}">抄</button>
-        ${gate && hasTl ? `<button class="mini" data-tl="${i}">台羅</button>` : ''}
-        ${quad ? `<button class="mini" data-zh="${i}">中文</button>` : ''}
-        ${quad ? `<button class="mini" data-en="${i}">英文</button>` : ''}
-        ${gate ? `<button class="mini" data-tts="${i}">🔊</button>` : ''}
-      </span>
-    </div>
-    <div class="body" id="b${i}">${curSegs[i] ? bodyHtmlSegs(curSegs[i]) : bodyHtml(t, tl, null, null, false)}</div>
-  </article>`;
-}
-const splitHan = t => t.split('。').filter(s=>s.trim());
-/* quad segs: 逐句{h,t,z,e}天生對齊——零切句零走位 */
-function bodyHtmlSegs(segs){
-  return segs.map(s =>
-    `<span class="sent">${esc(s.h || '')}</span>` +
-    (s.t ? `<span class="line tl">${esc(s.t)}</span>` : '') +
-    (s.z ? `<span class="line zh">${esc(s.z)}</span>` : '') +
-    (s.e ? `<span class="line en">${esc(s.e)}</span>` : '')
-  ).join('');
-}
-function bodyHtml(t, tl, zhArr, enArr, mach){
-  const hs = splitHan(t);
-  const ts = (tl && !tl.includes('⟨')) ? tl.split('.').map(s=>s.trim()).filter(Boolean) : null;
-  let out = mach ? `<span class="mach">機轉台羅・參考用（母語判準版整備中）</span>` : '';
-  hs.forEach((seg,k)=>{
-    out += `<span class="sent">${esc(seg)}。</span>`;
-    if(ts && ts[k]) out += `<span class="line tl">${esc(ts[k])}.</span>`;
-    if(zhArr && zhArr[k]) out += `<span class="line zh">${esc(zhArr[k])}。</span>`;
-    if(enArr && enArr[k]) out += `<span class="line en">${esc(enArr[k])}</span>`;
-  });
-  return out;
-}
-function renderBody(i){
-  if(curSegs[i]) { $('#b'+i).innerHTML = bodyHtmlSegs(curSegs[i]); return; }
-  $('#b'+i).innerHTML = bodyHtml(curTexts[i], curTailos[i], curZh[i], curEn[i], !!curMach[i]);
-}
-
-/* 台羅: 庫有→直開; 庫無→中繼機轉(標示) */
-async function loadTl(i, btn){
-  const p = $('#p'+i);
-  if(curSegs[i] || (curTailos[i] && !curTailos[i].includes('⟨'))){ p.classList.toggle('show-tl'); btn.classList.toggle('on'); return; }
-  btn.textContent = '…';
-  try{
-    const r = await fetch(RELAY+'/taigi-to-tailo', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ text: curTexts[i] }),
-      signal: AbortSignal.timeout(60000)
-    });
-    const d = await r.json();
-    if(!d.tailo) throw 0;
-    curTailos[i] = d.tailo; curMach[i] = true;
-    renderBody(i);
-    p.classList.add('show-tl'); btn.classList.add('on'); btn.textContent = '台羅';
-  }catch{ btn.textContent = '台羅'; hint('台羅服務這馬袂通。'); }
-}
-/* 中/英: 判準軌直開; 非判準軌無服務(MT路徑已廢) */
-async function loadZh(i, btn){
-  if(!curSegs[i]) return;
-  $('#p'+i).classList.toggle('show-zh'); btn.classList.toggle('on');
-}
-async function loadEn(i, btn){
-  if(!curSegs[i]) return;
-  $('#p'+i).classList.toggle('show-en'); btn.classList.toggle('on');
-}
-
-/* ↻ 換這篇: 生1篇新的換入位 i (原始頁regen有叫無定義,這版補齊) */
-async function regen(i, btn){
-  if(!live || !curQuery) return;
-  btn.textContent = '…'; btn.disabled = true;
-  try{
-    const res = await fetch(S.base()+'/generate', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':S.key()},
-      body: JSON.stringify({query: curQuery, n: 1}),
-      signal: AbortSignal.timeout(120000)
-    });
-    const d = await res.json().catch(()=>({}));
-    if(res.status===429){ offline(d.error || '額度用了'); throw 0; }
-    if(!res.ok || !d.texts || !d.texts[0]) throw 0;
-    curTexts[i]   = d.texts[0];
-    curTailos[i]  = (d.tailos||[])[0] || '';
-    curZhsCanon[i]= (d.zhs||[])[0] || '';
-    curEnsCanon[i]= (d.ens||[])[0] || '';
-    curSegs[i]    = (d.segs||[])[0] || null;
-    curMach[i] = false;
-    const p = $('#p'+i);
-    p.classList.remove('show-tl','show-zh','show-en');
-    p.outerHTML = piece(curTexts[i], i, curTailos[i]);
-    quota();
-  }catch{
-    hint('換篇袂成，閣試一擺。');
-    btn.textContent = '↻'; btn.disabled = false;
-  }
-}
-
-/* ═══════════ 🔊 語音: 全走漢字路 ═══════════ */
-const audioCache = {};
-let curAudio = null;
-async function ttsOne(payload){
-  const ck = (payload.textType||'han') + ':' + payload.text;
-  if(audioCache[ck]) return audioCache[ck];
-  const r = await fetch(RELAY+'/tts', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(payload), signal: AbortSignal.timeout(60000)
-  });
-  const d = await r.json();
-  if(!d.audioBase64) throw 0;
-  return audioCache[ck] = d.audioBase64;
-}
-const playB64 = b64 => new Promise(res => {
-  const a = new Audio('data:audio/wav;base64,'+b64);
-  curAudio = a;
-  a.onended = res; a.onerror = res;
-  a.play().catch(res);
-});
-async function playTts(i, btn){
-  if(btn.classList.contains('playing')){
-    if(curAudio){ curAudio.pause(); curAudio = null; }
-    btn.classList.remove('playing'); btn.textContent = '🔊';
-    return;
-  }
-  btn.classList.add('playing'); btn.textContent = '⏸';
-  try{
-    /* 漢字直送中繼(台羅詞界空格會予TTS當停頓,只做顯示毋送唸) */
-    const b64 = await ttsOne({ text: curTexts[i], speaker:'male' });
-    await playB64(b64);
-  }catch(_e){
-    hint('語音服務這馬袂通。');
-  }finally{
-    btn.classList.remove('playing'); btn.textContent = '🔊'; curAudio = null;
-  }
-}
-
-$('#out').onclick = e => {
-  const b = e.target.closest('button'); if(!b) return;
-  if(b.dataset.re !== undefined) regen(+b.dataset.re, b);
-  if(b.dataset.copy !== undefined){
-    navigator.clipboard.writeText(curTexts[+b.dataset.copy] || $('#b'+b.dataset.copy).textContent);
-    b.textContent = '抄好'; setTimeout(()=>b.textContent='抄', 1200);
-  }
-  if(b.dataset.tl !== undefined) loadTl(+b.dataset.tl, b);
-  if(b.dataset.zh !== undefined) loadZh(+b.dataset.zh, b);
-  if(b.dataset.en !== undefined) loadEn(+b.dataset.en, b);
-  if(b.dataset.tts !== undefined) playTts(+b.dataset.tts, b);
-};
-
-/* ═══════════ 語音輸入: 講台語→中繼ASR→查詢 ═══════════ */
-let rec = null, chunks = [], recording = false;
-$('#mic').onclick = async () => {
-  if(recording){ rec.stop(); return; }
-  if(!navigator.mediaDevices?.getUserMedia){
-    hint('這台裝置袂當錄音（愛 https 佮麥克風權限）。'); return;
-  }
-  try{
-    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    rec = new MediaRecorder(stream);
-    chunks = [];
-    rec.ondataavailable = e => chunks.push(e.data);
-    rec.onstop = async () => {
-      stream.getTracks().forEach(t=>t.stop());
-      recording = false;
-      $('#mic').classList.remove('rec');
-      $('#mic').disabled = true;
-      hint('聽拍中…');
-      const blob = new Blob(chunks, {type: rec.mimeType || 'audio/webm'});
-      if(blob.size < 2000){ hint('傷短，閣講一擺。'); $('#mic').disabled=false; return; }
-      try{
-        const b64 = await blobB64(blob);
-        const r = await fetch(RELAY+'/asr-web', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({audioBase64:b64, mimeType: blob.type.split(';')[0]}),
-          signal: AbortSignal.timeout(70000)
-        });
-        const d = await r.json();
-        const t = (d.transcript || '').trim();
-        if(!t){ hint('聽無，閣講一擺。'); return; }
-        $('#q').value = t;
-        hint(`聽著：「${esc(t)}」`);
-        run();
-      }catch(e){
-        hint('語音服務這馬袂通。');
-      }finally{ $('#mic').disabled=false; }
-    };
-    rec.start();
-    recording = true;
-    $('#mic').classList.add('rec');
-    hint('咧錄音…講一个查詢，講煞閣撳一下。');
-  }catch{
-    hint('麥克風開袂起來——檢查瀏覽器的權限。');
-  }
-};
-const hint = t => $('#mic-hint').innerHTML = t;
-const blobB64 = b => new Promise((res,rej)=>{
-  const r = new FileReader();
-  r.onload = () => res(r.result.split(',')[1]);
-  r.onerror = rej;
-  r.readAsDataURL(b);
-});
-
-/* ═══════════ 歷史 ═══════════ */
 function drawHist(){
   $('#hist-empty').style.display = hist.length ? 'none' : 'block';
   $('#hist').innerHTML = hist.map((h,i)=>`<li><button data-h="${i}">
-    <span class="q">${esc(h.q)}</span>
-    <span class="m">${h.p} 篇 · ${new Date(h.t).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}</span>
+    <div class="q">${esc(h.q)}</div>
+    <div class="m">${h.p} 篇 · ${new Date(h.t).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})}</div>
   </button></li>`).join('');
 }
 $('#hist').onclick = e => {
@@ -1086,31 +766,8 @@ $('#hist').onclick = e => {
 };
 $('#btn-clear').onclick = () => { hist=[]; localStorage.removeItem('xny_hist'); drawHist(); };
 
-/* ═══════════ 設定 dialog ═══════════ */
-$('#btn-set').onclick = () => {
-  $('#base').value = localStorage.getItem('xny_base') || '';
-  $('#key').value  = localStorage.getItem('xny_key')  || '';
-  $('#dlg').showModal();
-};
-$('#dlg-x').onclick = () => $('#dlg').close();
-$('#dlg-reset').onclick = () => {
-  localStorage.removeItem('xny_base'); localStorage.removeItem('xny_key');
-  $('#dlg').close(); quota();
-};
-$('#dlg-ok').onclick = () => {
-  const b = $('#base').value.trim().replace(/\/$/,''), k = $('#key').value.trim();
-  b ? localStorage.setItem('xny_base', b) : localStorage.removeItem('xny_base');
-  k ? localStorage.setItem('xny_key',  k) : localStorage.removeItem('xny_key');
-  $('#dlg').close(); quota();
-};
-
-/* LINE Bot 指引窗 */
-$('#dlg-line-x').onclick = () => $('#dlg-line').close();
-$('#rail-guide').onclick = e => { e.preventDefault(); closeRail(); $('#dlg-line').showModal(); };
-
-/* ═══════════ 起動 ═══════════ */
-$('#out').innerHTML = `<div class="empty"><div class="big">揀一个所在抑是職業，看伊按怎用台語講家己的故事</div>
-  <div>頂懸拍字、撳籤，抑是掀開右爿的分類尋寶。</div></div>`;
+$('#out').innerHTML = `<div class="empty"><div class="big">揀一个職業，看伊按怎講家己的工課</div>
+  <div>頂懸拍字抑是點下跤的籤。</div></div>`;
 drawHist(); quota();
 </script>
 </body>
