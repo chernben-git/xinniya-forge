@@ -49,7 +49,7 @@
   .burger{display:none; width:38px; height:38px; border-radius:10px;
     border:1px solid var(--glass-bd); background:var(--glass);
     font-size:17px; line-height:1; flex-shrink:0}
-  .brand{font-family:var(--serif); font-weight:900; font-size:19px; letter-spacing:.08em; white-space:nowrap; color:var(--gold)}
+  .brand{font-family:var(--serif); font-weight:900; font-size:19px; letter-spacing:.08em; white-space:nowrap}
   .brand em{font-style:normal; color:var(--seal-l)}
   .brand .cs{font-family:var(--mono); font-size:10px; color:var(--gold);
     border:1px solid rgba(199,154,62,.4); border-radius:99px; padding:1px 8px;
@@ -108,8 +108,7 @@
   .view{display:none; flex:1; min-height:0; flex-direction:column}
   .view.on{display:flex}
 
-  /* —— 生文 view —— */
-  #v-forge{overflow-y:auto; padding-right:2px}
+  /* —— 生文 view(v4.6 起=iframe,同 v-trans,免特規) —— */
   .forge-hero{padding:6px 4px 16px}
   .eyebrow{font-family:var(--mono); font-size:11px; color:var(--gold); letter-spacing:.24em; margin-bottom:8px}
   .forge-hero h1{font-family:var(--serif); font-weight:900; font-size:clamp(21px,2.6vw,29px);
@@ -236,7 +235,8 @@
     border:1px solid var(--glass-bd);
     background:var(--void-2);
     box-shadow:0 14px 44px rgba(0,0,0,.4), inset 0 0 0 1px rgba(199,154,62,.12)}
-  .frame-wrap iframe{width:100%; height:100%; border:0; display:block; background:#fff}
+  .frame-wrap{width:100%; min-width:0}
+  .frame-wrap iframe{width:100%; min-width:100%; height:100%; border:0; display:block; background:#fff}
   .view.fs{position:fixed; inset:0; z-index:70; background:var(--void); padding:10px; display:flex}
   .view.fs .vtool{padding-top:6px}
 
@@ -398,12 +398,8 @@
     .backdrop.on{opacity:1; pointer-events:auto}
 
     .stage{overflow:visible}
-    /* v4.5.3: 生文頁手機捲動修 — stage開visible了後 #v-forge 高度鏈斷去,
-       予伊家己一个視窗高的捲動框(iframe頁內捲照舊,免動) */
-    #v-forge{ height:calc(100vh - var(--top) - 20px);
-      height:calc(100dvh - var(--top) - 20px - env(safe-area-inset-bottom));
-      overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:76px }
-    #v-forge{padding-right:0}
+    /* v4.6.1: v4.5.3原生捲動規則退役(iframe內捲) */
+    
     .forge-hero{padding:2px 2px 13px}
     .forge-hero h1{font-size:21px}
     .qrow{flex-wrap:wrap}
@@ -450,7 +446,7 @@
       <a href="features.html">🧭 功能總覽</a>
       <a href="#" id="rail-guide">📱 LINE Bot 指引</a>
       <a href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">LINE 官方帳號 ↗</a>
-      <a href="mailto:chernben@gmail.com">chernben@gmail.com · v4.6</a>
+      <a href="mailto:chernben@gmail.com">chernben@gmail.com · v4.6.1</a>
     </div>
   </nav>
 
@@ -464,9 +460,9 @@
         <span class="vd">台語文章生成・四語判準同步</span>
         <span class="sp"></span>
         <button class="vbtn" data-fs="v-forge">⛶ 全螢幕</button>
-        <a class="vbtn" href="app.html" target="_blank" rel="noopener">↗ 新視窗</a>
+        <a class="vbtn" href="forge.html" target="_blank" rel="noopener">↗ 新視窗</a>
       </div>
-      <div class="frame-wrap"><iframe src="app.html" title="生文" allow="microphone"></iframe></div>
+      <div class="frame-wrap"><iframe src="forge.html" title="生文" allow="microphone"></iframe></div>
       <!-- v4.6: 原生生文退役改掛 forge iframe(單一真相); stub 予舊 JS 綁定免拋錯 -->
       <div hidden aria-hidden="true">
         <input id="q"><button id="mic"></button><select id="n"></select><button id="go"></button>
@@ -726,7 +722,7 @@ $('#cats-bd').onclick = e => {
   if(it){
     /* v4.6: 生文=forge iframe, 籤直接駛 iframe 帶參數自動生成 */
     const fr = $('#v-forge iframe');
-    fr.src = 'app.html?q=' + encodeURIComponent(it.textContent) + '&auto=1&t=' + Date.now();
+    fr.src = 'forge.html?q=' + encodeURIComponent(it.textContent) + '&auto=1&t=' + Date.now();
     switchView('forge');
     closeCats();
     return;
