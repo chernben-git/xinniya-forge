@@ -450,7 +450,7 @@
       <a href="features.html">🧭 功能總覽</a>
       <a href="#" id="rail-guide">📱 LINE Bot 指引</a>
       <a href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">LINE 官方帳號 ↗</a>
-      <a href="mailto:chernben@gmail.com">chernben@gmail.com · v4.5.3</a>
+      <a href="mailto:chernben@gmail.com">chernben@gmail.com · v4.6</a>
     </div>
   </nav>
 
@@ -459,54 +459,20 @@
 
     <!-- 生文 (原生) -->
     <section class="view on" id="v-forge">
-      <div class="forge-hero">
-        <div class="eyebrow">XIN ERYA · TAIGI ENGINE</div>
-        <h1>讓<span class="r">台語</span>通往世界語言的橋樑</h1>
-        <div class="sub">台語文章生成，四語同步——台羅、中文、英文逐句判準對齊，毋是機器翻譯。</div>
-        <div class="stats-mini">
-          <div class="sm"><b>上億篇</b><span>台語文章</span></div>
-          <div class="sm"><b>千億字</b><span>台語語料</span></div>
-          <div class="sm"><b>四語</b><span>判準同步</span></div>
-          <div class="sm"><b>台語 LLM</b><span>辭海百科・建置中</span></div>
-        </div>
+      <div class="vtool">
+        <span class="vt">📝 生文</span>
+        <span class="vd">台語文章生成・四語判準同步</span>
+        <span class="sp"></span>
+        <button class="vbtn" data-fs="v-forge">⛶ 全螢幕</button>
+        <a class="vbtn" href="forge.html" target="_blank" rel="noopener">↗ 新視窗</a>
       </div>
-
-      <div class="panel">
-        <div class="qrow">
-          <input id="q" placeholder="拍字，抑是撳🎤講台語…（例：消防員、菜市仔）" autocomplete="off">
-          <button class="mic" id="mic" title="講台語輸入">🎤</button>
-          <select id="n">
-            <option value="1">1 篇</option>
-            <option value="3" selected>3 篇</option>
-            <option value="5">5 篇</option>
-          </select>
-          <button id="go">生成</button>
-        </div>
-        <div id="mic-hint"></div>
-        <div class="chips" id="chips"></div>
+      <div class="frame-wrap"><iframe src="forge.html" title="生文" allow="microphone"></iframe></div>
+      <!-- v4.6: 原生生文退役改掛 forge iframe(單一真相); stub 予舊 JS 綁定免拋錯 -->
+      <div hidden aria-hidden="true">
+        <input id="q"><button id="mic"></button><select id="n"></select><button id="go"></button>
+        <span id="mic-hint"></span><div id="chips"></div><div id="out"></div>
+        <div id="hist-empty"></div><div id="hist"></div><button id="btn-clear"></button>
       </div>
-
-      <div id="out"></div>
-
-      <details class="fold">
-        <summary>📖 使用說明</summary>
-        <div class="fold-bd">
-          <b>按怎用：</b>頂懸拍一个查詢（職業抑是所在），撳「生成」。逐篇會使撳
-          <b>台羅／中文／英文</b> 展開行間對照，<b>🔊</b> 唸予你聽，<b>抄</b> 複製全文，<b>↻</b> 換這篇。<br>
-          <b>判準四語：</b>掛綠徽章的篇，四軌攏是新爾雅引擎判準出的——毋是機器翻譯。<br>
-          <b>右爿分類：</b>29 大類生活場域＋146 種職業，撳落即生。<br>
-          <b>額度：</b>逐工有免費額度；用了會轉預生樣本。
-        </div>
-      </details>
-
-      <details class="fold">
-        <summary>🕘 這擺的紀錄</summary>
-        <div class="fold-bd">
-          <div id="hist-empty">猶未生過。</div>
-          <ul id="hist"></ul>
-          <button class="clear-h" id="btn-clear">清掉紀錄</button>
-        </div>
-      </details>
     </section>
 
     <!-- 翻譯機 -->
@@ -758,10 +724,11 @@ $('#cats-bd').onclick = e => {
   if(e.target.closest('[data-line-guide]')){ $('#dlg-line').showModal(); return; }
   const it = e.target.closest('.it');
   if(it){
+    /* v4.6: 生文=forge iframe, 籤直接駛 iframe 帶參數自動生成 */
+    const fr = $('#v-forge iframe');
+    fr.src = 'forge.html?q=' + encodeURIComponent(it.textContent) + '&auto=1&t=' + Date.now();
     switchView('forge');
-    $('#q').value = it.textContent;
     closeCats();
-    run();
     return;
   }
   const lk = e.target.closest('.cat-link[data-goto]');

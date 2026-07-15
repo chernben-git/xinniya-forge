@@ -735,7 +735,7 @@ function drawDir(kind){
         `<h4>${esc(n)}<span class="cnt">${c} 場所</span></h4>
          <div class="grp">${items.map(x=>`<button class="it">${esc(x)}</button>`).join('')}</div>`).join('')
     : `<div style="font-size:12px;color:var(--ink-3);margin-bottom:10px">
-         撳落即生 · 台語＋語音（<span style="color:var(--amber)">四語判準資料已備・近期上線</span>）</div>` +
+         撳落即生 · 台語＋語音（<span style="color:var(--amber)">四語判準</span>）</div>` +
       DIR_OCC.map(([n,items])=>
         `<h4>${esc(n)}<span class="cnt">${items.length}</span></h4>
          <div class="grp">${items.map(x=>`<button class="it">${esc(x)}</button>`).join('')}</div>`).join('');
@@ -769,6 +769,16 @@ $('#btn-clear').onclick = () => { hist=[]; localStorage.removeItem('xny_hist'); 
 $('#out').innerHTML = `<div class="empty"><div class="big">揀一个職業，看伊按怎講家己的工課</div>
   <div>頂懸拍字抑是點下跤的籤。</div></div>`;
 drawHist(); quota();
+
+/* v4.4.1: app shell iframe 接口 — ?q=職業/場所&auto=1 自動生成 */
+try{
+  const _p = new URLSearchParams(location.search);
+  const _q = (_p.get('q')||'').trim();
+  if(_q){
+    $('#q').value = _q;
+    if(_p.get('auto')==='1') setTimeout(()=>run(), 60);
+  }
+}catch(_e){}
 </script>
 </body>
 </html>
