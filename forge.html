@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>新爾雅台語文章產生器｜台語・台羅・中文・英文 4 語對照</title>
+<!-- forge v4.5-dark 2026-07-16 -->
 <meta name="description" content="新爾雅台語知識引擎——上億篇生成空間，23 場域 122 職業，台語/台羅/中文/英文 4 語對照，語音朗讀。">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -209,6 +210,22 @@
   .lg-sec p{font-size:12.5px;color:var(--ink-2);line-height:1.75;margin:0}
   .lg-join{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--line)}
   .lg-join .right{margin-left:auto}
+
+/* ═══ v4.5-dark: 墨玉黑皮 — 干焦色票+寫死白底四戶,邏輯/排版零動 ═══
+   欲倒轉白卡: 這塊規塊剃掉就是 */
+:root{
+  --paper:#100e0c; --card:#1a1712; --wash:#221d16; --line:#3a332a;
+  --ink:#efe9dd; --ink-2:#c8c0b1; --ink-3:#8d887e;
+  --seal:#c8352a; --moss:#5c8a6f; --amber:#c79a3e;
+}
+body{background:var(--paper)}
+input,textarea,select{background:#171310; color:var(--ink); border-color:var(--line)}
+::placeholder{color:#6f6a60}
+/* 寫死白底四戶轉暗(白字鈕.go/.idx/.dirbtn.on免動,本底就深底白字) */
+#q:focus{background:#171310}
+.mini{background:#241f18}
+.contrast .tabs button{background:#241f18}
+img{filter:none}
 </style>
 </head>
 <body>
