@@ -398,6 +398,11 @@
     .backdrop.on{opacity:1; pointer-events:auto}
 
     .stage{overflow:visible}
+    /* v4.5.3: 生文頁手機捲動修 — stage開visible了後 #v-forge 高度鏈斷去,
+       予伊家己一个視窗高的捲動框(iframe頁內捲照舊,免動) */
+    #v-forge{ height:calc(100vh - var(--top) - 20px);
+      height:calc(100dvh - var(--top) - 20px - env(safe-area-inset-bottom));
+      overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:76px }
     #v-forge{padding-right:0}
     .forge-hero{padding:2px 2px 13px}
     .forge-hero h1{font-size:21px}
@@ -445,7 +450,7 @@
       <a href="features.html">🧭 功能總覽</a>
       <a href="#" id="rail-guide">📱 LINE Bot 指引</a>
       <a href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">LINE 官方帳號 ↗</a>
-      <a href="mailto:chernben@gmail.com">chernben@gmail.com · v4.5.2</a>
+      <a href="mailto:chernben@gmail.com">chernben@gmail.com · v4.5.3</a>
     </div>
   </nav>
 
