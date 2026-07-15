@@ -40,6 +40,14 @@
   :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:6px}
 
   /* ══════════ 頂列 ══════════ */
+  /* iframe內嵌: 藏自己的header(外框index已有), stage補位 */
+  body.embed .topbar{display:none}
+  body.embed .fab{display:none !important}
+  body.embed .cats{display:none !important}
+  body.embed .rail{display:none !important}
+  body.embed .backdrop{display:none !important}
+  body.embed .stage{padding-top:0 !important; grid-template-columns:1fr !important}
+  body.embed{--top:0px}
   .topbar{
     position:fixed; top:0; left:0; right:0; height:var(--top); z-index:50;
     display:flex; align-items:center; gap:12px; padding:0 16px;
@@ -110,7 +118,14 @@
 
   /* —— 生文 view —— */
   #v-forge{overflow-y:auto; padding-right:2px}
-  .forge-hero{padding:6px 4px 16px}
+  .forge-hero{padding:6px 4px 16px; transition:max-height .35s ease,opacity .3s ease; overflow:hidden; max-height:600px}
+  #v-forge.gen .forge-hero{max-height:0; opacity:0; padding:0; margin:0}
+  #v-forge.gen .hero-restore{display:flex}
+  .hero-restore{display:none; align-items:center; gap:8px; cursor:pointer;
+    font-family:var(--mono); font-size:11px; color:var(--gold); letter-spacing:.18em;
+    padding:8px 4px 10px; opacity:.85; user-select:none}
+  .hero-restore:hover{opacity:1}
+  .hero-restore .ln{flex:1; height:1px; background:linear-gradient(90deg,var(--gold),transparent); opacity:.4}
   .eyebrow{font-family:var(--mono); font-size:11px; color:var(--gold); letter-spacing:.24em; margin-bottom:8px}
   .forge-hero h1{font-family:var(--serif); font-weight:900; font-size:clamp(21px,2.6vw,29px);
     line-height:1.3; letter-spacing:.02em}
@@ -357,7 +372,7 @@
       transform:translateY(-112%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
       box-shadow:0 24px 60px rgba(0,0,0,.55);
     }
-    .rail.open{transform:translateY(0); z-index:45}
+    .rail.open{transform:translateY(0)}
     .rail-ft{margin-top:8px}
 
     /* 右欄 → 底部抽屜 */
@@ -369,7 +384,7 @@
       box-shadow:0 -18px 60px rgba(0,0,0,.55);
       padding-bottom:env(safe-area-inset-bottom);
     }
-    .cats.open{transform:translateY(0); z-index:46}
+    .cats.open{transform:translateY(0)}
     .cats-h{padding:13px 16px 9px}
     .cats-h::before{content:""; position:absolute; top:7px; left:50%; transform:translateX(-50%);
       width:42px; height:4px; border-radius:99px; background:rgba(243,237,225,.22)}
@@ -377,11 +392,6 @@
     .cats-x{display:block; margin-left:auto; width:30px; height:30px; border-radius:9px;
       border:1px solid var(--glass-bd); background:var(--glass); font-size:13px; color:var(--ink-2)}
 
-    /* v4.5.2: 四粒數字卡手機一排(Plus 430px 內鬥會落) */
-    .stats-mini{ flex-wrap:nowrap; gap:7px }
-    .sm{ min-width:0; flex:1 1 0; padding:8px 9px }
-    .sm b{ font-size:14px; white-space:nowrap }
-    .sm span{ font-size:9.5px; letter-spacing:.01em; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
     .fab{
       display:flex; align-items:center; gap:8px;
       position:fixed; right:14px; bottom:calc(16px + env(safe-area-inset-bottom)); z-index:44;
@@ -398,11 +408,6 @@
     .backdrop.on{opacity:1; pointer-events:auto}
 
     .stage{overflow:visible}
-    /* v4.5.3: 生文頁手機捲動修 — stage開visible了後 #v-forge 高度鏈斷去,
-       予伊家己一个視窗高的捲動框(iframe頁內捲照舊,免動) */
-    #v-forge{ height:calc(100vh - var(--top) - 20px);
-      height:calc(100dvh - var(--top) - 20px - env(safe-area-inset-bottom));
-      overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:76px }
     #v-forge{padding-right:0}
     .forge-hero{padding:2px 2px 13px}
     .forge-hero h1{font-size:21px}
@@ -434,7 +439,6 @@
 </header>
 
 <div class="shell" id="shell">
-  <div class="backdrop" id="backdrop"></div><!--v4.5.1: 搬入shell脈絡,修手機面板予罩崁烏-->
 
   <!-- ══ 左欄 ══ -->
   <nav class="rail" id="rail">
@@ -442,15 +446,14 @@
     <button class="rbtn on" data-view="forge"><span class="ic">📝</span><span class="lb">生文</span></button>
     <button class="rbtn" data-view="trans"><span class="ic">🌐</span><span class="lb">翻譯機</span></button>
     <button class="rbtn" data-view="type"><span class="ic">⌨️</span><span class="lb">台語打字</span></button>
-    <button class="rbtn soon" tabindex="-1"><span class="ic">🤖</span><span class="lb">AI 對話</span><span class="tag-soon">整備中</span></button>
+    <button class="rbtn" data-view="chat"><span class="ic">🤖</span><span class="lb">AI 對話</span></button>
     <div class="rail-div"></div>
     <a class="rbtn" href="https://lin.ee/zkftVc3" target="_blank" rel="noopener"><span class="ic">🔊</span><span class="lb">發音評分</span><span class="tag-line">LINE</span></a>
     <a class="rbtn" href="https://lin.ee/zkftVc3" target="_blank" rel="noopener"><span class="ic">🎓</span><span class="lb">學習</span><span class="tag-line">LINE</span></a>
     <div class="rail-ft">
-      <a href="features.html">🧭 功能總覽</a>
       <a href="#" id="rail-guide">📱 LINE Bot 指引</a>
       <a href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">LINE 官方帳號 ↗</a>
-      <a href="mailto:chernben@gmail.com">chernben@gmail.com · v4.6</a>
+      <a href="mailto:chernben@gmail.com">chernben@gmail.com</a>
     </div>
   </nav>
 
@@ -459,20 +462,57 @@
 
     <!-- 生文 (原生) -->
     <section class="view on" id="v-forge">
-      <div class="vtool">
-        <span class="vt">📝 生文</span>
-        <span class="vd">台語文章生成・四語判準同步</span>
-        <span class="sp"></span>
-        <button class="vbtn" data-fs="v-forge">⛶ 全螢幕</button>
-        <a class="vbtn" href="app.html" target="_blank" rel="noopener">↗ 新視窗</a>
+      <div class="forge-hero">
+        <div class="eyebrow">XIN ERYA · TAIGI ENGINE</div>
+        <h1>讓<span class="r">台語</span>通往世界語言的橋樑</h1>
+        <div class="sub">台語文章生成，四語同步——台羅、中文、英文逐句判準對齊，毋是機器翻譯。</div>
+        <div class="stats-mini">
+          <div class="sm"><b>上億篇</b><span>台語文章</span></div>
+          <div class="sm"><b>千億字</b><span>台語語料</span></div>
+          <div class="sm"><b>四語</b><span>判準同步</span></div>
+          <div class="sm"><b>台語 LLM</b><span>辭海百科・建置中</span></div>
+        </div>
       </div>
-      <div class="frame-wrap"><iframe src="app.html" title="生文" allow="microphone"></iframe></div>
-      <!-- v4.6: 原生生文退役改掛 forge iframe(單一真相); stub 予舊 JS 綁定免拋錯 -->
-      <div hidden aria-hidden="true">
-        <input id="q"><button id="mic"></button><select id="n"></select><button id="go"></button>
-        <span id="mic-hint"></span><div id="chips"></div><div id="out"></div>
-        <div id="hist-empty"></div><div id="hist"></div><button id="btn-clear"></button>
+      <div class="hero-restore" onclick="document.getElementById('v-forge').classList.remove('gen')">
+        <span>XIN ERYA</span><span class="ln"></span><span>▽ 展開簡介</span>
       </div>
+
+      <div class="panel">
+        <div class="qrow">
+          <input id="q" placeholder="拍字，抑是撳🎤講台語…（例：消防員、菜市仔）" autocomplete="off">
+          <button class="mic" id="mic" title="講台語輸入">🎤</button>
+          <select id="n">
+            <option value="1">1 篇</option>
+            <option value="3" selected>3 篇</option>
+            <option value="5">5 篇</option>
+          </select>
+          <button id="go">生成</button>
+        </div>
+        <div id="mic-hint"></div>
+        <div class="chips" id="chips"></div>
+      </div>
+
+      <div id="out"></div>
+
+      <details class="fold">
+        <summary>📖 使用說明</summary>
+        <div class="fold-bd">
+          <b>按怎用：</b>頂懸拍一个查詢（職業抑是所在），撳「生成」。逐篇會使撳
+          <b>台羅／中文／英文</b> 展開行間對照，<b>🔊</b> 唸予你聽，<b>抄</b> 複製全文，<b>↻</b> 換這篇。<br>
+          <b>判準四語：</b>掛綠徽章的篇，四軌攏是新爾雅引擎判準出的——毋是機器翻譯。<br>
+          <b>右爿分類：</b>29 大類生活場域＋146 種職業，撳落即生。<br>
+          <b>額度：</b>逐工有免費額度；用了會轉預生樣本。
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary>🕘 這擺的紀錄</summary>
+        <div class="fold-bd">
+          <div id="hist-empty">猶未生過。</div>
+          <ul id="hist"></ul>
+          <button class="clear-h" id="btn-clear">清掉紀錄</button>
+        </div>
+      </details>
     </section>
 
     <!-- 翻譯機 -->
@@ -499,6 +539,18 @@
       <div class="frame-wrap"><iframe data-src="taigi-typing.html" title="台語打字"></iframe></div>
     </section>
 
+    <!-- AI 對話 -->
+    <section class="view" id="v-chat">
+      <div class="vtool">
+        <span class="vt">🤖 台語 AI 對話</span>
+        <span class="vd">台灣文化・語言學習助手</span>
+        <span class="sp"></span>
+        <button class="vbtn" data-fs="v-chat">⛶ 全螢幕</button>
+        <a class="vbtn" href="taigi-chatbot.html" target="_blank" rel="noopener">↗ 新視窗</a>
+      </div>
+      <div class="frame-wrap"><iframe data-src="taigi-chatbot.html" title="台語 AI 對話" allow="microphone"></iframe></div>
+    </section>
+
   </main>
 
   <!-- ══ 右欄 ══ -->
@@ -514,7 +566,7 @@
 </div>
 
 <button class="fab" id="fab">☰ 分類尋寶</button>
-
+<div class="backdrop" id="backdrop"></div>
 
 <dialog id="dlg">
   <h3>設定</h3>
@@ -626,7 +678,7 @@ const DIR_OCC = [
 ];
 
 /* ═══════════ 殼: 主題切換 ═══════════ */
-const VIEW_IDS = ['forge','trans','type'];
+const VIEW_IDS = ['forge','trans','type','chat'];
 function switchView(v){
   VIEW_IDS.forEach(id=>{
     $('#v-'+id).classList.toggle('on', id===v);
@@ -692,7 +744,7 @@ function buildCats(){
     <details class="cat"${open}>
       <summary><span class="ct">🔧 職業敘事</span><span class="cn">146 種</span></summary>
       <div class="cat-bd">
-        <div class="cat-note">撳落即生 · 台語＋語音（<b style="color:var(--gold)">四語判準</b>）</div>
+        <div class="cat-note">撳落即生 · <b>四語判準</b>（台語・台羅・中文・英文）</div>
         ${occBd}
       </div>
     </details>
@@ -700,8 +752,8 @@ function buildCats(){
       <summary><span class="ct">🌐 語音・翻譯</span><span class="cn">3</span></summary>
       <div class="cat-bd">
         <button class="cat-link" data-goto="trans">🌐 台語翻譯機 <span class="arr">開 ›</span></button>
+        <button class="cat-link" data-goto="chat">🤖 AI 對話 <span class="arr">開 ›</span></button>
         <button class="cat-link" data-goto="type">⌨️ 台語打字 <span class="arr">開 ›</span></button>
-        <div class="cat-link" style="cursor:default">🤖 AI 對話 <span class="soon-lb">整備中</span></div>
       </div>
     </details>
     <details class="cat">
@@ -724,11 +776,10 @@ $('#cats-bd').onclick = e => {
   if(e.target.closest('[data-line-guide]')){ $('#dlg-line').showModal(); return; }
   const it = e.target.closest('.it');
   if(it){
-    /* v4.6: 生文=forge iframe, 籤直接駛 iframe 帶參數自動生成 */
-    const fr = $('#v-forge iframe');
-    fr.src = 'app.html?q=' + encodeURIComponent(it.textContent) + '&auto=1&t=' + Date.now();
     switchView('forge');
+    $('#q').value = it.textContent;
     closeCats();
+    run();
     return;
   }
   const lk = e.target.closest('.cat-link[data-goto]');
@@ -768,6 +819,7 @@ async function run(){
 
   const go = $('#go');
   go.disabled = true; go.innerHTML = '<i class="spin"></i>生成中';
+  document.getElementById('v-forge').classList.add('gen');
   out.innerHTML = '';
   try{
     if(!live) throw new Error('__FALLBACK__');
@@ -1090,6 +1142,10 @@ $('#rail-guide').onclick = e => { e.preventDefault(); closeRail(); $('#dlg-line'
 $('#out').innerHTML = `<div class="empty"><div class="big">揀一个所在抑是職業，看伊按怎用台語講家己的故事</div>
   <div>頂懸拍字、撳籤，抑是掀開右爿的分類尋寶。</div></div>`;
 drawHist(); quota();
+</script>
+<script>
+/* 佇iframe內(index崁入)就藏自己的header,免雙重「新爾雅」 */
+if(window.self!==window.top){document.documentElement.classList.add('is-embed');document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('embed')});}
 </script>
 </body>
 </html>
