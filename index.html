@@ -357,7 +357,7 @@
       transform:translateY(-112%); transition:transform .32s cubic-bezier(.2,.8,.2,1);
       box-shadow:0 24px 60px rgba(0,0,0,.55);
     }
-    .rail.open{transform:translateY(0)}
+    .rail.open{transform:translateY(0); z-index:45}
     .rail-ft{margin-top:8px}
 
     /* 右欄 → 底部抽屜 */
@@ -369,7 +369,7 @@
       box-shadow:0 -18px 60px rgba(0,0,0,.55);
       padding-bottom:env(safe-area-inset-bottom);
     }
-    .cats.open{transform:translateY(0)}
+    .cats.open{transform:translateY(0); z-index:46}
     .cats-h{padding:13px 16px 9px}
     .cats-h::before{content:""; position:absolute; top:7px; left:50%; transform:translateX(-50%);
       width:42px; height:4px; border-radius:99px; background:rgba(243,237,225,.22)}
@@ -377,6 +377,11 @@
     .cats-x{display:block; margin-left:auto; width:30px; height:30px; border-radius:9px;
       border:1px solid var(--glass-bd); background:var(--glass); font-size:13px; color:var(--ink-2)}
 
+    /* v4.5.2: 四粒數字卡手機一排(Plus 430px 內鬥會落) */
+    .stats-mini{ flex-wrap:nowrap; gap:7px }
+    .sm{ min-width:0; flex:1 1 0; padding:8px 9px }
+    .sm b{ font-size:14px; white-space:nowrap }
+    .sm span{ font-size:9.5px; letter-spacing:.01em; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
     .fab{
       display:flex; align-items:center; gap:8px;
       position:fixed; right:14px; bottom:calc(16px + env(safe-area-inset-bottom)); z-index:44;
@@ -440,7 +445,7 @@
       <a href="features.html">🧭 功能總覽</a>
       <a href="#" id="rail-guide">📱 LINE Bot 指引</a>
       <a href="https://lin.ee/zkftVc3" target="_blank" rel="noopener">LINE 官方帳號 ↗</a>
-      <a href="mailto:chernben@gmail.com">chernben@gmail.com</a>
+      <a href="mailto:chernben@gmail.com">chernben@gmail.com · v4.5.2</a>
     </div>
   </nav>
 
