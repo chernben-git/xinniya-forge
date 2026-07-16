@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>新爾雅台語文章產生器｜台語・台羅・中文・英文 4 語對照</title>
 <!-- forge v4.5-dark 2026-07-16 -->
-<meta name="description" content="新爾雅台語知識引擎——上億篇生成空間，23 場域 122 職業，台語/台羅/中文/英文 4 語對照，語音朗讀。">
+<meta name="description" content="新爾雅台語知識引擎——上億篇生成空間，29 場域 146 職業，台語/台羅/中文/英文 4 語對照，語音朗讀。">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -161,10 +161,10 @@
   .hero h1{font-family:var(--serif);font-size:26px;margin:0 0 2px;letter-spacing:.04em}
   .hero h1 em{font-style:normal;color:var(--seal)}
   .hero .sub{color:var(--ink-3);font-size:14px;margin-bottom:12px}
-  .stats{display:flex;gap:8px;flex-wrap:wrap}
+  .stats{display:flex;gap:7px;flex-wrap:nowrap} .stat{flex:1 1 0;min-width:0}
   .stat{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 13px}
-  .stat b{font-family:var(--serif);font-size:16px;color:var(--seal);display:block;line-height:1.2}
-  .stat span{font-size:11.5px;color:var(--ink-3)}
+  .stat b{font-family:var(--serif);font-size:clamp(13px,3.6vw,16px);color:var(--seal);display:block;line-height:1.2;white-space:nowrap}
+  .stat span{font-size:clamp(9px,2.5vw,11.5px);color:var(--ink-3);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* LINE卡 */
   .linecard{display:flex;gap:18px;align-items:center;border:1px solid var(--line);
             border-radius:var(--r);background:var(--card);padding:18px;margin:26px 0 10px;flex-wrap:wrap}
@@ -259,7 +259,7 @@ img{filter:none}
       <div class="stats">
         <div class="stat"><b>上億篇</b><span>台語文・千億字</span></div>
         <div class="stat"><b>0.01 秒</b><span>單篇生成</span></div>
-        <div class="stat"><b>23 場域</b><span>122 職業・4 大情境</span></div>
+        <div class="stat"><b>29 場域</b><span>146 職業・4 大情境</span></div>
         <div class="stat"><b>4 語判準</b><span>台語・台羅・中文・英文</span></div>
       </div>
       <div class="roadline">向 <b>台語 LLM</b>・<b>辭海百科</b> 前進——予機器嘛學會曉講正港台語</div>
