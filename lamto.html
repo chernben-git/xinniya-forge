@@ -161,25 +161,13 @@ footer b{color:#b8ac96;font-weight:500}
 <!-- ═══ 功能 ═══ -->
 <div class="page" id="pg-fn">
   <div class="eyebrow" data-zh="功能 · 語料生成 × 南島接軌" data-tai="功能 · 語料生成 × 南島接軌">功能 · 語料生成 × 南島接軌</div>
-  <h1 data-zh="一份骨架，逐句對齊、逐槽接軌" data-tai="一份骨架，逐句對齊、逐槽接軌">一份骨架，逐句對齊、逐槽接軌</h1>
+  <h1 data-zh="先生成台語，再選你要對齊的語系" data-tai="先生成台語，才揀你欲對齊的語系">先生成台語，再選你要對齊的語系</h1>
   <p class="lede"
-     data-zh="選一個生活場域或職業，引擎即時生成台語篇章——逐句嚴格對齊台羅、中文、英文；篇中的語意槽鏈同步展開南島語實現，每一格都帶證據等級。"
-     data-tai="揀一个生活場域抑是職業，引擎隨生成台語篇章——逐句嚴格對齊台羅、中文、英文；篇內的語意槽鏈同齊展開南島語實現，逐一格攏帶證據等級。">選一個生活場域或職業，引擎即時生成台語篇章——逐句嚴格對齊台羅、中文、英文；篇中的語意槽鏈同步展開南島語實現，每一格都帶證據等級。</p>
+     data-zh="選一個生活場域，引擎即時生成台語篇章。生成後點任一語言鍵——每一句台語下面就跟著那個語言：台羅、中文、英文是逐句嚴格對齊；南島語是逐槽真值對照，每格帶證據等級。"
+     data-tai="揀一个生活場域，引擎隨生成台語篇章。生成了後撳任一个語言鍵——逐句台語下跤就綴彼个語言：台羅、中文、英文是逐句嚴格對齊；南島語是逐槽真值對照，逐格帶證據等級。">選一個生活場域，引擎即時生成台語篇章。生成後點任一語言鍵——每一句台語下面就跟著那個語言：台羅、中文、英文是逐句嚴格對齊；南島語是逐槽真值對照，每格帶證據等級。</p>
 
   <div class="bar">
-    <input type="text" id="q" value="菜市仔" spellcheck="false"
-      data-ph-zh="輸入場域／職業（例：菜市仔）" data-ph-tai="拍場域／職業入去（例：菜市仔）">
-    <select id="target">
-      <option value="all">★ 全語系對照（矩陣）</option>
-      <option value="tgl">Tagalog 他加祿語</option>
-      <option value="ceb">Cebuano 宿霧語</option>
-      <option value="zsm">Melayu 馬來語</option>
-      <option value="ind">Indonesia 印尼語</option>
-      <option value="mlg">Malagasy 馬拉加斯語</option>
-      <option value="mri">Māori 毛利語</option>
-      <option value="tao">達悟語（引用展示）</option>
-      <option value="ami">阿美語（引用展示）</option>
-    </select>
+    <input type="text" id="q" value="菜市仔" spellcheck="false">
     <button class="go" onclick="realize()" data-zh="生成" data-tai="生成">生成</button>
   </div>
   <div class="samples">
@@ -195,38 +183,36 @@ footer b{color:#b8ac96;font-weight:500}
   </details>
 
   <div class="stage" id="stage" aria-live="polite">
-    <div class="axisrow"><div class="lab">台語 · 軸 <span class="mono" id="o-role" style="font-size:12px"></span>
-      <button class="ttsbtn" id="btn-tts" onclick="playTts()" title="台語語音">🔊 台語語音</button></div>
-      <div class="txt serif" id="o-tai">撳「生成」——引擎即時產出</div></div>
-
-    <div class="chainwrap">
-      <div class="lab2" data-zh="語意槽鏈 · 撳槽展開南島實現" data-tai="語意槽鏈 · 撳槽展開南島實現">語意槽鏈 · 撳槽展開南島實現</div>
-      <div id="o-chain" class="chain"></div>
-      <div id="o-slotdetail" class="slotdetail"></div>
+    <div class="doct">
+      <span class="lab">台語 · 軸 <span class="mono" id="o-role"></span></span>
+      <span class="sp"></span>
+      <button class="ttsbtn" id="btn-tts" onclick="playTts()" title="台語語音">🔊 台語語音</button>
     </div>
-
-    <div class="alignhead">
-      <span class="lab" id="o-tlab">對齊 · 阿美語</span>
-      <span class="axtg" role="group">
-        <button class="on" data-ax="tai" onclick="setAxis('tai',this)">台語</button>
-        <button data-ax="tailo" onclick="setAxis('tailo',this)">台羅</button>
-        <button data-ax="zh" onclick="setAxis('zh',this)">中文</button>
-        <button data-ax="en" onclick="setAxis('en',this)">英文</button>
-      </span>
-      <span class="cov mono" id="o-cov"></span>
+    <div class="laybar" id="laybar">
+      <button class="lay on" data-l="tailo">台羅</button>
+      <button class="lay" data-l="zh">中文</button>
+      <button class="lay" data-l="en">英文</button>
+      <span class="laysep"></span>
+      <button class="lay" data-l="tgl">Tagalog</button>
+      <button class="lay" data-l="ceb">Cebuano</button>
+      <button class="lay" data-l="zsm">Melayu</button>
+      <button class="lay" data-l="ind">Indonesia</button>
+      <button class="lay" data-l="mlg">Malagasy</button>
+      <button class="lay" data-l="mri">Māori</button>
+      <button class="lay cited" data-l="tao">達悟語</button>
+      <button class="lay cited" data-l="ami">阿美語</button>
     </div>
-    <div id="o-align" class="alignbody"></div>
-
-    <div class="subrow" id="r-tailo"><div class="k">台羅</div><div class="v mono" id="o-tailo">—</div></div>
-    <div class="subrow" id="r-zh"><div class="k">中文</div><div class="v" id="o-zh">—</div></div>
-    <div class="subrow" id="r-en"><div class="k">英文</div><div class="v" id="o-en">—</div></div>
-    <div id="o-segs" class="segstack"></div>
-
-    <div id="o-rest"></div>
+    <div id="o-doc" class="segstack">
+      <div class="sg"><div class="h" style="color:var(--mist);font-weight:400" data-zh="撳「生成」——引擎即時產出" data-tai="撳「生成」——引擎隨時產出">撳「生成」——引擎即時產出</div></div>
+    </div>
+    <div class="covline mono" id="o-cov"></div>
+    <div class="citefoot" id="o-cite" style="display:none"
+      data-zh="達悟／阿美語值：引用·原住民族語言研究發展基金會辭典（印證展示）；「—」＝該句槽位尚無此軌實現，歡迎族語者裁定補上。"
+      data-tai="達悟／阿美語值：引用·原住民族語言研究發展基金會辭典（印證展示）；「—」＝彼句的槽猶無這軌的實現，歡迎族語者裁定補入。">達悟／阿美語值：引用·原住民族語言研究發展基金會辭典（印證展示）；「—」＝該句槽位尚無此軌實現，歡迎族語者裁定補上。</div>
   </div>
   <div class="offnote">
     <span class="mode" id="mode"><b>●</b> <span data-zh="待生成" data-tai="猶未生成">待生成</span></span>
-    　<span class="mono" style="font-size:12px">POST {base}/an/generate</span>
+    　<span class="mono" style="font-size:12px">POST {base}/an/generate (target=all)</span>
   </div>
 </div>
 
@@ -298,31 +284,68 @@ document.addEventListener('DOMContentLoaded',()=>{
   const db=document.querySelector('.dirbox');
   if(db) db.addEventListener('toggle',drawDir);});
 
-let lastChain=[],lastResp=null,curAxis='tai',curAudio=null;
+let lastResp=null,curLayer='tailo',curAudio=null;
 const RELAY='https://asr.bitfull.tw';
-const AXK={tai:'han',tailo:'tailo',zh:'zh',en:'en'};
-function setAxis(ax,btn){curAxis=ax;
-  document.querySelectorAll('.axtg button').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');drawAlign();}
-function drawAlign(){
-  const box=document.getElementById('o-align'); if(!box) return;
+const CITED=new Set(['tao','ami']);
+document.getElementById('laybar').addEventListener('click',e=>{
+  const b=e.target.closest('.lay'); if(!b) return;
+  curLayer=b.dataset.l;
+  document.querySelectorAll('.lay').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); drawDoc();});
+
+function drawDoc(){
+  const j=lastResp, box=document.getElementById('o-doc');
+  if(!j){return;}
   box.innerHTML='';
-  const j=lastResp; if(!j) return;
-  const tcode=j.target?.code, chain=j.slot_chain||[];
-  chain.forEach(c=>{
-    const axv= curAxis==='tai'? c.han
-      : curAxis==='tailo'? (c.tailo||'—')
-      : curAxis==='zh'? (c.zh||c.han)
-      : (c.en||'—');
-    const mv=c.an&&c.an[tcode];
-    const row=document.createElement('div');row.className='arow';
-    row.innerHTML='<div class="ax">'+esc(axv)+'</div><div class="mo">'
-      +(mv? esc(mv.text)+'<span class="ev '+(mv.evidence==='verified'?'v':'')+'">'
-             +esc(mv.evidence)+'</span>'
-           : '<span class="miss">（此槽'+esc(tcode)+'軌待建——歡迎族語者裁定補上）</span>')
-      +'</div>';
-    box.appendChild(row);});
-  if(!chain.length) box.innerHTML='<div class="arow"><div class="miss" style="color:var(--mist)">待生成</div></div>';}
+  const segs=j.segs||[];
+  const mat=j.matrix||[];
+  segs.forEach(g=>{
+    const d=document.createElement('div');d.className='sg';
+    let sub='';
+    if(curLayer==='tailo') sub='<div class="t">'+esc(g.t||'')+'</div>';
+    else if(curLayer==='zh') sub='<div class="z">'+esc(g.z||'')+'</div>';
+    else if(curLayer==='en') sub='<div class="e">'+esc(g.e||'')+'</div>';
+    else{
+      const hits=mat.filter(m=>m.an&&m.an[curLayer]&&g.h.includes(m.han));
+      sub='<div class="an">'+(hits.length? hits.map(m=>{
+        const v=m.an[curLayer];
+        return '<span class="pair'+(CITED.has(curLayer)?' cite':'')+'">'
+          +'<span class="hk">'+esc(m.han)+' → </span>'+esc(v.text)
+          +'<span class="ev2 '+(v.evidence==='verified'?'v':'')+'"></span></span>';
+      }).join('') : '<span class="none">—</span>')+'</div>';
+    }
+    d.innerHTML='<div class="h">'+esc(g.h)+'</div>'+sub;
+    box.appendChild(d);});
+  if(!segs.length && j.tai_han)
+    box.innerHTML='<div class="sg"><div class="h">'+esc(j.tai_han)+'</div></div>';
+  document.getElementById('o-cite').style.display=CITED.has(curLayer)?'block':'none';
+  const tk=(j.tracks||[]).find(t=>t.code===curLayer);
+  document.getElementById('o-cov').textContent=
+    CITED.has(curLayer)||['tgl','ceb','zsm','ind','mlg','mri'].includes(curLayer)
+      ? (tk? '槽覆蓋 '+tk.coverage+' · 南島軌=槽層真值,句法組裝另案':'')
+      : '逐句嚴格對齊 · quad 引擎';
+}
+async function realize(){
+  const item=document.getElementById('q').value.trim();
+  document.getElementById('mode').innerHTML='<b>●</b> 生成中…';
+  try{
+    const r=await fetch(S.base()+'/an/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':S.key()},
+      signal:AbortSignal.timeout(30000),
+      body:JSON.stringify({mode:'venue',item,n:1,target:'all'})});
+    const j=await r.json();
+    if(!r.ok){document.getElementById('mode').innerHTML=
+      '<b style="color:var(--seal-l)">●</b> '+esc(j.error||('HTTP '+r.status));return;}
+    lastResp=j;
+    document.getElementById('o-role').textContent=j.meta?.item?('· '+j.meta.item):'';
+    drawDoc();
+    document.getElementById('mode').innerHTML=
+      '<b style="color:var(--gold)">●</b> 線上 · '+esc(S.base());
+  }catch(e){
+    document.getElementById('mode').innerHTML=
+      '<b style="color:var(--seal-l)">●</b> API 未連線——連線後即時生成';}
+}
 async function playTts(){
   if(!lastResp||!lastResp.tai_han) return;
   const b=document.getElementById('btn-tts'); b.disabled=true;
@@ -337,114 +360,6 @@ async function playTts(){
       await curAudio.play();}
     else b.disabled=false;
   }catch(e){b.disabled=false;}
-}
-function drawChain(chain,target){
-  const box=document.getElementById('o-chain');box.innerHTML='';
-  lastChain=chain;
-  chain.forEach((c,i)=>{
-    const b=document.createElement('button');b.className='chip';
-    b.innerHTML=esc(c.han)+'<span class="st">'+esc(c.slot_type||'')+'</span>';
-    b.onclick=()=>showSlot(i,b);box.appendChild(b);});
-  document.getElementById('o-slotdetail').classList.remove('on');}
-function showSlot(i,btn){
-  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
-  btn.classList.add('on');
-  const c=lastChain[i], d=document.getElementById('o-slotdetail');
-  const rows=Object.entries(c.an||{});
-  d.innerHTML='<b class="serif" style="font-size:16px;color:var(--gold-l)">'
-    +esc(c.han)+'</b> <span class="mono" style="font-size:11px;color:var(--mist)">slot '
-    +esc(c.slot_id)+' · '+esc(c.slot_type||'')+'</span>'
-    +(rows.length? rows.map(([code,v])=>'<div class="an-row"><span class="c">'
-        +esc(code)+'</span><span>'+esc(v.text)+'</span><span class="ev '
-        +(v.evidence==='verified'?'v':'')+'">'+esc(v.evidence)+'</span></div>').join('')
-      : '<div class="an-row" style="color:var(--mist)">此槽南島軌實現待補</div>')
-    +((c.an&&(c.an.tao||c.an.ami))?
-      '<div style="font-size:11px;color:var(--mist);margin-top:6px">達悟/阿美語值：引用·原住民族語言研究發展基金會辭典（印證展示）</div>':'');
-  d.classList.add('on');}
-
-function drawSegs(j){
-  const sb=document.getElementById('o-segs');sb.innerHTML='';
-  const has=(j.segs||[]).length>0;
-  ['r-tailo','r-zh','r-en'].forEach(id=>{
-    document.getElementById(id).style.display=has?'none':'grid';});
-  (j.segs||[]).forEach(g=>{
-    const d=document.createElement('div');d.className='sg';
-    d.innerHTML='<div class="h">'+esc(g.h)+'</div><div class="t">'+esc(g.t)
-      +'</div><div class="z">'+esc(g.z)+'</div><div class="e">'+esc(g.e)+'</div>';
-    sb.appendChild(d);});
-  if(has) document.getElementById('o-tai').textContent='';
-}
-function renderMatrix(j,live){
-  lastResp=j;
-  document.getElementById('o-tai').textContent=j.tai_han||'—';
-  document.getElementById('o-role').textContent=j.meta?.item?('· '+j.meta.item):'';
-  document.getElementById('o-tlab').textContent='全語系對照 · 逐槽矩陣';
-  document.getElementById('o-cov').textContent=(j.tracks||[])
-    .map(t=>t.code+' '+t.coverage).join(' · ');
-  document.getElementById('o-tailo').textContent=j.tailo||'—';
-  document.getElementById('o-zh').textContent=j.zh||'—';
-  document.getElementById('o-en').textContent=j.en||'—';
-  document.getElementById('o-chain').innerHTML='';
-  document.getElementById('o-slotdetail').classList.remove('on');
-  const codes=['tgl','ceb','zsm','ind','mlg','mri','tao','ami'];
-  let h='<div class="mtxwrap"><table class="mtx"><tr><th>台語</th>'
-    +codes.map(c=>'<th>'+esc(NAMES[c]||c)+'</th>').join('')+'</tr>';
-  (j.matrix||[]).forEach(m=>{
-    h+='<tr><td class="tk">'+esc(m.han)+'</td>'
-      +codes.map(c=>{const v=m.an&&m.an[c];
-        if(!v) return '<td class="na">—</td>';
-        const cl=(c==='tao'||c==='ami')?' cite':'';
-        return '<td class="'+cl+'">'+esc(v.text)
-          +'<span class="ev2 '+(v.evidence==='verified'?'v':'')+'"></span></td>';
-      }).join('')+'</tr>';});
-  h+='</table></div>';
-  document.getElementById('o-align').innerHTML=h;
-  drawSegs(j);
-  document.getElementById('o-rest').innerHTML='';
-  document.getElementById('mode').innerHTML=live
-    ?'<b style="color:var(--gold)">●</b> 線上 · '+esc(S.base()):'<b>●</b> —';}
-function render(j,target,live){
-  if(target==='all') return renderMatrix(j,live);
-  lastResp=j;
-  document.getElementById('o-tai').textContent=j.tai_han||'—';
-  document.getElementById('o-role').textContent=j.meta?.item?('· '+j.meta.item):'';
-  document.getElementById('o-tlab').textContent='對齊 · '+(NAMES[target]||target.toUpperCase());
-  document.getElementById('o-cov').textContent=j.target?.coverage
-    ? '槽覆蓋 '+j.target.coverage+' · 母語軌=槽層真值':'';
-  drawAlign();
-  document.getElementById('o-tailo').textContent=j.tailo||'—';
-  document.getElementById('o-zh').textContent=j.zh||'—';
-  document.getElementById('o-en').textContent=j.en||'—';
-  drawChain(j.slot_chain||[],target);
-  drawSegs(j);
-  const rest=document.getElementById('o-rest');rest.innerHTML='';
-  (j.an_rest||[]).filter(t=>!t.locked).forEach(t=>{
-    const row=document.createElement('div');row.className='subrow';
-    const badge=t.status==='stress'?'<span class="badge stress">壓測軌</span>'
-      :(t.status==='cited'?'<span class="badge cite">引用·原語會辭典</span>':'');
-    row.innerHTML='<div class="k">'+(NAMES[t.code]||t.code)+'</div><div class="v">'
-      +esc(t.text||'—')+' <span class="mono" style="font-size:11px;color:var(--mist)">'
-      +esc(t.coverage||'')+'</span>'+badge+'</div>';
-    rest.appendChild(row);});
-  document.getElementById('mode').innerHTML=live
-    ? '<b style="color:var(--gold)">●</b> 線上 · '+esc(S.base())
-    : '<b style="color:var(--seal-l)">●</b> API 未連線——連線後即時生成（本頁不擺離線假料）';}
-
-async function realize(){
-  const item=document.getElementById('q').value.trim();
-  const target=document.getElementById('target').value;
-  document.getElementById('mode').innerHTML='<b>●</b> 生成中…';
-  try{
-    const r=await fetch(S.base()+'/an/generate',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':S.key()},
-      signal:AbortSignal.timeout(30000),
-      body:JSON.stringify({mode:'venue',item,n:1,target})});
-    const j=await r.json();
-    if(!r.ok){document.getElementById('mode').innerHTML=
-      '<b style="color:var(--seal-l)">●</b> '+esc(j.error||('HTTP '+r.status));return;}
-    render(j,target,true);
-  }catch(e){render({},target,false);}
 }
 /* ── 星圖(介紹頁) ── */
 const cv=document.getElementById('starmap'),cx=cv.getContext('2d');
