@@ -176,15 +176,22 @@ footer b{color:#b8ac96;font-weight:500}
       <option value="ind">Indonesia 印尼語</option>
       <option value="mlg">Malagasy 馬拉加斯語</option>
       <option value="mri">Māori 毛利語</option>
+      <option value="tao">達悟語（引用展示）</option>
+      <option value="ami">阿美語（引用展示）</option>
     </select>
     <button class="go" onclick="realize()" data-zh="生成" data-tai="生成">生成</button>
   </div>
   <div class="samples">
     <button onclick="pick('菜市仔')">菜市仔</button>
-    <button onclick="pick('漁夫')">漁夫</button>
+    <button onclick="pick('夜市')">夜市</button>
     <button onclick="pick('廟')">廟</button>
-    <button onclick="pick('圖書館員')">圖書館員</button>
+    <button onclick="pick('灶跤')">灶跤</button>
+    <button onclick="pick('火車站')">火車站</button>
   </div>
+  <details class="dirbox">
+    <summary data-zh="📍 生活場域目錄 · 29 大類（撳場所即生成）" data-tai="📍 生活場域目錄 · 29 大類（撳場所隨生成）">📍 生活場域目錄 · 29 大類（撳場所即生成）</summary>
+    <div id="dirpanel"></div>
+  </details>
 
   <div class="stage" id="stage" aria-live="polite">
     <div class="axisrow"><div class="lab">台語 · 軸 <span class="mono" id="o-role" style="font-size:12px"></span></div>
@@ -210,8 +217,6 @@ footer b{color:#b8ac96;font-weight:500}
     </details>
 
     <div id="o-rest"></div>
-    <div class="subrow dim"><div class="k">達悟語</div><div class="v"><span class="badge lock" data-zh="表層語值 · 經族群授權後公開" data-tai="表層語值 · 經族群授權了後公開">表層語值 · 經族群授權後公開</span></div></div>
-    <div class="subrow dim"><div class="k">阿美語</div><div class="v"><span class="badge lock" data-zh="表層語值 · 經族群授權後公開" data-tai="表層語值 · 經族群授權了後公開">表層語值 · 經族群授權後公開</span></div></div>
   </div>
   <div class="offnote">
     <span class="mode" id="mode"><b>●</b> <span data-zh="待生成" data-tai="猶未生成">待生成</span></span>
@@ -222,6 +227,7 @@ footer b{color:#b8ac96;font-weight:500}
 <footer>
   <b>華語｜</b>架構與對齊方法屬新爾雅系統（發明專利 I914853）。原住民族語言之表層語值屬於各族群社群與主管機關；未經授權，不對外公開或引用任何族語數據。<br>
   <b>台語｜</b>架構佮對齊工法屬新爾雅系統（發明專利 I914853）。原住民族語言的表層語值屬各族群社群佮主管機關；未經授權，無對外公開抑是引用任何族語數據。<br>
+  <b>引用｜</b>達悟語、阿美語語值引用自原住民族語言研究發展基金會辭典之原子對應，僅作語言模型印證展示，非重製散布。Tao and Amis surface values are cited from the ILRDF dictionaries (atomic correspondences) for model attestation display only.<br><br>
   <span class="mono">XINNIYA · Austronesian API · 2026</span>
 </footer>
 
@@ -246,9 +252,45 @@ const PUB_KEY='xny_pub_624uu0dq';
 const S={base:()=>localStorage.getItem('xny_base')||API_DEFAULT,
          key:()=>localStorage.getItem('xny_key')||PUB_KEY};
 const NAMES={tgl:'TAGALOG',ceb:'CEBUANO',zsm:'MELAYU',ind:'INDONESIA',
-             mlg:'MALAGASY',mri:'MĀORI'};
+             mlg:'MALAGASY',mri:'MĀORI',tao:'達悟語 TAO',ami:'阿美語 AMI'};
+/* 生活場域目錄 · 與主站 index.html DIR_VENUE 同源(2026-08-19 抄錄) */
+const DIR_VENUE=[
+['居住 residence',52,['厝','灶跤','客廳','房間','眠床','浴間','後尾','門口埕','樓梯間','陽台']],
+['買賣 commerce',44,['菜市仔','百貨公司','手機店','衫仔店','銀樓','維修店','便利商店','超級市場','藥房','花店']],
+['娛樂 leisure',29,['夜市','公園','電影院','KTV','網咖','溫泉','游泳池','球場','海水浴場','遊樂園']],
+['交通 traffic',23,['火車站','公車站','機場','港口','捷運站','客運站','加油站','停車場','碼頭','高鐵站']],
+['公共 public',20,['圖書館','公所','活動中心','公園管理處','里民中心']],
+['教育 education',18,['學校','教室','幼稚園','補習班','大學','圖書室','研究所','托兒所']],
+['醫療 medical',13,['病院','診所','藥局','牙科','眼科','復健科','急診室','月內房']],
+['廟宇 temple',11,['廟','城隍廟','媽祖廟','土地公廟','關帝廟','廟埕','宮']],
+['水利 waterworks',10,['水庫','圳溝','水塔','抽水站','溪邊']],
+['工地 worksite',10,['工地','工廠','鐵工廠','木工廠','機車行']],
+['飲食 food',10,['麵店','咖啡廳','餐廳','早餐店','飲料店','小食部','熱炒店']],
+['農場 farm',6,['田','果子園','菜園','牧場','雞寮','豬椆']],
+['行政 admin',6,['戶政事務所','監理站','地政事務所','稅捐處','區公所']],
+['戶外 outdoor',6,['山頂','海邊','溪邊','郊外','草埔','海岸']],
+['古蹟 heritage',5,['古厝','老街','博物館','美術館','紀念館']],
+['金融 finance',4,['銀行','郵局','保險公司','當鋪']],
+['宗教 religion',3,['佛寺','道場','神壇']],
+['警政 police',2,['派出所','警察局']],
+['法律 legal',2,['法院','律師事務所']],
+['辦公 office',1,['辦公室']],
+['祖先 ancestor',1,['祖厝']],
+['教堂 church',1,['教堂']],
+['清真 mosque',1,['清真寺']]];
+function drawDir(){
+  const d=document.getElementById('dirpanel'); if(!d||d.dataset.done) return;
+  d.dataset.done=1;
+  d.innerHTML=DIR_VENUE.map(([n,c,items])=>
+    '<h4>'+esc(n)+'<span class="cnt">'+c+' 場所</span></h4><div class="dgrp">'
+    +items.map(x=>'<button onclick="pick(\''+x+'\')">'+esc(x)+'</button>').join('')
+    +'</div>').join('');
+}
 const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function pick(v){document.getElementById('q').value=v;realize();}
+document.addEventListener('DOMContentLoaded',()=>{
+  const db=document.querySelector('.dirbox');
+  if(db) db.addEventListener('toggle',drawDir);});
 
 let lastChain=[];
 function drawChain(chain,target){
@@ -270,7 +312,9 @@ function showSlot(i,btn){
     +(rows.length? rows.map(([code,v])=>'<div class="an-row"><span class="c">'
         +esc(code)+'</span><span>'+esc(v.text)+'</span><span class="ev '
         +(v.evidence==='verified'?'v':'')+'">'+esc(v.evidence)+'</span></div>').join('')
-      : '<div class="an-row" style="color:var(--mist)">此槽南島軌實現待補</div>');
+      : '<div class="an-row" style="color:var(--mist)">此槽南島軌實現待補</div>')
+    +((c.an&&(c.an.tao||c.an.ami))?
+      '<div style="font-size:11px;color:var(--mist);margin-top:6px">達悟/阿美語值：引用·原住民族語言研究發展基金會辭典（印證展示）</div>':'');
   d.classList.add('on');}
 
 function render(j,target,live){
@@ -294,7 +338,8 @@ function render(j,target,live){
   const rest=document.getElementById('o-rest');rest.innerHTML='';
   (j.an_rest||[]).filter(t=>!t.locked).forEach(t=>{
     const row=document.createElement('div');row.className='subrow';
-    const badge=t.status==='stress'?'<span class="badge stress">壓測軌</span>':'';
+    const badge=t.status==='stress'?'<span class="badge stress">壓測軌</span>'
+      :(t.status==='cited'?'<span class="badge cite">引用·原語會辭典</span>':'');
     row.innerHTML='<div class="k">'+(NAMES[t.code]||t.code)+'</div><div class="v">'
       +esc(t.text||'—')+' <span class="mono" style="font-size:11px;color:var(--mist)">'
       +esc(t.coverage||'')+'</span>'+badge+'</div>';
