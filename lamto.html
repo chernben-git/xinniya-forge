@@ -299,13 +299,22 @@ function drawDoc(){
   box.innerHTML='';
   const segs=j.segs||[];
   const mat=j.matrix||[];
-  segs.forEach(g=>{
+  const ft=j.full_texts&&j.full_texts[curLayer];
+  let anSents=null,anWhole=null;
+  if(ft&&ft.text){
+    const parts=ft.text.match(/[^.!?。]+[.!?。]?/g)||[];
+    if(parts.length===segs.length) anSents=parts.map(x=>x.trim());
+    else anWhole=ft.text;}
+  segs.forEach((g,gi)=>{
     const d=document.createElement('div');d.className='sg';
     let sub='';
     if(curLayer==='tailo') sub='<div class="t">'+esc(g.t||'')+'</div>';
     else if(curLayer==='zh') sub='<div class="z">'+esc(g.z||'')+'</div>';
     else if(curLayer==='en') sub='<div class="e">'+esc(g.e||'')+'</div>';
-    else{
+    else if(anSents){
+      sub='<div class="anfull'+(CITED.has(curLayer)?' cite':'')+'">'
+        +esc(anSents[gi]||'')+'</div>';
+    }else{
       const hits=mat.filter(m=>m.an&&m.an[curLayer]&&g.h.includes(m.han));
       sub='<div class="an">'+(hits.length? hits.map(m=>{
         const v=m.an[curLayer];
@@ -316,13 +325,19 @@ function drawDoc(){
     }
     d.innerHTML='<div class="h">'+esc(g.h)+'</div>'+sub;
     box.appendChild(d);});
+  if(anWhole){
+    const d=document.createElement('div');d.className='sg';
+    d.innerHTML='<div class="anfull'+(CITED.has(curLayer)?' cite':'')
+      +'" style="font-size:15px">'+esc(anWhole)+'</div>';
+    box.appendChild(d);}
   if(!segs.length && j.tai_han)
     box.innerHTML='<div class="sg"><div class="h">'+esc(j.tai_han)+'</div></div>';
   document.getElementById('o-cite').style.display=CITED.has(curLayer)?'block':'none';
   const tk=(j.tracks||[]).find(t=>t.code===curLayer);
   document.getElementById('o-cov').textContent=
     CITED.has(curLayer)||['tgl','ceb','zsm','ind','mlg','mri'].includes(curLayer)
-      ? (tk? '槽覆蓋 '+tk.coverage+' · 南島軌=槽層真值,句法組裝另案':'')
+      ? ((ft&&ft.cov!=null? '詞面覆蓋 '+Math.round(ft.cov*100)+'% · ⟨⟩=待補格(邀請族語者裁定) · ':'')
+         +(tk? '槽覆蓋 '+tk.coverage:''))
       : '逐句嚴格對齊 · quad 引擎';
 }
 async function realize(){
