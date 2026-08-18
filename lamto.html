@@ -170,6 +170,7 @@ footer b{color:#b8ac96;font-weight:500}
     <input type="text" id="q" value="菜市仔" spellcheck="false"
       data-ph-zh="輸入場域／職業（例：菜市仔）" data-ph-tai="拍場域／職業入去（例：菜市仔）">
     <select id="target">
+      <option value="all">★ 全語系對照（矩陣）</option>
       <option value="tgl">Tagalog 他加祿語</option>
       <option value="ceb">Cebuano 宿霧語</option>
       <option value="zsm">Melayu 馬來語</option>
@@ -216,14 +217,10 @@ footer b{color:#b8ac96;font-weight:500}
     </div>
     <div id="o-align" class="alignbody"></div>
 
-    <div class="subrow"><div class="k">台羅</div><div class="v mono" id="o-tailo">—</div></div>
-    <div class="subrow"><div class="k">中文</div><div class="v" id="o-zh">—</div></div>
-    <div class="subrow"><div class="k">英文</div><div class="v" id="o-en">—</div></div>
-
-    <details class="segbox" id="segbox">
-      <summary data-zh="逐句四語對照（生成的證據）" data-tai="逐句四語對照（生成的證據）">逐句四語對照（生成的證據）</summary>
-      <div id="o-segs"></div>
-    </details>
+    <div class="subrow" id="r-tailo"><div class="k">台羅</div><div class="v mono" id="o-tailo">—</div></div>
+    <div class="subrow" id="r-zh"><div class="k">中文</div><div class="v" id="o-zh">—</div></div>
+    <div class="subrow" id="r-en"><div class="k">英文</div><div class="v" id="o-en">—</div></div>
+    <div id="o-segs" class="segstack"></div>
 
     <div id="o-rest"></div>
   </div>
@@ -365,7 +362,49 @@ function showSlot(i,btn){
       '<div style="font-size:11px;color:var(--mist);margin-top:6px">達悟/阿美語值：引用·原住民族語言研究發展基金會辭典（印證展示）</div>':'');
   d.classList.add('on');}
 
+function drawSegs(j){
+  const sb=document.getElementById('o-segs');sb.innerHTML='';
+  const has=(j.segs||[]).length>0;
+  ['r-tailo','r-zh','r-en'].forEach(id=>{
+    document.getElementById(id).style.display=has?'none':'grid';});
+  (j.segs||[]).forEach(g=>{
+    const d=document.createElement('div');d.className='sg';
+    d.innerHTML='<div class="h">'+esc(g.h)+'</div><div class="t">'+esc(g.t)
+      +'</div><div class="z">'+esc(g.z)+'</div><div class="e">'+esc(g.e)+'</div>';
+    sb.appendChild(d);});
+  if(has) document.getElementById('o-tai').textContent='';
+}
+function renderMatrix(j,live){
+  lastResp=j;
+  document.getElementById('o-tai').textContent=j.tai_han||'—';
+  document.getElementById('o-role').textContent=j.meta?.item?('· '+j.meta.item):'';
+  document.getElementById('o-tlab').textContent='全語系對照 · 逐槽矩陣';
+  document.getElementById('o-cov').textContent=(j.tracks||[])
+    .map(t=>t.code+' '+t.coverage).join(' · ');
+  document.getElementById('o-tailo').textContent=j.tailo||'—';
+  document.getElementById('o-zh').textContent=j.zh||'—';
+  document.getElementById('o-en').textContent=j.en||'—';
+  document.getElementById('o-chain').innerHTML='';
+  document.getElementById('o-slotdetail').classList.remove('on');
+  const codes=['tgl','ceb','zsm','ind','mlg','mri','tao','ami'];
+  let h='<div class="mtxwrap"><table class="mtx"><tr><th>台語</th>'
+    +codes.map(c=>'<th>'+esc(NAMES[c]||c)+'</th>').join('')+'</tr>';
+  (j.matrix||[]).forEach(m=>{
+    h+='<tr><td class="tk">'+esc(m.han)+'</td>'
+      +codes.map(c=>{const v=m.an&&m.an[c];
+        if(!v) return '<td class="na">—</td>';
+        const cl=(c==='tao'||c==='ami')?' cite':'';
+        return '<td class="'+cl+'">'+esc(v.text)
+          +'<span class="ev2 '+(v.evidence==='verified'?'v':'')+'"></span></td>';
+      }).join('')+'</tr>';});
+  h+='</table></div>';
+  document.getElementById('o-align').innerHTML=h;
+  drawSegs(j);
+  document.getElementById('o-rest').innerHTML='';
+  document.getElementById('mode').innerHTML=live
+    ?'<b style="color:var(--gold)">●</b> 線上 · '+esc(S.base()):'<b>●</b> —';}
 function render(j,target,live){
+  if(target==='all') return renderMatrix(j,live);
   lastResp=j;
   document.getElementById('o-tai').textContent=j.tai_han||'—';
   document.getElementById('o-role').textContent=j.meta?.item?('· '+j.meta.item):'';
@@ -377,13 +416,7 @@ function render(j,target,live){
   document.getElementById('o-zh').textContent=j.zh||'—';
   document.getElementById('o-en').textContent=j.en||'—';
   drawChain(j.slot_chain||[],target);
-  const sb=document.getElementById('o-segs');sb.innerHTML='';
-  (j.segs||[]).forEach(g=>{
-    const d=document.createElement('div');d.className='seg';
-    d.innerHTML='<div class="sh">'+esc(g.h)+'</div><div class="stl">'+esc(g.t)
-      +'</div><div class="sz">'+esc(g.z)+'</div><div class="se">'+esc(g.e)+'</div>';
-    sb.appendChild(d);});
-  document.getElementById('segbox').open=(j.segs||[]).length>0;
+  drawSegs(j);
   const rest=document.getElementById('o-rest');rest.innerHTML='';
   (j.an_rest||[]).filter(t=>!t.locked).forEach(t=>{
     const row=document.createElement('div');row.className='subrow';
