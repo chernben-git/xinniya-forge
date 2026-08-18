@@ -106,7 +106,7 @@ footer b{color:#b8ac96;font-weight:500}
   <div class="brand serif">新爾雅 <b>南島語系</b></div>
   <nav>
     <button id="tab-intro" class="on" onclick="go('intro')" data-zh="介紹" data-tai="介紹">介紹</button>
-    <button id="tab-fn" onclick="go('fn')" data-zh="功能" data-tai="功能">功能</button>
+    <button id="tab-fn" onclick="go('fn')" data-zh="文章生成" data-tai="文章生成">文章生成</button>
   </nav>
   <div class="langtg">
     <button id="btn-zh" class="on" onclick="setLang('zh')">華</button>
@@ -160,7 +160,7 @@ footer b{color:#b8ac96;font-weight:500}
 
 <!-- ═══ 功能 ═══ -->
 <div class="page" id="pg-fn">
-  <div class="eyebrow" data-zh="功能 · 語料生成 × 南島接軌" data-tai="功能 · 語料生成 × 南島接軌">功能 · 語料生成 × 南島接軌</div>
+  <div class="eyebrow" data-zh="文章生成 · 台語為軸 × 南島語系對照" data-tai="文章生成 · 台語做軸 × 南島語系對照">文章生成 · 台語為軸 × 南島語系對照</div>
   <h1 data-zh="先生成台語，再選你要對齊的語系" data-tai="先生成台語，才揀你欲對齊的語系">先生成台語，再選你要對齊的語系</h1>
   <p class="lede"
      data-zh="選一個生活場域，引擎即時生成台語篇章。生成後點任一語言鍵——每一句台語下面就跟著那個語言：台羅、中文、英文是逐句嚴格對齊；南島語是逐槽真值對照，每格帶證據等級。"
@@ -284,14 +284,18 @@ document.addEventListener('DOMContentLoaded',()=>{
   const db=document.querySelector('.dirbox');
   if(db) db.addEventListener('toggle',drawDir);});
 
-let lastResp=null,curLayer='tailo',curAudio=null;
+let lastResp=null,curAudio=null;
 const RELAY='https://asr.bitfull.tw';
 const CITED=new Set(['tao','ami']);
+const LAYER_ORDER=['tailo','zh','en','tgl','ceb','zsm','ind','mlg','mri','tao','ami'];
+const ANL=new Set(['tgl','ceb','zsm','ind','mlg','mri','tao','ami']);
+const active=new Set(['tailo']);
 document.getElementById('laybar').addEventListener('click',e=>{
   const b=e.target.closest('.lay'); if(!b) return;
-  curLayer=b.dataset.l;
-  document.querySelectorAll('.lay').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on'); drawDoc();});
+  const l=b.dataset.l;
+  if(active.has(l)){active.delete(l);b.classList.remove('on');}
+  else{active.add(l);b.classList.add('on');}
+  drawDoc();});
 
 function drawDoc(){
   const j=lastResp, box=document.getElementById('o-doc');
@@ -299,46 +303,63 @@ function drawDoc(){
   box.innerHTML='';
   const segs=j.segs||[];
   const mat=j.matrix||[];
-  const ft=j.full_texts&&j.full_texts[curLayer];
-  let anSents=null,anWhole=null;
-  if(ft&&ft.text){
-    const parts=ft.text.match(/[^.!?。]+[.!?。]?/g)||[];
-    if(parts.length===segs.length) anSents=parts.map(x=>x.trim());
-    else anWhole=ft.text;}
+  // 各啟用南島軌: 整篇切句(句數對上=逐句;對不上=null另落底)
+  const anMap={},anWholeList=[];
+  for(const c of LAYER_ORDER){
+    if(!ANL.has(c)||!active.has(c)) continue;
+    const ft=j.full_texts&&j.full_texts[c];
+    if(ft&&ft.text){
+      const parts=ft.text.match(/[^.!?。]+[.!?。]?/g)||[];
+      if(parts.length===segs.length) anMap[c]=parts.map(x=>x.trim());
+      else anWholeList.push([c,ft.text]);
+    }else anMap[c]=null;   // 無整篇→槽對照保底
+  }
   segs.forEach((g,gi)=>{
     const d=document.createElement('div');d.className='sg';
     let sub='';
-    if(curLayer==='tailo') sub='<div class="t">'+esc(g.t||'')+'</div>';
-    else if(curLayer==='zh') sub='<div class="z">'+esc(g.z||'')+'</div>';
-    else if(curLayer==='en') sub='<div class="e">'+esc(g.e||'')+'</div>';
-    else if(anSents){
-      sub='<div class="anfull'+(CITED.has(curLayer)?' cite':'')+'">'
-        +esc(anSents[gi]||'')+'</div>';
-    }else{
-      const hits=mat.filter(m=>m.an&&m.an[curLayer]&&g.h.includes(m.han));
-      sub='<div class="an">'+(hits.length? hits.map(m=>{
-        const v=m.an[curLayer];
-        return '<span class="pair'+(CITED.has(curLayer)?' cite':'')+'">'
-          +'<span class="hk">'+esc(m.han)+' → </span>'+esc(v.text)
-          +'<span class="ev2 '+(v.evidence==='verified'?'v':'')+'"></span></span>';
-      }).join('') : '<span class="none">—</span>')+'</div>';
+    for(const c of LAYER_ORDER){
+      if(!active.has(c)) continue;
+      if(c==='tailo') sub+='<div class="t">'+esc(g.t||'')+'</div>';
+      else if(c==='zh') sub+='<div class="z">'+esc(g.z||'')+'</div>';
+      else if(c==='en') sub+='<div class="e">'+esc(g.e||'')+'</div>';
+      else if(anMap[c]!==undefined){
+        const tag='<span class="ltag'+(CITED.has(c)?' cite':'')+'">'
+          +esc(NAMES[c]||c)+'</span>';
+        if(anMap[c]) sub+='<div class="anfull'+(CITED.has(c)?' cite':'')+'">'
+          +tag+esc(anMap[c][gi]||'')+'</div>';
+        else{
+          const hits=mat.filter(m=>m.an&&m.an[c]&&g.h.includes(m.han));
+          sub+='<div class="an">'+tag+(hits.length? hits.map(m=>{
+            const v=m.an[c];
+            return '<span class="pair'+(CITED.has(c)?' cite':'')+'">'
+              +'<span class="hk">'+esc(m.han)+' → </span>'+esc(v.text)
+              +'<span class="ev2 '+(v.evidence==='verified'?'v':'')+'"></span></span>';
+          }).join('') : '<span class="none">—</span>')+'</div>';
+        }
+      }
     }
     d.innerHTML='<div class="h">'+esc(g.h)+'</div>'+sub;
     box.appendChild(d);});
-  if(anWhole){
+  for(const [c,txt] of anWholeList){
     const d=document.createElement('div');d.className='sg';
-    d.innerHTML='<div class="anfull'+(CITED.has(curLayer)?' cite':'')
-      +'" style="font-size:15px">'+esc(anWhole)+'</div>';
+    d.innerHTML='<span class="ltag'+(CITED.has(c)?' cite':'')+'">'+esc(NAMES[c]||c)
+      +'</span><div class="anfull'+(CITED.has(c)?' cite':'')
+      +'" style="font-size:15px">'+esc(txt)+'</div>';
     box.appendChild(d);}
   if(!segs.length && j.tai_han)
     box.innerHTML='<div class="sg"><div class="h">'+esc(j.tai_han)+'</div></div>';
-  document.getElementById('o-cite').style.display=CITED.has(curLayer)?'block':'none';
-  const tk=(j.tracks||[]).find(t=>t.code===curLayer);
+  const anyCite=[...active].some(c=>CITED.has(c));
+  document.getElementById('o-cite').style.display=anyCite?'block':'none';
+  const covs=[];
+  for(const c of LAYER_ORDER){
+    if(!active.has(c)||!ANL.has(c)) continue;
+    const ft=j.full_texts&&j.full_texts[c];
+    const tk=(j.tracks||[]).find(t=>t.code===c);
+    covs.push((NAMES[c]||c)+(ft&&ft.cov!=null?' 詞面'+Math.round(ft.cov*100)+'%':'')
+      +(tk?' 槽'+tk.coverage:''));}
   document.getElementById('o-cov').textContent=
-    CITED.has(curLayer)||['tgl','ceb','zsm','ind','mlg','mri'].includes(curLayer)
-      ? ((ft&&ft.cov!=null? '詞面覆蓋 '+Math.round(ft.cov*100)+'% · ⟨⟩=待補格(邀請族語者裁定) · ':'')
-         +(tk? '槽覆蓋 '+tk.coverage:''))
-      : '逐句嚴格對齊 · quad 引擎';
+    covs.length? covs.join(' · ')+' · ⟨⟩=待補格(邀請族語者裁定)'
+    : (active.size? '逐句嚴格對齊 · quad 引擎':'');
 }
 async function realize(){
   const item=document.getElementById('q').value.trim();
