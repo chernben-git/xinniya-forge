@@ -194,7 +194,8 @@ footer b{color:#b8ac96;font-weight:500}
   </details>
 
   <div class="stage" id="stage" aria-live="polite">
-    <div class="axisrow"><div class="lab">台語 · 軸 <span class="mono" id="o-role" style="font-size:12px"></span></div>
+    <div class="axisrow"><div class="lab">台語 · 軸 <span class="mono" id="o-role" style="font-size:12px"></span>
+      <button class="ttsbtn" id="btn-tts" onclick="playTts()" title="台語語音">🔊 台語語音</button></div>
       <div class="txt serif" id="o-tai">撳「生成」——引擎即時產出</div></div>
 
     <div class="chainwrap">
@@ -203,9 +204,17 @@ footer b{color:#b8ac96;font-weight:500}
       <div id="o-slotdetail" class="slotdetail"></div>
     </div>
 
-    <div class="targetrow"><div class="lab" id="o-tlab">TAGALOG · 槽鏈實現</div>
-      <div class="txt" id="o-target">—</div>
-      <div class="cov mono" id="o-cov"></div></div>
+    <div class="alignhead">
+      <span class="lab" id="o-tlab">對齊 · 阿美語</span>
+      <span class="axtg" role="group">
+        <button class="on" data-ax="tai" onclick="setAxis('tai',this)">台語</button>
+        <button data-ax="tailo" onclick="setAxis('tailo',this)">台羅</button>
+        <button data-ax="zh" onclick="setAxis('zh',this)">中文</button>
+        <button data-ax="en" onclick="setAxis('en',this)">英文</button>
+      </span>
+      <span class="cov mono" id="o-cov"></span>
+    </div>
+    <div id="o-align" class="alignbody"></div>
 
     <div class="subrow"><div class="k">台羅</div><div class="v mono" id="o-tailo">—</div></div>
     <div class="subrow"><div class="k">中文</div><div class="v" id="o-zh">—</div></div>
@@ -292,7 +301,46 @@ document.addEventListener('DOMContentLoaded',()=>{
   const db=document.querySelector('.dirbox');
   if(db) db.addEventListener('toggle',drawDir);});
 
-let lastChain=[];
+let lastChain=[],lastResp=null,curAxis='tai',curAudio=null;
+const RELAY='https://asr.bitfull.tw';
+const AXK={tai:'han',tailo:'tailo',zh:'zh',en:'en'};
+function setAxis(ax,btn){curAxis=ax;
+  document.querySelectorAll('.axtg button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');drawAlign();}
+function drawAlign(){
+  const box=document.getElementById('o-align'); if(!box) return;
+  box.innerHTML='';
+  const j=lastResp; if(!j) return;
+  const tcode=j.target?.code, chain=j.slot_chain||[];
+  chain.forEach(c=>{
+    const axv= curAxis==='tai'? c.han
+      : curAxis==='tailo'? (c.tailo||'—')
+      : curAxis==='zh'? (c.zh||c.han)
+      : (c.en||'—');
+    const mv=c.an&&c.an[tcode];
+    const row=document.createElement('div');row.className='arow';
+    row.innerHTML='<div class="ax">'+esc(axv)+'</div><div class="mo">'
+      +(mv? esc(mv.text)+'<span class="ev '+(mv.evidence==='verified'?'v':'')+'">'
+             +esc(mv.evidence)+'</span>'
+           : '<span class="miss">（此槽'+esc(tcode)+'軌待建——歡迎族語者裁定補上）</span>')
+      +'</div>';
+    box.appendChild(row);});
+  if(!chain.length) box.innerHTML='<div class="arow"><div class="miss" style="color:var(--mist)">待生成</div></div>';}
+async function playTts(){
+  if(!lastResp||!lastResp.tai_han) return;
+  const b=document.getElementById('btn-tts'); b.disabled=true;
+  try{
+    if(curAudio){curAudio.pause();curAudio=null;}
+    const r=await fetch(RELAY+'/tts',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:lastResp.tai_han})});
+    const d=await r.json();
+    if(d.audioBase64){curAudio=new Audio('data:audio/wav;base64,'+d.audioBase64);
+      curAudio.onended=()=>{b.disabled=false;};
+      await curAudio.play();}
+    else b.disabled=false;
+  }catch(e){b.disabled=false;}
+}
 function drawChain(chain,target){
   const box=document.getElementById('o-chain');box.innerHTML='';
   lastChain=chain;
@@ -318,12 +366,13 @@ function showSlot(i,btn){
   d.classList.add('on');}
 
 function render(j,target,live){
+  lastResp=j;
   document.getElementById('o-tai').textContent=j.tai_han||'—';
   document.getElementById('o-role').textContent=j.meta?.item?('· '+j.meta.item):'';
-  document.getElementById('o-tlab').textContent=(NAMES[target]||target.toUpperCase())+' · 槽鏈實現';
-  document.getElementById('o-target').textContent=j.target?.text||'—';
+  document.getElementById('o-tlab').textContent='對齊 · '+(NAMES[target]||target.toUpperCase());
   document.getElementById('o-cov').textContent=j.target?.coverage
-    ? '槽覆蓋 '+j.target.coverage+' · 南島軌=槽層真值,句法組裝另案':'';
+    ? '槽覆蓋 '+j.target.coverage+' · 母語軌=槽層真值':'';
+  drawAlign();
   document.getElementById('o-tailo').textContent=j.tailo||'—';
   document.getElementById('o-zh').textContent=j.zh||'—';
   document.getElementById('o-en').textContent=j.en||'—';
