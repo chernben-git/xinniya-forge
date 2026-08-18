@@ -98,6 +98,63 @@ footer{border-top:1px solid var(--line);margin-top:70px;padding:34px 5% 50px;
 footer b{color:#b8ac96;font-weight:500}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}}
 @media (max-width:620px){.subrow{grid-template-columns:78px 1fr}}
+
+/* ═══ 文章生成頁 · 樣式總補(v6.1 合帙) ═══ */
+.doct{display:flex;align-items:center;padding:18px 28px 4px}
+.doct .sp{flex:1}
+.ttsbtn{margin-left:14px;background:none;border:1px solid var(--gold);
+  color:var(--gold-l);font-size:12px;padding:3px 12px;border-radius:2px;
+  cursor:pointer;font-family:inherit;letter-spacing:.08em}
+.ttsbtn:hover{background:var(--gold);color:var(--void)}
+.ttsbtn:disabled{opacity:.45;cursor:wait}
+.laybar{display:flex;flex-wrap:wrap;gap:6px;padding:10px 28px 14px;
+  border-bottom:1px solid var(--line)}
+.lay{background:none;border:1px solid #3a352c;color:#6b6455;
+  font-size:13px;padding:4px 13px;border-radius:2px;font-family:inherit;
+  cursor:pointer;transition:all .12s}
+.lay:hover{color:#a89d88}
+.lay.on{background:var(--moss);color:var(--void);font-weight:700;
+  border-color:var(--moss);box-shadow:0 0 10px rgba(122,158,126,.35)}
+.lay.an.on{background:var(--gold);color:var(--void);border-color:var(--gold);
+  box-shadow:0 0 10px rgba(198,161,91,.4)}
+.lay.cited{border-style:dashed}
+.lay.cited.on{background:var(--seal);color:var(--ink);border-color:var(--seal);
+  box-shadow:0 0 10px rgba(158,74,58,.45)}
+.laysep{width:1px;background:var(--line);margin:0 4px}
+.segstack{padding:4px 28px 18px;border-bottom:1px solid var(--line)}
+.sg{padding:12px 0;border-bottom:1px dashed var(--line)}
+.sg:last-child{border-bottom:none}
+.sg .h{font-size:19px;color:var(--ink);font-weight:600;line-height:1.75}
+.sg .t{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;
+  color:var(--moss);margin-top:3px}
+.sg .z{font-size:13.5px;color:var(--mist);margin-top:2px}
+.sg .e{font-size:13px;color:#8d8471;font-style:italic;margin-top:1px}
+.sg .an{margin-top:4px}
+.sg .an .pair{display:inline-block;margin-right:16px;font-size:14px;color:#d8cfbd}
+.sg .an .pair .hk{color:var(--mist);font-size:12.5px}
+.sg .an .pair.cite{color:var(--seal-l)}
+.sg .an .none{color:#4a4237;font-size:13px}
+.anfull{font-size:15.5px;color:#d8cfbd;margin-top:4px;line-height:1.8}
+.anfull.cite{color:var(--seal-l)}
+.ltag{display:inline-block;font-size:10.5px;letter-spacing:.1em;color:var(--gold);
+  border:1px solid var(--line);padding:0 6px;border-radius:2px;margin-right:10px;
+  vertical-align:1px;line-height:1.6;white-space:nowrap}
+.ltag.cite{color:var(--seal-l);border-style:dashed}
+.ev2{display:inline-block;width:6px;height:6px;border-radius:50%;
+  margin-left:6px;background:var(--mist);vertical-align:2px}
+.ev2.v{background:var(--moss)}
+.covline{padding:10px 28px;font-size:12px;color:var(--mist);
+  border-bottom:1px solid var(--line)}
+.citefoot{padding:10px 28px 14px;font-size:12px;color:var(--mist)}
+.dirbox{border:1px solid var(--line);background:var(--panel);margin:0 0 26px}
+.dirbox summary{padding:12px 18px;font-size:14px;color:var(--gold-l);
+  cursor:pointer;letter-spacing:.06em}
+.dirbox h4{font-size:13.5px;color:var(--seal-l);margin:14px 18px 6px;font-weight:500}
+.dirbox h4 .cnt{color:var(--mist);font-size:11px;margin-left:8px}
+.dgrp{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 6px}
+.dgrp button{background:none;border:1px solid var(--line);color:#cfc6b4;
+  font-size:13px;padding:4px 11px;border-radius:2px;font-family:inherit;cursor:pointer}
+.dgrp button:hover{border-color:var(--gold);color:var(--gold-l)}
 </style>
 </head>
 <body>
@@ -193,12 +250,12 @@ footer b{color:#b8ac96;font-weight:500}
       <button class="lay" data-l="zh">中文</button>
       <button class="lay" data-l="en">英文</button>
       <span class="laysep"></span>
-      <button class="lay" data-l="tgl">Tagalog</button>
-      <button class="lay" data-l="ceb">Cebuano</button>
-      <button class="lay" data-l="zsm">Melayu</button>
-      <button class="lay" data-l="ind">Indonesia</button>
-      <button class="lay" data-l="mlg">Malagasy</button>
-      <button class="lay" data-l="mri">Māori</button>
+      <button class="lay an" data-l="tgl">Tagalog</button>
+      <button class="lay an" data-l="ceb">Cebuano</button>
+      <button class="lay an" data-l="zsm">Melayu</button>
+      <button class="lay an" data-l="ind">Indonesia</button>
+      <button class="lay an" data-l="mlg">Malagasy</button>
+      <button class="lay an" data-l="mri">Māori</button>
       <button class="lay cited" data-l="tao">達悟語</button>
       <button class="lay cited" data-l="ami">阿美語</button>
     </div>
