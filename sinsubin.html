@@ -212,8 +212,8 @@ footer b{color:#b8ac96;font-weight:500}
       <button class="lay an" data-l="ind">Indonesia 印尼</button>
       <button class="lay an" data-l="zsm">Melayu 馬來</button>
       <button class="lay an" data-l="tgl">Tagalog 菲律賓</button>
-      <button class="lay pend" data-l="mya" disabled>緬甸 · 開軌中</button>
-      <button class="lay pend" data-l="khm" disabled>柬埔寨 · 開軌中</button>
+      <button class="lay an" data-l="mya">မြန်မာ 緬甸</button>
+      <button class="lay an" data-l="khm">ខ្មែរ 柬埔寨</button>
     </div>
     <div id="o-doc" class="segstack">
       <div class="sg"><div class="h" style="color:var(--mist);font-weight:400" data-zh="撳「生成」——引擎即時產出" data-tai="撳「生成」——引擎隨時產出">撳「生成」——引擎即時產出</div></div>
@@ -257,7 +257,7 @@ const PUB_KEY='xny_pub_624uu0dq';
 const S={base:()=>localStorage.getItem('xny_base')||API_DEFAULT,
          key:()=>localStorage.getItem('xny_key')||PUB_KEY};
 const NAMES={tgl:'TAGALOG',ceb:'CEBUANO',zsm:'MELAYU',ind:'INDONESIA',
-             mlg:'MALAGASY',mri:'MĀORI',vi:'TIẾNG VIỆT',tha:'ไทย THAI',mya:'緬甸語',khm:'柬埔寨語'};
+             mlg:'MALAGASY',mri:'MĀORI',vi:'TIẾNG VIỆT',tha:'ไทย THAI',mya:'မြန်မာ 緬甸',khm:'ខ្មែរ 柬埔寨'};
 /* 生活場域目錄 · 與主站 index.html DIR_VENUE 同源(2026-08-19 抄錄) */
 const DIR_VENUE=[
 ['居住 residence',52,['厝','灶跤','客廳','房間','眠床','浴間','後尾','門口埕','樓梯間','陽台']],
@@ -300,8 +300,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 let lastResp=null,curAudio=null;
 const RELAY='https://asr.bitfull.tw';
 const CITED=new Set([]);
-const LAYER_ORDER=['tailo','zh','en','vi','tha','ind','zsm','tgl'];
-const ANL=new Set(['vi','tha','ind','zsm','tgl']);
+const LAYER_ORDER=['tailo','zh','en','vi','tha','ind','zsm','tgl','mya','khm'];
+const ANL=new Set(['vi','tha','ind','zsm','tgl','mya','khm']);
 const active=new Set(['tailo']);
 document.getElementById('laybar').addEventListener('click',e=>{
   const b=e.target.closest('.lay'); if(!b) return;
