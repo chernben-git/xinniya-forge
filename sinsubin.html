@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新住民語系 · 新爾雅</title>
+<style>
+:root{ /* 沿用主站色系 */
+  --void:#100e0c; --ink:#f3ede1; --seal:#c8352a; --seal-l:#e0574c;
+  --gold:#c79a3e; --gold-l:#e0bd6a; --moss:#5c8a6f; --jade:#3f5d4a;
+  --panel:#181512; --line:#2b251e; --mist:#9a8f7c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--void);color:var(--ink);font-size:16.5px;line-height:1.8;
+  font-family:'Noto Sans TC','Microsoft JhengHei','PingFang TC',sans-serif}
+h1,h2,h3,.serif{font-family:'Noto Serif TC','Songti TC',serif}
+.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+a{color:var(--gold-l);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+/* ── 頂欄＋分頁 ── */
+header{position:sticky;top:0;z-index:40;background:#100e0cf2;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:26px;padding:0 22px}
+.brand{font-size:15px;letter-spacing:.2em;color:var(--mist);padding:15px 0}
+.brand b{color:var(--gold);font-weight:600}
+nav{display:flex;gap:4px;margin-left:auto}
+nav button{background:none;border:none;color:var(--mist);font-size:15px;
+  padding:16px 18px;border-bottom:2px solid transparent;letter-spacing:.14em}
+nav button.on{color:var(--gold-l);border-bottom-color:var(--seal)}
+.langtg{display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden;margin-left:14px}
+.langtg button{background:none;border:none;color:var(--mist);padding:4px 12px;font-size:12.5px}
+.langtg button.on{background:var(--gold);color:var(--void);font-weight:700}
+
+.page{display:none;max-width:1080px;margin:0 auto;padding:44px 5% 80px}
+.page.on{display:block}
+
+/* ── 介紹頁 ── */
+#map-wrap{position:relative;height:400px;border:1px solid var(--line);
+  background:var(--panel);margin-bottom:44px;overflow:hidden}
+#starmap{width:100%;height:100%}
+.maplegend{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--mist);
+  line-height:1.9;background:#100e0cd0;padding:8px 14px;border:1px solid var(--line)}
+.lg{display:inline-block;width:10px;height:10px;margin-right:8px;vertical-align:-1px}
+.lg.sq{background:var(--gold)} 
+.lg.an{background:var(--moss);border-radius:50%} .lg.ot{background:#3a332a;border-radius:50%}
+.eyebrow{font-size:12px;letter-spacing:.42em;color:var(--seal-l);margin-bottom:10px}
+h1{font-size:clamp(26px,3.6vw,42px);line-height:1.4;margin-bottom:12px}
+h1 em{font-style:normal;color:var(--gold)}
+.lede{color:#cfc6b4;max-width:64ch;margin-bottom:20px}
+h2{font-size:22px;color:var(--gold-l);margin:40px 0 10px}
+.taisub{color:var(--mist);font-size:13.5px;margin-bottom:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.card{border:1px solid var(--line);background:var(--panel);padding:20px 22px}
+.card h3{font-size:17px;color:var(--gold);margin-bottom:8px}
+.card p{font-size:14px;color:#c4bba9}
+.roadrow{display:flex;gap:14px;align-items:baseline;padding:9px 0;
+  border-bottom:1px dashed var(--line);font-size:14.5px;max-width:620px}
+.roadrow .mono{color:var(--gold);width:64px}
+.roadrow .st{margin-left:auto;font-size:12px;color:var(--mist)}
+
+/* ── 功能頁 ── */
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:8px}
+select,input[type=text]{background:var(--panel);border:1px solid var(--line);
+  color:var(--ink);padding:10px 12px;font-size:15.5px;font-family:inherit;border-radius:2px}
+input[type=text]{flex:1;min-width:240px}
+.go{background:var(--seal);border:none;color:var(--ink);padding:10px 26px;
+  font-size:15px;letter-spacing:.2em;border-radius:2px}
+.go:hover{background:var(--seal-l)}
+.mode{font-size:12.5px;color:var(--mist)}
+.mode b{color:var(--moss);font-weight:500}
+.samples{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 26px}
+.samples button{background:none;border:1px solid var(--line);color:var(--mist);
+  font-size:13px;padding:5px 12px;border-radius:2px}
+.samples button:hover{border-color:var(--gold);color:var(--gold-l)}
+
+.stage{border:1px solid var(--line);background:var(--panel)}
+.axisrow{padding:26px 28px 10px}
+.axisrow .lab{font-size:12px;letter-spacing:.3em;color:var(--gold);margin-bottom:6px}
+.axisrow .txt{font-size:clamp(22px,3vw,30px);color:var(--gold-l);line-height:1.7}
+.targetrow{padding:10px 28px 24px;border-bottom:1px solid var(--line)}
+.targetrow .lab{font-size:12px;letter-spacing:.3em;color:var(--seal-l);margin-bottom:6px}
+.targetrow .txt{font-size:clamp(20px,2.6vw,26px);color:var(--ink);line-height:1.7}
+.subrow{display:grid;grid-template-columns:96px 1fr;border-bottom:1px solid var(--line)}
+.subrow:last-child{border-bottom:none}
+.subrow .k{padding:13px 0 13px 28px;font-size:12.5px;color:var(--mist);
+  letter-spacing:.12em;border-right:1px solid var(--line)}
+.subrow .v{padding:13px 28px;font-size:16px;color:#d8cfbd}
+.subrow.dim .v{color:var(--mist);font-size:14.5px}
+.badge{display:inline-block;font-size:11px;color:var(--mist);border:1px solid var(--line);
+  padding:1px 8px;margin-left:10px;border-radius:2px;vertical-align:2px;letter-spacing:.1em}
+.badge.stress{color:var(--moss);border-color:var(--jade)}
+.badge.lock{color:var(--seal-l);border-style:dashed;border-color:var(--seal)}
+.offnote{font-size:12.5px;color:var(--mist);margin-top:12px}
+
+footer{border-top:1px solid var(--line);margin-top:70px;padding:34px 5% 50px;
+  font-size:12.5px;color:var(--mist);line-height:2.05}
+footer b{color:#b8ac96;font-weight:500}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+@media (max-width:620px){.subrow{grid-template-columns:78px 1fr}}
+
+/* ═══ 文章生成頁 · 樣式總補(v6.1 合帙) ═══ */
+.doct{display:flex;align-items:center;padding:18px 28px 4px}
+.doct .sp{flex:1}
+.ttsbtn{margin-left:14px;background:none;border:1px solid var(--gold);
+  color:var(--gold-l);font-size:12px;padding:3px 12px;border-radius:2px;
+  cursor:pointer;font-family:inherit;letter-spacing:.08em}
+.ttsbtn:hover{background:var(--gold);color:var(--void)}
+.ttsbtn:disabled{opacity:.45;cursor:wait}
+.laybar{display:flex;flex-wrap:wrap;gap:6px;padding:10px 28px 14px;
+  border-bottom:1px solid var(--line)}
+.lay{background:none;border:1px solid #3a352c;color:#6b6455;
+  font-size:13px;padding:4px 13px;border-radius:2px;font-family:inherit;
+  cursor:pointer;transition:all .12s}
+.lay:hover{color:#a89d88}
+.lay.on{background:var(--moss);color:var(--void);font-weight:700;
+  border-color:var(--moss);box-shadow:0 0 10px rgba(122,158,126,.35)}
+.lay.an.on{background:var(--gold);color:var(--void);border-color:var(--gold);
+  box-shadow:0 0 10px rgba(198,161,91,.4)}
+.lay.cited{border-style:dashed}
+.lay.cited.on{background:var(--seal);color:var(--ink);border-color:var(--seal);
+  box-shadow:0 0 10px rgba(158,74,58,.45)}
+.laysep{width:1px;background:var(--line);margin:0 4px}
+.segstack{padding:4px 28px 18px;border-bottom:1px solid var(--line)}
+.sg{padding:12px 0;border-bottom:1px dashed var(--line)}
+.sg:last-child{border-bottom:none}
+.sg .h{font-size:19px;color:var(--ink);font-weight:600;line-height:1.75}
+.sg .t{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;
+  color:var(--moss);margin-top:3px}
+.sg .z{font-size:13.5px;color:var(--mist);margin-top:2px}
+.sg .e{font-size:13px;color:#8d8471;font-style:italic;margin-top:1px}
+.sg .an{margin-top:4px}
+.sg .an .pair{display:inline-block;margin-right:16px;font-size:14px;color:#d8cfbd}
+.sg .an .pair .hk{color:var(--mist);font-size:12.5px}
+.sg .an .pair.cite{color:var(--seal-l)}
+.sg .an .none{color:#4a4237;font-size:13px}
+.anfull{font-size:15.5px;color:#d8cfbd;margin-top:4px;line-height:1.8}
+.anfull.cite{color:var(--seal-l)}
+.ltag{display:inline-block;font-size:10.5px;letter-spacing:.1em;color:var(--gold);
+  border:1px solid var(--line);padding:0 6px;border-radius:2px;margin-right:10px;
+  vertical-align:1px;line-height:1.6;white-space:nowrap}
+.ltag.cite{color:var(--seal-l);border-style:dashed}
+.ev2{display:inline-block;width:6px;height:6px;border-radius:50%;
+  margin-left:6px;background:var(--mist);vertical-align:2px}
+.ev2.v{background:var(--moss)}
+.covline{padding:10px 28px;font-size:12px;color:var(--mist);
+  border-bottom:1px solid var(--line)}
+.citefoot{padding:10px 28px 14px;font-size:12px;color:var(--mist)}
+.dirbox{border:1px solid var(--line);background:var(--panel);margin:0 0 26px}
+.dirbox summary{padding:12px 18px;font-size:14px;color:var(--gold-l);
+  cursor:pointer;letter-spacing:.06em}
+.dirbox h4{font-size:13.5px;color:var(--seal-l);margin:14px 18px 6px;font-weight:500}
+.dirbox h4 .cnt{color:var(--mist);font-size:11px;margin-left:8px}
+.dgrp{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px 6px}
+.dgrp button{background:none;border:1px solid var(--line);color:#cfc6b4;
+  font-size:13px;padding:4px 11px;border-radius:2px;font-family:inherit;cursor:pointer}
+.dgrp button:hover{border-color:var(--gold);color:var(--gold-l)}
+.lay.pend{border-style:dotted;color:#4a4237;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand serif">新爾雅 <b>新住民語系</b></div>
+  <nav>
+    
+    <button id="tab-fn" class="on" onclick="go('fn')" data-zh="文章生成" data-tai="文章生成">文章生成</button>
+  </nav>
+  <div class="langtg">
+    <button id="btn-zh" class="on" onclick="setLang('zh')">華</button>
+    <button id="btn-tai" onclick="setLang('tai')">台</button>
+  </div>
+</header>
+
+<!-- ═══ 介紹 ═══ -->
+<div class="page on" id="pg-fn">
+  <div class="eyebrow" data-zh="文章生成 · 台語為軸 × 新住民語系對照" data-tai="文章生成 · 台語做軸 × 新住民語系對照">文章生成 · 台語為軸 × 新住民語系對照</div>
+  <h1 data-zh="先生成台語，再選你要對齊的語系" data-tai="先生成台語，才揀你欲對齊的語系">先生成台語，再選你要對齊的語系</h1>
+  <p class="lede"
+     data-zh="選一個生活場域，引擎即時生成台語篇章。生成後點任一語言鍵——每一句台語下面就跟著那個語言：台羅、中文、英文是逐句嚴格對齊；各語言是逐槽真值對照，每格帶證據等級。"
+     data-tai="揀一个生活場域，引擎隨生成台語篇章。生成了後撳任一个語言鍵——逐句台語下跤就綴彼个語言：台羅、中文、英文是逐句嚴格對齊；各語言是逐槽真值對照，逐格帶證據等級。">選一個生活場域，引擎即時生成台語篇章。生成後點任一語言鍵——每一句台語下面就跟著那個語言：台羅、中文、英文是逐句嚴格對齊；各語言是逐槽真值對照，每格帶證據等級。</p>
+
+  <div class="bar">
+    <input type="text" id="q" value="菜市仔" spellcheck="false">
+    <button class="go" onclick="realize()" data-zh="生成" data-tai="生成">生成</button>
+  </div>
+  <div class="samples">
+    <button onclick="pick('菜市仔')">菜市仔</button>
+    <button onclick="pick('夜市')">夜市</button>
+    <button onclick="pick('廟')">廟</button>
+    <button onclick="pick('灶跤')">灶跤</button>
+    <button onclick="pick('火車站')">火車站</button>
+  </div>
+  <details class="dirbox">
+    <summary data-zh="📍 生活場域目錄 · 29 大類（撳場所即生成）" data-tai="📍 生活場域目錄 · 29 大類（撳場所隨生成）">📍 生活場域目錄 · 29 大類（撳場所即生成）</summary>
+    <div id="dirpanel"></div>
+  </details>
+
+  <div class="stage" id="stage" aria-live="polite">
+    <div class="doct">
+      <span class="lab">台語 · 軸 <span class="mono" id="o-role"></span></span>
+      <span class="sp"></span>
+      <button class="ttsbtn" id="btn-tts" onclick="playTts()" title="台語語音">🔊 台語語音</button>
+    </div>
+    <div class="laybar" id="laybar">
+      <button class="lay on" data-l="tailo">台羅</button>
+      <button class="lay" data-l="zh">中文</button>
+      <button class="lay" data-l="en">英文</button>
+      <span class="laysep"></span>
+      <button class="lay an" data-l="vi">Tiếng Việt 越南</button>
+      <button class="lay an" data-l="tha">ไทย 泰</button>
+      <button class="lay an" data-l="ind">Indonesia 印尼</button>
+      <button class="lay an" data-l="zsm">Melayu 馬來</button>
+      <button class="lay an" data-l="tgl">Tagalog 菲律賓</button>
+      <button class="lay pend" data-l="mya" disabled>緬甸 · 開軌中</button>
+      <button class="lay pend" data-l="khm" disabled>柬埔寨 · 開軌中</button>
+    </div>
+    <div id="o-doc" class="segstack">
+      <div class="sg"><div class="h" style="color:var(--mist);font-weight:400" data-zh="撳「生成」——引擎即時產出" data-tai="撳「生成」——引擎隨時產出">撳「生成」——引擎即時產出</div></div>
+    </div>
+    <div class="covline mono" id="o-cov"></div>
+    <div class="citefoot" id="o-cite" style="display:none"
+      data-zh="各語言值為新爾雅語意槽對照，部分詞面比對取材自 Wiktionary（CC BY-SA）等開放辭書；⟨⟩＝待補格，歡迎母語者裁定補上。"
+      data-tai="各語言值是新爾雅語意槽對照，部分詞面比對取材自 Wiktionary（CC BY-SA）等開放辭書；⟨⟩＝待補格，歡迎母語人裁定補入。">各語言值為新爾雅語意槽對照，部分詞面比對取材自 Wiktionary（CC BY-SA）等開放辭書；⟨⟩＝待補格，歡迎母語者裁定補上。</div>
+  </div>
+  <div class="offnote">
+    <span class="mode" id="mode"><b>●</b> <span data-zh="待生成" data-tai="猶未生成">待生成</span></span>
+    　<span class="mono" style="font-size:12px">POST {base}/sea/generate (target=all)</span>
+  </div>
+</div>
+
+<footer>
+  <b>華語｜</b>架構與對齊方法屬新爾雅系統（發明專利 I914853）。原住民族語言之表層語值屬於各族群社群與主管機關；未經授權，不對外公開或引用任何族語數據。<br>
+  <b>台語｜</b>架構佮對齊工法屬新爾雅系統（發明專利 I914853）。原住民族語言的表層語值屬各族群社群佮主管機關；未經授權，無對外公開抑是引用任何族語數據。<br>
+  <b>授權｜</b>台語篇章為新爾雅引擎生成之自有著作；各語言詞面對照部分取材自 Wiktionary 等 CC BY-SA 開放辭書之原子對應，僅作語言模型印證展示。Generated Taiwanese texts are original works; cross-lingual atomic correspondences partially draw on CC BY-SA open dictionaries (e.g. Wiktionary) for model attestation display only.<br><br>
+  <span class="mono">XINNIYA · New-Resident SEA API · 2026</span>
+</footer>
+
+<script>
+/* ── 分頁/語言 ── */
+function go(p){
+  for(const [pg,tb] of [['pg-intro','tab-intro'],['pg-fn','tab-fn']]){
+    const a=document.getElementById(pg),b=document.getElementById(tb);
+    if(a) a.classList.toggle('on',pg==='pg-'+p);
+    if(b) b.classList.toggle('on',tb==='tab-'+p);}
+}
+function setLang(l){
+  document.getElementById('btn-zh').classList.toggle('on',l==='zh');
+  document.getElementById('btn-tai').classList.toggle('on',l==='tai');
+  document.querySelectorAll('[data-zh]').forEach(el=>{
+    el.innerHTML=el.getAttribute(l==='tai'?'data-tai':'data-zh');});
+}
+
+/* ── 主站慣例: base/key 沿用 xny_base/xny_key ── */
+const API_DEFAULT='https://taigi.bitfull.tw';
+const PUB_KEY='xny_pub_624uu0dq';
+const S={base:()=>localStorage.getItem('xny_base')||API_DEFAULT,
+         key:()=>localStorage.getItem('xny_key')||PUB_KEY};
+const NAMES={tgl:'TAGALOG',ceb:'CEBUANO',zsm:'MELAYU',ind:'INDONESIA',
+             mlg:'MALAGASY',mri:'MĀORI',vi:'TIẾNG VIỆT',tha:'ไทย THAI',mya:'緬甸語',khm:'柬埔寨語'};
+/* 生活場域目錄 · 與主站 index.html DIR_VENUE 同源(2026-08-19 抄錄) */
+const DIR_VENUE=[
+['居住 residence',52,['厝','灶跤','客廳','房間','眠床','浴間','後尾','門口埕','樓梯間','陽台']],
+['買賣 commerce',44,['菜市仔','百貨公司','手機店','衫仔店','銀樓','維修店','便利商店','超級市場','藥房','花店']],
+['娛樂 leisure',29,['夜市','公園','電影院','KTV','網咖','溫泉','游泳池','球場','海水浴場','遊樂園']],
+['交通 traffic',23,['火車站','公車站','機場','港口','捷運站','客運站','加油站','停車場','碼頭','高鐵站']],
+['公共 public',20,['圖書館','公所','活動中心','公園管理處','里民中心']],
+['教育 education',18,['學校','教室','幼稚園','補習班','大學','圖書室','研究所','托兒所']],
+['醫療 medical',13,['病院','診所','藥局','牙科','眼科','復健科','急診室','月內房']],
+['廟宇 temple',11,['廟','城隍廟','媽祖廟','土地公廟','關帝廟','廟埕','宮']],
+['水利 waterworks',10,['水庫','圳溝','水塔','抽水站','溪邊']],
+['工地 worksite',10,['工地','工廠','鐵工廠','木工廠','機車行']],
+['飲食 food',10,['麵店','咖啡廳','餐廳','早餐店','飲料店','小食部','熱炒店']],
+['農場 farm',6,['田','果子園','菜園','牧場','雞寮','豬椆']],
+['行政 admin',6,['戶政事務所','監理站','地政事務所','稅捐處','區公所']],
+['戶外 outdoor',6,['山頂','海邊','溪邊','郊外','草埔','海岸']],
+['古蹟 heritage',5,['古厝','老街','博物館','美術館','紀念館']],
+['金融 finance',4,['銀行','郵局','保險公司','當鋪']],
+['宗教 religion',3,['佛寺','道場','神壇']],
+['警政 police',2,['派出所','警察局']],
+['法律 legal',2,['法院','律師事務所']],
+['辦公 office',1,['辦公室']],
+['祖先 ancestor',1,['祖厝']],
+['教堂 church',1,['教堂']],
+['清真 mosque',1,['清真寺']]];
+function drawDir(){
+  const d=document.getElementById('dirpanel'); if(!d||d.dataset.done) return;
+  d.dataset.done=1;
+  d.innerHTML=DIR_VENUE.map(([n,c,items])=>
+    '<h4>'+esc(n)+'<span class="cnt">'+c+' 場所</span></h4><div class="dgrp">'
+    +items.map(x=>'<button onclick="pick(\''+x+'\')">'+esc(x)+'</button>').join('')
+    +'</div>').join('');
+}
+const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function pick(v){document.getElementById('q').value=v;realize();}
+document.addEventListener('DOMContentLoaded',()=>{
+  const db=document.querySelector('.dirbox');
+  if(db) db.addEventListener('toggle',drawDir);});
+
+let lastResp=null,curAudio=null;
+const RELAY='https://asr.bitfull.tw';
+const CITED=new Set([]);
+const LAYER_ORDER=['tailo','zh','en','vi','tha','ind','zsm','tgl'];
+const ANL=new Set(['vi','tha','ind','zsm','tgl']);
+const active=new Set(['tailo']);
+document.getElementById('laybar').addEventListener('click',e=>{
+  const b=e.target.closest('.lay'); if(!b) return;
+  const l=b.dataset.l;
+  if(active.has(l)){active.delete(l);b.classList.remove('on');}
+  else{active.add(l);b.classList.add('on');}
+  drawDoc();});
+
+function drawDoc(){
+  const j=lastResp, box=document.getElementById('o-doc');
+  if(!j){return;}
+  box.innerHTML='';
+  const segs=j.segs||[];
+  const mat=j.matrix||[];
+  // 各啟用南島軌: 整篇切句(句數對上=逐句;對不上=null另落底)
+  const anMap={},anWholeList=[];
+  for(const c of LAYER_ORDER){
+    if(!ANL.has(c)||!active.has(c)) continue;
+    const ft=j.full_texts&&j.full_texts[c];
+    if(ft&&ft.text){
+      const parts=ft.text.match(/[^.!?。]+[.!?。]?/g)||[];
+      if(parts.length===segs.length) anMap[c]=parts.map(x=>x.trim());
+      else anWholeList.push([c,ft.text]);
+    }else anMap[c]=null;   // 無整篇→槽對照保底
+  }
+  segs.forEach((g,gi)=>{
+    const d=document.createElement('div');d.className='sg';
+    let sub='';
+    for(const c of LAYER_ORDER){
+      if(!active.has(c)) continue;
+      if(c==='tailo') sub+='<div class="t">'+esc(g.t||'')+'</div>';
+      else if(c==='zh') sub+='<div class="z">'+esc(g.z||'')+'</div>';
+      else if(c==='en') sub+='<div class="e">'+esc(g.e||'')+'</div>';
+      else if(anMap[c]!==undefined){
+        const tag='<span class="ltag'+(CITED.has(c)?' cite':'')+'">'
+          +esc(NAMES[c]||c)+'</span>';
+        if(anMap[c]) sub+='<div class="anfull'+(CITED.has(c)?' cite':'')+'">'
+          +tag+esc(anMap[c][gi]||'')+'</div>';
+        else{
+          const hits=mat.filter(m=>m.an&&m.an[c]&&g.h.includes(m.han));
+          sub+='<div class="an">'+tag+(hits.length? hits.map(m=>{
+            const v=m.an[c];
+            return '<span class="pair'+(CITED.has(c)?' cite':'')+'">'
+              +'<span class="hk">'+esc(m.han)+' → </span>'+esc(v.text)
+              +'<span class="ev2 '+(v.evidence==='verified'?'v':'')+'"></span></span>';
+          }).join('') : '<span class="none">—</span>')+'</div>';
+        }
+      }
+    }
+    d.innerHTML='<div class="h">'+esc(g.h)+'</div>'+sub;
+    box.appendChild(d);});
+  for(const [c,txt] of anWholeList){
+    const d=document.createElement('div');d.className='sg';
+    d.innerHTML='<span class="ltag'+(CITED.has(c)?' cite':'')+'">'+esc(NAMES[c]||c)
+      +'</span><div class="anfull'+(CITED.has(c)?' cite':'')
+      +'" style="font-size:15px">'+esc(txt)+'</div>';
+    box.appendChild(d);}
+  if(!segs.length && j.tai_han)
+    box.innerHTML='<div class="sg"><div class="h">'+esc(j.tai_han)+'</div></div>';
+  const anyCite=[...active].some(c=>CITED.has(c));
+  document.getElementById('o-cite').style.display=anyCite?'block':'none';
+  const covs=[];
+  for(const c of LAYER_ORDER){
+    if(!active.has(c)||!ANL.has(c)) continue;
+    const ft=j.full_texts&&j.full_texts[c];
+    const tk=(j.tracks||[]).find(t=>t.code===c);
+    covs.push((NAMES[c]||c)+(ft&&ft.cov!=null?' 詞面'+Math.round(ft.cov*100)+'%':'')
+      +(tk?' 槽'+tk.coverage:''));}
+  document.getElementById('o-cov').textContent=
+    covs.length? covs.join(' · ')+' · ⟨⟩=待補格(邀請族語者裁定)'
+    : (active.size? '逐句嚴格對齊 · quad 引擎':'');
+}
+async function realize(){
+  const item=document.getElementById('q').value.trim();
+  document.getElementById('mode').innerHTML='<b>●</b> 生成中…';
+  try{
+    const r=await fetch(S.base()+'/sea/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':S.key()},
+      signal:AbortSignal.timeout(30000),
+      body:JSON.stringify({mode:'venue',item,n:1,target:'all'})});
+    const j=await r.json();
+    if(!r.ok){document.getElementById('mode').innerHTML=
+      '<b style="color:var(--seal-l)">●</b> '+esc(j.error||('HTTP '+r.status));return;}
+    lastResp=j;
+    document.getElementById('o-role').textContent=j.meta?.item?('· '+j.meta.item):'';
+    drawDoc();
+    document.getElementById('mode').innerHTML=
+      '<b style="color:var(--gold)">●</b> 線上 · '+esc(S.base());
+  }catch(e){
+    document.getElementById('mode').innerHTML=
+      '<b style="color:var(--seal-l)">●</b> API 未連線——連線後即時生成';}
+}
+async function playTts(){
+  if(!lastResp||!lastResp.tai_han) return;
+  const b=document.getElementById('btn-tts'); b.disabled=true;
+  try{
+    if(curAudio){curAudio.pause();curAudio=null;}
+    const r=await fetch(RELAY+'/tts',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:lastResp.tai_han})});
+    const d=await r.json();
+    if(d.audioBase64){curAudio=new Audio('data:audio/wav;base64,'+d.audioBase64);
+      curAudio.onended=()=>{b.disabled=false;};
+      await curAudio.play();}
+    else b.disabled=false;
+  }catch(e){b.disabled=false;}
+}
+
+</script>
+</body>
+</html>
